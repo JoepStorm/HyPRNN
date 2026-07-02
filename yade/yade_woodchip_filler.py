@@ -1,17 +1,15 @@
 # -*- encoding=utf-8 -*-
-"""3D gravity deposition → horizontal slice → 2D periodic sheet, WITH filler.
+"""3D gravity deposition → horizontal slice → 2D periodic sheet, with filler.
 
-Variant of yade_woodchip_2D.py that adds a second particle population: "filler".
 Filler particles interact mechanically with the wood during deposition and
-relaxation — they take up space and hold voids open — but are tagged separately
-so the mesher (mesh_rve_filler_2D.py) can drop them and treat the space they
-occupied as matrix/void.
+relaxation, but are tagged separately so the mesher (mesh_rve_filler_2D.py)
+ can drop them and treat the space they occupied as matrix/void.
 
 There is a single wood chip type: a slender single-row chip lying flat in the
 horizontal plane. Its in-plane orientation is set by one deposition --angle
 (0..1 → 0..180° about the vertical axis); the vertical tilt is forced to 0 for
 every chip, so the flat chips can be initialised close together vertically.
-Filler blobs are single, slightly oversized spheres.
+Filler blobs are single spheres.
 
 Apart from material parameters there are two real knobs:
     --angle            deposition angle, 0..1 → 0..180° in the horizontal plane
@@ -22,6 +20,10 @@ Output format adds a 5th column to coords_2D_*.npy:
 
 Phase 1: Non-periodic gravity deposition into a box (wood + filler mixed).
 Phase 2: Slice at cut_height, extract 2D circles, periodic relaxation.
+
+Example usage:
+    yadedaily yade_woodchip_filler.py -- --filler_fraction 0.3 --angle 0.0 --base_radius 0.04 --num_chips 500
+
 """
 
 from yade import pack
@@ -73,7 +75,7 @@ MAX_ITER_GRAVITY      = 300000
 MIN_ITER_GRAVITY      = 3000
 MAX_ITER_RELAXING     = 30000
 
-OUTPUT_NAME = _args.output or f"data/datasetv1/coords_2D_{SEED}_{NUM_CHIPS}_{FILLER_FRACTION}.npy"
+OUTPUT_NAME = _args.output or f"data/single_runs/coords_2D_{SEED}_{NUM_CHIPS}_{FILLER_FRACTION}.npy"
 
 random.seed(SEED)
 

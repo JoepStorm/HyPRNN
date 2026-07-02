@@ -1,14 +1,9 @@
 """Convert a saved 3D sphere packing (coords_3D_*.npy) to a ParaView .vtp.
 
-The yade deposition script (yade_woodchip_filler.py) saves the settled 3D
-packing as columns [x, y, z, radius, clumpId, type] (type 0 = wood, 1 = filler).
-This renders each sphere as actual geometry (a glyphed icosphere scaled by
-radius), so the result opens directly in ParaView with no Glyph filter needed.
 Colour by 'type' (wood/filler) or 'clumpId' in ParaView.
 
 Usage:
-    python coords_3D_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy
-    python coords_3D_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy out.vtp
+    python coords_3D_to_vtk.py data/single_runs/coords_3D_0_500_0.3.npy
 """
 
 import sys

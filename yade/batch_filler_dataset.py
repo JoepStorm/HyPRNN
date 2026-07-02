@@ -5,8 +5,11 @@ each resulting packing with mesh_rve_filler_2D.py, producing 10 .msh files in
 OUT_DIR (one per fraction). Afterwards it writes two PDFs:
     vfrac_vs_filler.pdf  - inclusion volume fraction vs filler fraction
     meshes_row.pdf       - the 10 meshes in a single row (matrix vs inclusions)
+
+Note: many default settings from yade_woodchip_filler are used.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -19,9 +22,9 @@ from mesh_utils import draw_mesh, read_inclusion_vfrac, MATERIAL_COLORS
 
 HERE    = Path(__file__).resolve().parent
 # OUT_DIR = HERE / "data" / "datasetv6_r0.02"
-OUT_DIR = HERE / "data" / "dataset_combi_v4v6"
+OUT_DIR = HERE / "data" / "dataset_new"
 
-YADE    = "yadedaily"          # DEM runner
+YADE    = os.environ.get("YADE_BIN", "yadedaily")   # DEM runner (override with YADE_BIN=yade)
 SEED    = 2
 FRACTIONS = np.round(np.arange(0.0, 1.0, 0.1), 1)   # 0.0 .. 0.9
 vel = 0.1 #0.05 # 0.1
