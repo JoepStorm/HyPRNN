@@ -1,0 +1,25 @@
+name: hyprnn_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - pip
+  - numpy
+  - fenics-dolfinx=0.10.0
+  - mpich
+  - pyvista
+  - dolfinx_mpc=0.10.0
+  - matplotlib
+  - pandas
+  - pip:
+    - jax
+    - jaxmat
+    - flax
+    - git+https://github.com/bleyerj/dolfinx_materials.git
+    - gmsh
+    - optuna
+    - pypdf2
+    - pytest
+    - pyvistaqt
+    - "--editable=git+https://github.com/JoepStorm/SciencePlotStyles#egg=SciencePlotStyles"
