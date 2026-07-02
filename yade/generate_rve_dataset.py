@@ -1,5 +1,4 @@
-"""Build a filler-fraction sweep: deposit + mesh one RVE per filler fraction.
-
+"""
 Runs deposit_rve.py for filler_fraction = 0.0, 0.1, ... 0.9 and meshes
 each resulting packing with packing_to_mesh.py, producing 10 .msh files in
 OUT_DIR (one per fraction). Afterwards it writes two PDFs:
