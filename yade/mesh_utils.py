@@ -1,20 +1,26 @@
-"""Conversion: periodic YADE output to GMSH mesh using convex hulls for clumps.
+"""Supporting functions for meshing and visualizing 2D RVE packings.
 
-Instead of creating individual circles and boolean-unioning them, this script
-computes the convex hull of each clump's spheres (with radius offsets) and
-creates polygon-based inclusions. Ghost surfaces for periodic boundaries are
-created via occ.copy + occ.translate to guarantee geometric symmetry, ensuring
-matching node counts on opposite boundaries.
-After meshing, loads into DOLFINx to compute volume fractions.
+Meshing: periodic YADE packing (.npy) to GMSH mesh using convex hulls for
+clumps. Instead of creating individual circles and boolean-unioning them, the
+convex hull of each clump's spheres (with radius offsets) becomes a polygon
+inclusion. Ghost surfaces for periodic boundaries are created via
+occ.copy + occ.translate to guarantee geometric symmetry, ensuring matching
+node counts on opposite boundaries.
+
+Plotting: render a meshed RVE (matrix vs inclusions) into a matplotlib axis.
+
+Used by mesh_rve_filler_2D.py and batch_filler_dataset.py.
 """
 
-import os
 import numpy as np
 import gmsh
+from pathlib import Path
 from scipy.spatial import ConvexHull
-from dataset_yade import generate_grid
-from visualize_clumps import config_to_filepath
 
+
+# ---------------------------------------------------------------------------
+# Meshing (packing .npy -> periodic GMSH mesh)
+# ---------------------------------------------------------------------------
 
 def load_periodic_data(npy_file):
     """Load sphere data and cell dimensions."""
@@ -329,7 +335,6 @@ def create_mesh(npy_file, output_msh, mesh_size=0.02, shrink_factor=1.0,
 
 def compute_volume_fractions(msh_file):
     """Compute area fractions from mesh element areas (via gmsh) and save to _vfrac.txt."""
-    import gmsh
     gmsh.initialize()
     gmsh.option.setNumber("General.Terminal", 0)
     gmsh.open(msh_file)
@@ -368,66 +373,67 @@ def compute_volume_fractions(msh_file):
     print(f"Saved area fractions to {txt_file}")
 
 
-def mesh_batch(r1_values, r2_values, nz_values, seed, shrink_factor,
-               data_dir, output_dir, mesh_size=0.02, min_radius_factor=0.25):
-    """Mesh all valid (r1, r2, nz) combinations from the dataset grid."""
-    configs = generate_grid(r1_values, r2_values, nz_values)
+# ---------------------------------------------------------------------------
+# Plotting (meshed RVE -> matplotlib axis)
+# ---------------------------------------------------------------------------
 
-    os.makedirs(output_dir, exist_ok=True)
-
-    succeeded, failed = 0, 0
-    for i, (r1, r2, nz) in enumerate(configs):
-        input_file = config_to_filepath(r1, r2, nz, seed, data_dir)
-        if not os.path.exists(input_file):
-            print(f"[{i+1}/{len(configs)}] Skipping r1={r1:.2f} r2={r2:.2f} nz={nz} (file not found)")
-            failed += 1
-            continue
-
-        output_file = f"{output_dir}/rve_r1_{r1:.2f}_r2_{r2:.2f}_nz_{nz}_{seed}_shrink{shrink_factor}.msh"
-        if os.path.exists(output_file):
-            print(f"[{i+1}/{len(configs)}] Skipping r1={r1:.2f} r2={r2:.2f} nz={nz} (already meshed)")
-            succeeded += 1
-            continue
-
-        print(f"\n[{i+1}/{len(configs)}] Meshing r1={r1:.2f} r2={r2:.2f} nz={nz}")
-        try:
-            create_mesh(input_file, output_file, mesh_size, shrink_factor,
-                        min_radius_factor=min_radius_factor)
-            compute_volume_fractions(output_file)
-            succeeded += 1
-        except Exception as e:
-            print(f"  FAILED: {e}")
-            failed += 1
-
-    print(f"\nBatch complete: {succeeded} succeeded, {failed} failed out of {len(configs)}")
+# Tag 1 = matrix (fungi/binder), tag 2 = inclusions (woodchips)
+MATERIAL_COLORS = {1: '#E8F5E9', 2: '#6D4C41'}
 
 
-if __name__ == "__main__":
-    # mode = 'single'
-    mode = 'batch'
+def load_mesh(msh_file):
+    """Load a GMSH .msh file; return (coords, triangles, phys_tags)."""
+    gmsh.initialize()
+    gmsh.option.setNumber("General.Terminal", 0)
+    gmsh.open(str(msh_file))
+    node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
+    coords = node_coords.reshape(-1, 3)[:, :2]
+    tag_to_idx = {int(t): i for i, t in enumerate(node_tags)}
 
-    mesh_size = 0.02
-    shrink_factor = 0.8
-    min_radius_factor = 0.25
+    triangles, phys_tags = [], []
+    for dim, phys_tag in gmsh.model.getPhysicalGroups(dim=2):
+        for entity in gmsh.model.getEntitiesForPhysicalGroup(dim, phys_tag):
+            elem_types, _, node_tags_list = gmsh.model.mesh.getElements(dim, entity)
+            for etype, ntags in zip(elem_types, node_tags_list):
+                if int(etype) == 2:
+                    for e in ntags.reshape(-1, 3):
+                        triangles.append([tag_to_idx[int(n)] for n in e])
+                        phys_tags.append(phys_tag)
+    gmsh.finalize()
+    return coords, np.array(triangles), np.array(phys_tags)
 
-    if mode == "single":
-        seed = 0
-        chip_type = 'plate'
-        num_chips = 600
 
-        input_file = f"periodic/depositions_3d_to_2d_relaxed/coords_3Dto2D_{chip_type}_{num_chips}_{seed}.npy"
-        output_file = f"periodic/meshes_conhull/dep3d2drelaxed/rve_{chip_type}_{num_chips}_{seed}_shrink{shrink_factor}.msh"
+def read_inclusion_vfrac(msh_file):
+    """Inclusion (wood) area fraction from the companion _vfrac.txt, or nan.
 
-        create_mesh(input_file, output_file, mesh_size, shrink_factor, min_radius_factor=min_radius_factor)
-        compute_volume_fractions(output_file)
-    elif mode == "batch":
-        r1 = [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0]
-        r2 = [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0]
-        nz = [2, 3, 4, 5, 6, 7, 8]
-        seed = 0
+    The file stores two areas on line 2: 'wood matrix'; the fraction is
+    wood / (wood + matrix).
+    """
+    txt = Path(str(msh_file).replace('.msh', '_vfrac.txt'))
+    try:
+        wood, matrix = (float(v) for v in txt.read_text().splitlines()[1].split())
+        return wood / (wood + matrix)
+    except Exception:
+        return np.nan
 
-        data_dir = 'periodic/depositions_3d_to_2d_relaxed_cont'
-        output_dir = 'periodic/meshes_conhull/dep3d2drelaxed_cont'
 
-        mesh_batch(r1, r2, nz, seed, shrink_factor, data_dir, output_dir,
-                   mesh_size=mesh_size, min_radius_factor=min_radius_factor)
+def draw_mesh(ax, msh_file, show_vfrac=True):
+    """Render a mesh into ax with material colors; returns False on failure."""
+    from matplotlib.collections import PolyCollection
+    try:
+        coords, elems, tags = load_mesh(msh_file)
+        colors = [MATERIAL_COLORS.get(int(t), '#888888') for t in tags]
+        pc = PolyCollection(coords[elems], facecolors=colors, edgecolors='none')
+        ax.add_collection(pc)
+        ax.autoscale()
+        ax.set_aspect('equal')
+
+        if show_vfrac:
+            vf = read_inclusion_vfrac(msh_file)
+            if not np.isnan(vf):
+                ax.set_title(f'$V_f$={vf:.3f}', fontsize=6, pad=2)
+        return True
+    except Exception:
+        ax.text(0.5, 0.5, 'failed', transform=ax.transAxes,
+                ha='center', va='center', fontsize=6, color='red')
+        return False

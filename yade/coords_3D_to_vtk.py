@@ -7,8 +7,8 @@ radius), so the result opens directly in ParaView with no Glyph filter needed.
 Colour by 'type' (wood/filler) or 'clumpId' in ParaView.
 
 Usage:
-    python coords_3D_to_vtk.py periodic/2D_filler/coords_3D_0.npy
-    python coords_3D_to_vtk.py periodic/2D_filler/coords_3D_0.npy out.vtp
+    python coords_3D_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy
+    python coords_3D_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy out.vtp
 """
 
 import sys

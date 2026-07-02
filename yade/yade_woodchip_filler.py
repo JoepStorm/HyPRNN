@@ -73,7 +73,7 @@ MAX_ITER_GRAVITY      = 300000
 MIN_ITER_GRAVITY      = 3000
 MAX_ITER_RELAXING     = 30000
 
-OUTPUT_NAME = _args.output or f"filler/datasetv1/coords_2D_{SEED}_{NUM_CHIPS}_{FILLER_FRACTION}.npy"
+OUTPUT_NAME = _args.output or f"data/datasetv1/coords_2D_{SEED}_{NUM_CHIPS}_{FILLER_FRACTION}.npy"
 
 random.seed(SEED)
 

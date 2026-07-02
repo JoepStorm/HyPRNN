@@ -43,18 +43,17 @@ python createWoodchipData3D.py     # Generate 3D woodchip RVE training data
 ### RVE Microstructure Generation (YADE)
 ```bash
 cd yade
-# 2D: particle deposition + mesh generation
-python yade_woodchip.py                    # 2D gravity deposition + periodic relaxation
-python woodchip_to_gmsh_periodic.py        # Convert 2D packing to periodic GMSH mesh
+# Single deposition, run manually with args to inspect behavior (GUI)
+yadedaily yade_woodchip_filler.py -- --seed 0 --filler_fraction 0.5
 
-# 3D: particle deposition + mesh generation
-python yade_woodchip_3D.py                 # 3D periodic RVE generation
-python woodchip_3d_to_dolfinx.py           # Convert 3D packing to DOLFINx mesh (structured grid)
-python woodchip_3d_to_gmsh.py              # Convert 3D packing to GMSH mesh (boolean ops)
+# Filler-fraction sweep: deposit + mesh one RVE per fraction, plus overview plots
+python batch_filler_dataset.py
 
-# Batch generation
-python batch_rve_generation.py             # Batch 2D packings
-python batch_rve_generation_3D.py          # Batch 3D packings with volume fraction
+# Visualize a settled 3D packing in ParaView
+python coords_3D_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy
+
+# Mesh a single packing (strip filler, convex-hull periodic mesh)
+python mesh_rve_filler_2D.py --input data/datasetv1/coords_2D_0_500_0.5.npy
 ```
 
 ### Material Testing
@@ -77,9 +76,9 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 ### End-to-End Data Flow
 ```
 1. Particle Deposition (YADE)
-   └─> yade_woodchip*.py: periodic RVE packings
+   └─> yade_woodchip_filler.py: periodic 2D RVE packings
 2. Mesh Generation
-   └─> woodchip_*_to_gmsh.py / woodchip_*_to_dolfinx.py
+   └─> mesh_rve_filler_2D.py: packing → periodic GMSH mesh
 3. RVE Data Generation
    └─> createWoodchipData*.py: loading sequences → {F, PK1, cauchy}.npy
 4. PRNN Training
@@ -91,14 +90,12 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 ### Core Components
 
 **Particle Deposition & Meshing** (`yade/`):
-- `yade_woodchip.py` / `yade_woodchip_3D.py`: YADE gravity deposition with periodic relaxation
-- `woodchip_to_gmsh_periodic.py`: 2D packing → periodic GMSH mesh
-- `woodchip_3d_to_dolfinx.py`: 3D packing → DOLFINx mesh via structured grid with material tagging
-- `woodchip_3d_to_gmsh.py`: 3D packing → GMSH mesh via boolean operations
-- `woodchip_3d_grid.py`: Structured grid approach for 3D (avoids boolean ops)
-- `batch_rve_generation.py` / `batch_rve_generation_3D.py`: Batch packing generation
-- `woodchip_volume_fraction_3D.py`: Volume fraction computation for 3D packings
-- Output stored in `yade/periodic/` (2D) and `yade/periodic_3D/` (3D)
+- `yade_woodchip_filler.py`: 3D gravity deposition (wood chips + filler) → horizontal slice → relaxed periodic 2D sheet
+- `batch_filler_dataset.py`: filler-fraction sweep — deposit + mesh one RVE per fraction, with overview plots
+- `mesh_rve_filler_2D.py`: strip filler from a packing and mesh it (wood = inclusions, rest = matrix)
+- `mesh_utils.py`: supporting functions — convex-hull periodic meshing pipeline and mesh plotting
+- `coords_3D_to_vtk.py`: settled 3D packing → ParaView `.vtp`
+- Output stored in `yade/data/`
 
 **Materials System** (`scripts_materials/`):
 - `RVE_material.py`: Full 2D RVE homogenization with periodic BC (stress + tangent)
@@ -185,8 +182,7 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 ## Mesh and Data Structure
 
 - **RVE meshes**: `meshes/` (GMSH-generated)
-- **2D RVE packings**: `yade/periodic/` (per shrink factor)
-- **3D RVE packings**: `yade/periodic_3D/` (per shrink factor)
+- **RVE packings + meshes (filler workflow)**: `yade/data/` (per dataset version)
 - **Training data**: `data/` (NumPy arrays: `F.npy`, `PK1.npy`, `cauchy.npy`)
 - **Model storage**: `trained_models/` at repo root (JAX/Flax checkpoints)
 - **Shared material constants**: `material_params.py` at repo root (wood/fungi E, nu, Lamé constants) — import these instead of hardcoding values

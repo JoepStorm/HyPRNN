@@ -15,11 +15,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
-from mesh_rve_2D import _draw_mesh, MATERIAL_COLORS
+from mesh_utils import draw_mesh, read_inclusion_vfrac, MATERIAL_COLORS
 
 HERE    = Path(__file__).resolve().parent
-# OUT_DIR = HERE / "filler" / "datasetv6_r0.02"
-OUT_DIR = HERE / "filler" / "dataset_combi_v4v6"
+# OUT_DIR = HERE / "data" / "datasetv6_r0.02"
+OUT_DIR = HERE / "data" / "dataset_combi_v4v6"
 
 YADE    = "yadedaily"          # DEM runner
 SEED    = 2
@@ -28,20 +28,6 @@ vel = 0.1 #0.05 # 0.1
 
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def read_inclusion_vfrac(msh_file):
-    """Inclusion (wood) area fraction from the companion _vfrac.txt, or nan.
-
-    The file stores two areas on line 2: 'wood matrix'; the fraction is
-    wood / (wood + matrix).
-    """
-    txt = Path(str(msh_file).replace('.msh', '_vfrac.txt'))
-    try:
-        wood, matrix = (float(v) for v in txt.read_text().splitlines()[1].split())
-        return wood / (wood + matrix)
-    except Exception:
-        return np.nan
 
 
 meshes = []   # (frac, msh_path)
@@ -89,7 +75,7 @@ print(f"Saved {OUT_DIR / 'vfrac_vs_filler.pdf'}")
 n = len(meshes)
 fig, axes = plt.subplots(1, n, figsize=(2 * n, 2.4))
 for ax, (frac, msh) in zip(np.atleast_1d(axes), meshes):
-    _draw_mesh(ax, msh)
+    draw_mesh(ax, msh)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_xlabel(f"filler={frac:.1f}", fontsize=8)
