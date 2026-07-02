@@ -126,7 +126,7 @@ def run_comparison(
     macro_meshsize=0.03,
     R_inner=0.2,
     R_outer=0.5,
-    prnn_model_loc="../trained_models/prnn_LUv2_Sparse/samples512_run1",
+    prnn_model_loc="../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1",
     rve_meshsize=0.0125,
     output_folder="../results/graded_ring/validate",
     max_load=1.0,

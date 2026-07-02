@@ -174,7 +174,7 @@ if __name__ == "__main__":
     os.makedirs(save_loc, exist_ok=True)
 
     output_folder = "../results/optimization/"
-    prnn_model_loc = "../trained_models/prnn_LUv2_Sparse/samples512_run1"
+    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
 
 
     problem = OptimizationProblem(output_folder, prnn_model_loc, direction=direction)
