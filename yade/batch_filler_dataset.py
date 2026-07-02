@@ -38,14 +38,14 @@ for frac in FRACTIONS:
     msh = OUT_DIR / f"{tag}.msh"
     print(f"\n{'='*60}\nfiller_fraction = {frac:.1f}  ->  {msh.name}\n{'='*60}")
 
-    # # 1) DEM deposition + slice -> 2D packing .npy (+ _meta.npy)
-    # subprocess.run(
-    #     [YADE, "-x", "-n", "yade_woodchip_filler.py", "--",
-    #      "--seed", str(SEED),
-    #      "--filler_fraction", f"{frac:.1f}",
-    #      "--init_velocity", f"{vel:.2f}",
-    #      "--output", str(npy)],
-    #     cwd=HERE, check=True)
+    # 1) DEM deposition + slice -> 2D packing .npy (+ _meta.npy)
+    subprocess.run(
+        [YADE, "-x", "-n", "yade_woodchip_filler.py", "--",
+         "--seed", str(SEED),
+         "--filler_fraction", f"{frac:.1f}",
+         "--init_velocity", f"{vel:.2f}",
+         "--output", str(npy)],
+        cwd=HERE, check=True)
 
     # 2) Strip filler + mesh -> .msh
     subprocess.run(

@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a multi-scale computational mechanics project implementing **FE² (FE-squared) analysis** with **Physics-informed Recurrent Neural Networks (PRNNs)** as material surrogates. The project combines finite element analysis with machine learning to accelerate expensive Representative Volume Element (RVE) computations in heterogeneous woodchip composite materials. Both 2D and 3D workflows are supported.
+This is a multi-scale computational mechanics project implementing **FE² (FE-squared) analysis** with **Physics-informed Recurrent Neural Networks (PRNNs)** as material surrogates. The project combines finite element analysis with machine learning to accelerate expensive Representative Volume Element (RVE) computations in heterogeneous woodchip composite materials (wood chips in a fungal mycelium matrix), in a 2D large-deformation setting.
 
 ## Repository Cleanup (in progress)
 
-This repo was copied from another project and is being cleaned up: redundant files, stale results, and dead links to old experiment versions (e.g. `v5`, `v6`, `v7` folders in `results/`, `yade/generated_meshes_2D_wet/`, `data/deposition/`) are being removed. Git history only starts at the cleanup (heavy data dirs are gitignored) — treat deletions of data files as final and check with the user before removing anything non-obviously redundant.
+This repo was copied from another project and is being cleaned up for publication: redundant files, stale results, and dead links to old experiment versions are being removed. Git history only starts at the cleanup (heavy data dirs are gitignored) — treat deletions of data files as final and check with the user before removing anything non-obviously redundant.
 
 When helping with cleanup:
 - **Spotting unused files**: grep the whole repo for a file's name/module (import statements, string paths, CLI invocations) before flagging it as unused. A script with no incoming references and no `if __name__ == "__main__"` usage documented anywhere is a deletion candidate; report it rather than deleting outright.
@@ -21,23 +21,30 @@ When helping with cleanup:
 ### Training PRNN Models
 ```bash
 cd scripts_surrogates
-python train_LDprnn.py              # Train a single PRNN surrogate
-python train_multiconfig_batch.py   # Train multiple configurations for comparison
+python train_LDprnn.py                 # Train a single (Hy)PRNN surrogate
+python train_multiconfig_batch.py      # Train multiple architectures for comparison
+python train_LDprnn_batch.py           # Timed batch runs (PRNN / HyPRNN / NN)
+python train_LDprnn_deposit_batch.py   # Batch on the deposition filler dataset
 ```
 
-### Running FE² Simulations
+### FE² Validation and Design Studies
 ```bash
 cd scripts_FEM
-python LDFE2.py         # Main FE² simulation with PRNN materials
-python testFE2.py       # Simple FE² test with RVE materials
+python validate_bending.py         # 3-point bending: FE² ground truth vs surrogates
+python validate_fe2.py             # RVE vs PRNN stress response on identical load paths
+python graded_ring_pressure.py     # Pressurized annulus with graded PRNN material
+python optimize_ring.py            # Optimize radial grading of the annulus
+python squeeze_hole.py             # Hole-squeeze design with filler PRNN surrogate
+python validate_ring.py            # Validate optimized ring grading against FE²
 ```
 
 ### Data Generation
 ```bash
 cd scripts_surrogates
-python createUniaxialData.py       # Generate uniaxial training data (2D)
-python createMixedData.py          # Generate mixed loading training data (2D)
-python createWoodchipData3D.py     # Generate 3D woodchip RVE training data
+python createUniaxialData.py       # Uniaxial training data (synthetic ellipse RVEs)
+python createMixedData.py          # Mixed-loading training data (synthetic ellipse RVEs)
+python createDepositionData.py     # Mixed-loading data from YADE-deposited meshes
+python uniaxialDeposition.py       # Uniaxial runs on YADE-deposited meshes
 ```
 
 ### RVE Microstructure Generation (YADE)
@@ -59,9 +66,7 @@ python mesh_rve_filler_2D.py --input data/datasetv1/coords_2D_0_500_0.5.npy
 ### Material Testing
 ```bash
 cd scripts_materials
-python RVE_material.py         # Test 2D RVE homogenization
-python RVE_material_3D.py      # Test 3D RVE homogenization
-python PRNN_mat.py             # Test PRNN material interface
+python RVE_material.py         # Test 2D RVE homogenization standalone
 ```
 
 ## Architecture Overview
@@ -80,11 +85,11 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 2. Mesh Generation
    └─> mesh_rve_filler_2D.py: packing → periodic GMSH mesh
 3. RVE Data Generation
-   └─> createWoodchipData*.py: loading sequences → {F, PK1, cauchy}.npy
+   └─> create*Data.py: loading sequences → {F, PK1, cauchy}.npy
 4. PRNN Training
    └─> train_*.py: JAX/Flax training → trained_models/
 5. Macro FE² Inference
-   └─> LDFE2.py: PRNN replaces RVE at each Gauss point
+   └─> validate_*.py / design scripts: PRNN replaces RVE at each Gauss point
 ```
 
 ### Core Components
@@ -99,25 +104,26 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 
 **Materials System** (`scripts_materials/`):
 - `RVE_material.py`: Full 2D RVE homogenization with periodic BC (stress + tangent)
-- `RVE_material_3D.py`: Simplified 3D RVE homogenization (stress only, no tangent)
 - `PRNN_mat.py`: PRNN surrogate material (fast ML prediction)
 - `fe2mat.py`: Abstract FE² material interface with RVEStateManager
 - `fe2mat_heterogeneous_v2.py`: Parallel FE² with different RVEs per quadrature point
-- Material models: `neohooke.py`, `bonet.py`, `orthotropic.py`
-- `rve_mesher.py`: RVE mesh generation utilities
+- `neohooke.py`: Neo-Hookean material model (numpy + JAX variants)
+- `rve_mesher.py` / `createMeshes.py` / `createRVE.py`: RVE mesh generation utilities
 
 **Neural Networks** (`scripts_surrogates/`):
 - `LDprnn.py`: Physics-informed RNN architectures (core ML module)
+- `LDprnn_shared_hyper.py`: HyPRNN — shared hypernetwork PRNN variant
+- `LDnn.py`: Plain feed-forward NN baseline
 - `trainer.py`: JAX/Flax training framework
 - `data_utils.py`: Data processing, normalization, and dataset loading
-- `train_multiconfig_batch.py`: Multi-architecture comparison training
 
 **FEM Drivers** (`scripts_FEM/`):
-- `LDFE2.py`: Production FE² driver with PRNN materials
-- `testFE2.py`: Simple test case for validation
-- `graded_hole_compression.py`: FE² with stress concentrations
-- `optimization.py` / `optimize_auxetic.py`: Design optimization workflows
-- `validate_fe2_solution.py`: PRNN vs RVE comparison plots
+- `validate_bending.py`: 3-point bending — FE² ground truth vs surrogate models (deformation, stress maps, timing)
+- `validate_fe2.py`: RVE vs PRNN stress response on identical load paths
+- `graded_ring_pressure.py` / `optimize_ring.py` / `validate_ring.py`: graded annulus study — simulate, optimize, validate
+- `squeeze_hole.py` / `optimization.py`: design optimization with PRNN surrogates
+- `evaluate_fe2_surrogates.py`: surrogate losses on saved FE² strain trajectories
+- `plotting_utils.py`: shared plotting helpers
 
 ### Physics-Informed Architecture
 
@@ -150,7 +156,6 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 ## Development Patterns
 
 ### Code Organization
-- **MWE (Minimal Working Examples)**: `MWE_RVE/` contains standalone test files for component testing
 - **Material Interface**: All materials inherit from common `Material` base class
 - **JAX Integration**: Neural networks use JAX for automatic differentiation and JIT compilation
 - **MPI Parallelization**: FEM computations distributed via mpi4py/PETSc
@@ -158,7 +163,7 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 ### Dependencies
 - **FEniCSx/dolfinx**: Modern finite element framework
 - **dolfinx_mpc**: Multi-point constraints for periodic boundary conditions
-- **dolfinx_materials**: Advanced material modeling (external dependency in `MWE_RVE/`)
+- **dolfinx_materials**: QuadratureMap / custom material integration at Gauss points
 - **JAX/Flax**: Neural network framework with automatic differentiation
 - **MPI4Py/PETSc**: Parallel computing and linear algebra
 - **YADE**: Discrete element method for particle deposition simulations
@@ -169,13 +174,10 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 - `*_mat.py`: Material model implementations
 - `create*.py`: Data generation scripts
 - `train_*.py`: Training scripts
-- `MWE_*`: Minimal working examples
-- `*_3D.*`: 3D variants of existing 2D workflows
 
 ## Testing Approach
 
-- Use `testFE2.py` for basic FE² validation
-- MWE files in `MWE_RVE/` for component testing
+- Use `validate_fe2.py` / `validate_bending.py` for FE² vs surrogate validation
 - Material models have standalone test capabilities via `if __name__ == "__main__"`
 - No formal pytest structure; testing is integration-focused
 
@@ -194,4 +196,3 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 - JAX JIT compilation for neural networks
 - MPI parallelization for macro-scale FEM
 - Batched material point evaluation at quadrature points
-- 3D RVE solver is simplified (stress only) to manage computational cost
