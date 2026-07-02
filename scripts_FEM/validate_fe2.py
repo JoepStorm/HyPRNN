@@ -19,9 +19,9 @@ colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 rc('text', usetex=True)
 
 from mpi4py import MPI
-from scripts_materials.RVE_material import RVEMaterial
+from scripts_materials.rve_material import RVEMaterial
 from scripts_materials.rve_mesher import RVEMeshConfig
-from scripts_materials.PRNN_mat import prnnMaterial, complete_update_pk2, _convert_to_float64
+from scripts_materials.prnn_material import PRNNMaterial, complete_update_pk2, _convert_to_float64
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
 from scripts_surrogates.LDprnn_shared_hyper import SharedHyperPRNN
 from scripts_surrogates.LDnn import StandardNN
@@ -117,7 +117,7 @@ def _mesh_geo_file(geo_file):
         capture_output=True, check=True
     )
 
-    # Remove $PhysicalNames section (same as createRVE.py)
+    # Remove $PhysicalNames section (same as create_rve.py)
     with open(msh_file, 'r') as f:
         lines = f.readlines()
     with open(msh_file, 'w') as f:

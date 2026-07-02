@@ -38,8 +38,8 @@ from dolfinx_materials.quadrature_map import QuadratureMap
 from dolfinx_materials.solvers import NonlinearMaterialProblem
 from dolfinx_materials.utils import create_quadrature_functionspace
 
-from scripts_materials.PRNN_mat import prnnMaterial
-from scripts_materials.fe2mat import create_fe2_material
+from scripts_materials.prnn_material import PRNNMaterial
+from scripts_materials.fe2_material import HeterogeneousFE2Material
 from material_params import WOOD_MU, WOOD_LAMBDA, FUNGI_LAMBDA
 
 
@@ -168,11 +168,10 @@ class ThreePointBendingSimulation:
                 'lambda_wood': jnp.ones(self.num_ips) * WOOD_LAMBDA,
             }
             self.rve_config['gauss_coords'] = self.qp_coords
-            self.material = create_fe2_material(mode='heterogeneous',
-                                                graded_variables=full_micro,
-                                                rve_config=self.rve_config)
+            self.material = HeterogeneousFE2Material(graded_variables=full_micro,
+                                                     rve_config=self.rve_config)
         else:
-            self.material = prnnMaterial(f"{self.prnn_model_loc}_settings",
+            self.material = PRNNMaterial(f"{self.prnn_model_loc}_settings",
                                          f"{self.prnn_model_loc}_normparams",
                                          f"{self.prnn_model_loc}",
                                          self.micro_variables)

@@ -42,8 +42,8 @@ plt.style.use(['science', 'bright'])
 colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 rc('text', usetex=True)
 
-from scripts_materials.PRNN_mat import prnnMaterial
-from scripts_materials.fe2mat import create_fe2_material
+from scripts_materials.prnn_material import PRNNMaterial
+from scripts_materials.fe2_material import HeterogeneousFE2Material
 from material_params import FUNGI_LAMBDA
 
 
@@ -197,13 +197,12 @@ class GradedRingSimulation:
                 'lambda_wood': jnp.ones(self.num_ips) * E_w * nu_w / ((1 + nu_w) * (1 - 2 * nu_w)),
             }
             self.rve_config['gauss_coords'] = self.qp_coords
-            self.material = create_fe2_material(
-                mode='heterogeneous',
+            self.material = HeterogeneousFE2Material(
                 graded_variables=full_micro_variables,
                 rve_config=self.rve_config,
             )
         else:
-            self.material = prnnMaterial(
+            self.material = PRNNMaterial(
                 f"{self.prnn_model_loc}_settings",
                 f"{self.prnn_model_loc}_normparams",
                 f"{self.prnn_model_loc}",

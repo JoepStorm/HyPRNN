@@ -6,3 +6,4 @@ meshes/
 src/scienceplotstyles/
 __pycache__/
 *.pyc
+.idea/

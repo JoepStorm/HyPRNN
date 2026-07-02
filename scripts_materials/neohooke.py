@@ -4,8 +4,6 @@ import jax
 import jax.numpy as jnp
 from jax import jit, vmap
 from typing import NamedTuple
-from dolfinx_materials.generic import Material, DataManager
-from dolfinx.common import Timer
 import ufl
 
 
@@ -26,57 +24,10 @@ def neo_hooke_pk1_ufl(F, mu_, lmbda_):
     return mu_ * (F - F_inv_T) + lmbda_ * ufl.ln(J) * F_inv_T
 
 
-def neo_hooke_pk2_ufl(E, mu_, lmbda_):
-    """
-    Compute second Piola-Kirchhoff stress using UFL.
-
-    The strain energy density is W = (mu/2)(tr(C) - 2 - 2*ln(J)) + (lambda/2)(ln(J))^2
-    where C = 2E + I is the right Cauchy-Green tensor.
-
-    PK2 stress: S = 2 * dW/dC = lambda * ln(J) * C^{-1} + mu * (I - C^{-1})
-
-    Parameters
-    ----------
-    E : ufl tensor
-        Green-Lagrange strain tensor E = (C - I) / 2
-    mu_ : float or ufl.Constant
-        Shear modulus (second Lamé parameter)
-    lmbda_ : float or ufl.Constant
-        First Lamé parameter
-
-    Returns
-    -------
-    ufl tensor
-        Second Piola-Kirchhoff stress tensor
-    """
-    dim = ufl.shape(E)[0]
-    I = ufl.Identity(dim)
-    C = 2.0 * E + I
-    J = ufl.sqrt(ufl.det(C))
-    C_inv = ufl.inv(C)
-    return lmbda_ * ufl.ln(J) * C_inv + mu_ * (I - C_inv)
-
-
 def neo_hooke_pk1_jax_variable_params(F, mu_, lambda_):
     J = jnp.linalg.det(F)
     F_inv_T = jnp.linalg.inv(F).T
     return mu_ * (F - F_inv_T) + lambda_ * jnp.log(J) * F_inv_T
-
-
-jit_vmap_neo_hooke_pk1_variable = jit(vmap(neo_hooke_pk1_jax_variable_params,
-                                     in_axes=(0, 0, 0),
-                                     out_axes=(0)))
-
-
-def neo_hooke_pk1_jax(F, material):
-    J = jnp.linalg.det(F)
-    F_inv_T = jnp.linalg.inv(F).T
-    return material.mu_ * (F - F_inv_T) + material.lambda_ * jnp.log(J) * F_inv_T
-
-
-jit_vmap_neo_hooke_pk1 = jit(vmap(neo_hooke_pk1_jax,
-                                     in_axes=(0, None),
-                                     out_axes=(0)))
 
 
 def neo_hooke_pk2_jax_variable_params(C, mu_, lambda_):
@@ -233,80 +184,6 @@ def neo_hooke_update_stress_variable_mu(F, mu, lambda_):
 jit_vmap_neo_hooke_variable_mu = jit(vmap(neo_hooke_update_stress_variable_mu,
                                            in_axes=(0, 0, 0),
                                            out_axes=(0)))
-
-
-def to_mat(x):
-    """
-    Convert vector to matrix - Only for 2D!
-    """
-    if len(x) == 3:
-        return jnp.array([
-                [x[0], x[2] / jnp.sqrt(2)],
-                [x[2] / jnp.sqrt(2), x[1]]
-                ])
-    else:
-        return jnp.array([
-                [x[0], x[2]],
-                [x[3], x[1]]
-                ])
-
-
-def neo_hooke_update_voigt(Fv, material):
-    """
-    F = vector [4]
-    stress = voigt vector [3]
-    """
-    F = to_mat(Fv)
-
-    stress = neo_hooke_update_stress(F, material)
-
-    return jnp.array([stress[0, 0], stress[1, 1], stress[0, 1]])
-
-
-class NeoHookeMaterial(Material):
-    """A class to manage PRNN material model loading and updates."""
-
-    def __init__(self, lambda_=1000, mu=961.538):
-        super().__init__()
-        """Initialize the PRNN material model with loaded parameters."""
-
-        self.material = create_material(lambda_=lambda_, mu_=mu)
-
-        # JIT compiled stress function
-        self.update_stress_jit = jit(vmap(neo_hooke_update_voigt, in_axes=(0, None), out_axes=0))
-
-        # JIT compiled tangent function using JAX autodiff
-        def compute_tangent(F_single, material):
-            return jax.jacfwd(neo_hooke_update_voigt, argnums=0)(F_single, material)
-
-        self.compute_tangent_jit = jit(vmap(compute_tangent, in_axes=(0, None), out_axes=0))
-
-
-    @property
-    def fluxes(self):
-        return {"cauchy_stress": 3}
-
-    @property
-    def gradients(self):
-        return {"F": 4}
-
-    @property
-    def internal_state_variables(self):
-        return {}
-
-
-    def constitutive_update_vectorized(self, F, state_all):
-        # # Compute stress
-        with Timer("Constitutive NeoHooke stress: "):
-            stress_vect = self.update_stress_jit(F, self.material)
-
-        # Compute tangent using automatic differentiation
-        with Timer("Constitutive NeoHooke tangent: "):
-            tangent = self.compute_tangent_jit(F, self.material)
-
-        state_all['cauchy_stress'] = stress_vect
-
-        return stress_vect, tangent, state_all
 
 
 # --- Example Usage ---

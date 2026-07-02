@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from createRVE import createRVEs, createRVEs_ellipse
+from create_rve import createRVEs, createRVEs_ellipse
 
 
 # Ellipsoids

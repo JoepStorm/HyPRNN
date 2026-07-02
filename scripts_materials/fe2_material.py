@@ -1,8 +1,9 @@
 """
-Heterogeneous Parallel FE² Material Interface
+FE² material interface: parallel RVE solves at the macro quadrature points.
 
-Parallel FE² material where each quadrature point can have a different RVE
-microstructure. Meshes are pre-generated globally once and passed to workers.
+Each quadrature point can have a different RVE microstructure and material
+parameters. Meshes are pre-generated globally once and passed to persistent
+worker processes.
 """
 import os
 import glob
@@ -16,7 +17,7 @@ from dolfinx.common import Timer
 from dolfinx_materials.generic import Material, DataManager
 
 from scripts_materials.rve_mesher import RVEMeshConfig
-from scripts_materials.RVE_material import RVEMaterial
+from scripts_materials.rve_material import RVEMaterial
 
 
 def _generate_single_mesh(args):
@@ -571,7 +572,7 @@ if __name__ == "__main__":
 
     material.set_data_manager(ngauss)
 
-    material.plot_micro_meshes('../results/micro_meshes/fe2mat_test')
+    material.plot_micro_meshes('../results/micro_meshes/fe2_material_test')
 
 
     # Test multiple timesteps with small incremental loading

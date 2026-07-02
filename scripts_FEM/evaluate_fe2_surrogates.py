@@ -11,9 +11,9 @@ import numpy as np
 import jax.numpy as jnp
 from material_params import FUNGI_LAMBDA
 
-from scripts_materials.PRNN_mat import prnnMaterial
+from scripts_materials.prnn_material import PRNNMaterial
 from validate_bending import MODELS, MODEL_LABELS
-from scripts_surrogates.visualize_LD_data import plot_PK2_curves
+from scripts_surrogates.plot_LD_data import plot_PK2_curves
 
 
 def _vec_to_mat(v):
@@ -88,7 +88,7 @@ def evaluate(npz_path, output_folder=None):
         cfg = MODELS[key]
         print(f"\n--- {key} ({MODEL_LABELS.get(key, key)}) ---")
         loc = cfg['prnn_model_loc']
-        mat = prnnMaterial(f"{loc}_settings", f"{loc}_normparams", loc,
+        mat = PRNNMaterial(f"{loc}_settings", f"{loc}_normparams", loc,
                            micro_variables)
 
         PK1_pred = np.zeros_like(PK1_true)

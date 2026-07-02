@@ -32,7 +32,7 @@ the stable package.
 
 1. **Deposition + meshing** (`yade/`): deposit RVE packings with YADE and
    mesh them with GMSH — see [RVE generation](#rve-generation-yade) below.
-2. **Training data** (`scripts_surrogates/`): `create*Data.py` run RVE
+2. **Training data** (`scripts_data_creation/`): `create_*.py` run RVE
    simulations on the meshes and store `{F, PK1, cauchy}.npy` sequences.
 3. **Training** (`scripts_surrogates/`): `train_*.py` train PRNN / HyPRNN / NN
    surrogates into `trained_models/`.

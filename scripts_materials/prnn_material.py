@@ -83,7 +83,7 @@ def complete_update_pk2(model, F_vec, material, dataset, params, Q, micro_params
     return matrix_to_tensor(PK1)
 
 
-class prnnMaterial(Material):
+class PRNNMaterial(Material):
     """PRNN-based material model for FE² multiscale analysis.
 
     This material uses a Physics-informed Recurrent Neural Network (PRNN)

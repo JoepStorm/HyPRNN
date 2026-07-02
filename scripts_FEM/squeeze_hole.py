@@ -26,7 +26,7 @@ import gmsh
 from dolfinx_materials.quadrature_map import QuadratureMap
 from dolfinx_materials.solvers import NonlinearMaterialProblem
 from dolfinx_materials.utils import create_quadrature_functionspace
-from scripts_materials.PRNN_mat import prnnMaterial
+from scripts_materials.prnn_material import PRNNMaterial
 from material_params import FUNGI_MU, FUNGI_LAMBDA
 from plotting_utils import plot_interpolation_field
 
@@ -272,10 +272,10 @@ class SqueezeHole:
 
         loc = self.prnn_model_loc
         try:
-            self.material = prnnMaterial(f"{loc}_settings", f"{loc}_normparams",
+            self.material = PRNNMaterial(f"{loc}_settings", f"{loc}_normparams",
                                          f"{loc}", self.micro_variables)
         except Exception:
-            self.material = prnnMaterial(f"{loc}settings", f"{loc}normparams",
+            self.material = PRNNMaterial(f"{loc}settings", f"{loc}normparams",
                                          f"{loc}params", self.micro_variables)
 
         self.qmap = QuadratureMap(self.domain, self.deg_quad, self.material)

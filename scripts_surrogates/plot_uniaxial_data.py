@@ -1,4 +1,4 @@
-"""Visualize uniaxial dataset (createUniaxialData.py) with PRNN predictions.
+"""Visualize uniaxial dataset (create_uniaxial_data.py) with PRNN predictions.
 
 Subplots left-to-right: mu, vfrac, ratio variation.
 Tension + compression shown; solid = RVE, dashed = PRNN nonlin.
@@ -65,7 +65,7 @@ dataset = LDDataset(
 )
 data = dataset.get_all_batches()
 
-# Sample layout (from createUniaxialData.py):
+# Sample layout (from create_uniaxial_data.py):
 #   tension:     0=median, 2=nfib_min, 4=nfib_max, 6=ratio_min, 8=ratio_max, 10=mu_min, 12=mu_max
 #   compression: tension_idx + 1
 

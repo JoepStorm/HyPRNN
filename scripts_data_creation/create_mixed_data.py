@@ -2,7 +2,7 @@ import os
 import numpy as np
 import random
 import sys
-from scripts_materials.RVE_material import RVEMaterial
+from scripts_materials.rve_material import RVEMaterial
 from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 # Default settings

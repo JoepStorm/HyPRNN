@@ -10,7 +10,7 @@ import gmsh
 from mpi4py import MPI
 from dolfinx.io import gmsh as gmshio
 import os
-from scripts_materials.createRVE import createRVEs_ellipse
+from scripts_materials.create_rve import createRVEs_ellipse
 
 
 def check_ellipse_overlap(center1, center2, a, b, angle_rad, gap_factor=1.0):

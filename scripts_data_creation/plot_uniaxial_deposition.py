@@ -1,4 +1,4 @@
-"""Visualize uniaxial stress-strain paths from uniaxialDeposition.py output.
+"""Visualize uniaxial stress-strain paths from create_uniaxial_deposition_data.py output.
 
 Plots F_xx -> PK1_xx, F_yy -> PK1_yy, F_xy -> PK1_xy.
 Lines are colored by mix fraction (fraction of small chips).

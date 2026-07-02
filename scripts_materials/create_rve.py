@@ -377,7 +377,7 @@ def createRVEs_ellipse(meshes, num_fib, a, b, angle, vfrac, seed, delete_geo, sa
         try:
             os.system(f"/home/joep/Programs/gmsh-4.13.1-Linux64/bin/gmsh2 {geo_file} -format msh22 -2")     # gmsh2 used here is simply a renamed gmsh bin file - you can just use gmsh instead.
         except:
-            print(f"gmsh location incorrectly specified in createRVE.py. Change to your version.")
+            print(f"gmsh location incorrectly specified in create_rve.py. Change to your version.")
             exit()
         # os.remove(f"rve_{mesh_id}-fib{num_fib}.msh")  # Remove duplicate msh file
 

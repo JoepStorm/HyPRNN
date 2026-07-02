@@ -2,15 +2,15 @@
 
 For each (mix, seed, loading direction) combination, runs a uniaxial
 tension + compression simulation using the periodic GMSH meshes generated
-by batch_rve_generation_2D.py.
+in the yade/ workflow.
 
 The single varying material parameter is 'mix' (fraction of small chips):
   0.0 = all large, 0.25, 0.50, 0.75, 1.0 = all small.
 
 Usage:
     cd scripts_surrogates
-    python uniaxialDeposition.py
-    python uniaxialDeposition.py --shrink_factor 1.0 --mesh_dir ../yade/generated_meshes_2D_wet
+    python create_uniaxial_deposition_data.py
+    python create_uniaxial_deposition_data.py --shrink_factor 1.0 --mesh_dir ../yade/generated_meshes_2D_wet
 """
 
 import os
@@ -20,7 +20,7 @@ import numpy as np
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from scripts_materials.RVE_material import RVEMaterial
+from scripts_materials.rve_material import RVEMaterial
 from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 # ── Fixed material properties ─────────────────────────────────────────────────

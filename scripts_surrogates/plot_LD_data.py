@@ -266,14 +266,9 @@ def plot_stress_strain_curves(F_true, sigma_F_true, U_eq_true, sigma_U_eq_true,
     return fig, ax
 
 
-# if main
 if __name__ == '__main__':
-    """
-    Main function that replicates the original behavior of the script.
-    This loads data and creates the visualization.
-    """
-    # Load data
-    from data_utils import LDDataset_PK1, LDDataset
+    # Load a dataset and plot its PK2 stress-strain curves.
+    from data_utils import LDDataset
 
     settings = {
         # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/literature_matprops/mixed_t100',
@@ -295,53 +290,12 @@ if __name__ == '__main__':
         'seq_length': 50,
     }
     settings['matdata_path'] = settings['data_path'] + '_matparam.data'
-    dataset = LDDataset_PK1(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'])
-    # dataset = LDDataset_PK1(settings['data_path'], settings['seq_length']) #, mat_file=settings['matdata_path'])
-
-    all_indices = np.arange(dataset.F.shape[0])
-    # test_indices = all_indices[350:]
-    test_indices = all_indices[:]
-    testset = dataset.get_subset(test_indices)
-
-    # num_samples = 686 # 384  #8
-
-    # full_DF = testset['F'] #[-num_samples:]
-    # full_sigma = testset['sig_F'] #[-num_samples:]
-    # true_strain = testset['x'] #[-num_samples:]
-    # true_stress = testset['sig_U_eq_unnorm'] #[-num_samples:]
-    #
-    # # print(f"full_DF: {full_DF[0]}")
-    #
-    #
-    # # # To compare with a different dataset, we load that dataset and pass it as the predicted values
-    # # # alternative_file = f'../data/vfrac_ratio_smallmu_biggerdomain/uniaxial_1/uniaxial_tension_t50'
-    # # alternative_file = f'../data/woodchip/woodchip_periodic_relax_simple_80_compression'
-    # # dataset_alternative = LDDataset_PK1(alternative_file, settings['seq_length']) #, mat_file=f'../data/vfrac_ratio_smallmu_biggerdomain/uniaxial_1/uniaxial_tension_t50_matparam.data')
-    # # testset_alternative = dataset_alternative.get_subset(test_indices)
-    # # sigma_F_pred_alternative = testset_alternative['sig_F'][:]
-    # # pred_stress_alternative = testset_alternative['sig_U_eq_unnorm'][:]
-    # #
-    # # # print(f"full_DF: {full_DF}")
-    # # # print(f"F alternative: {testset_alternative['F']}")
-    # # # assert np.allclose(full_DF, testset_alternative['F']), "F's don't match"
-    #
-    # plot_stress_strain_curves(
-    #     F_true=full_DF,
-    #     sigma_F_true=full_sigma,
-    #     U_eq_true=true_strain,
-    #     sigma_U_eq_true=true_stress,
-    #     # sigma_U_pred=pred_stress_alternative,
-    #     # savename=no_geo_file + '_curves',
-    #     savename=settings['data_path'] + '_curves',
-    #     color_converged=True,
-    #     plot_U_U=True,
-    #     png=False
-    # )
 
     # dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'])
     # dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'], mat_features=['mix'])
     dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'], mat_features=['fil_frac'])
     # dataset = LDDataset(settings['data_path'], settings['seq_length'])
+    test_indices = np.arange(dataset.F.shape[0])
     testset = dataset.get_subset(test_indices)
     # plot_PK2_curves(
     #     E_true=testset['x'],

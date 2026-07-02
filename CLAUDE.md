@@ -40,11 +40,11 @@ python validate_ring.py            # Validate optimized ring grading against FE�
 
 ### Data Generation
 ```bash
-cd scripts_surrogates
-python createUniaxialData.py       # Uniaxial training data (synthetic ellipse RVEs)
-python createMixedData.py          # Mixed-loading training data (synthetic ellipse RVEs)
-python createDepositionData.py     # Mixed-loading data from YADE-deposited meshes
-python uniaxialDeposition.py       # Uniaxial runs on YADE-deposited meshes
+cd scripts_data_creation
+python create_uniaxial_data.py                # Uniaxial training data (synthetic ellipse RVEs)
+python create_mixed_data.py                   # Mixed-loading training data (synthetic ellipse RVEs)
+python create_deposition_data.py              # Mixed-loading data from YADE-deposited meshes
+python create_uniaxial_deposition_data.py     # Uniaxial runs on YADE-deposited meshes
 ```
 
 ### RVE Microstructure Generation (YADE)
@@ -66,7 +66,7 @@ python packing_to_mesh.py --input data/datasetv1/coords_2D_0_500_0.5.npy
 ### Material Testing
 ```bash
 cd scripts_materials
-python RVE_material.py         # Test 2D RVE homogenization standalone
+python rve_material.py         # Test 2D RVE homogenization standalone
 ```
 
 ## Architecture Overview
@@ -85,7 +85,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 2. Mesh Generation
    └─> packing_to_mesh.py: packing → periodic GMSH mesh
 3. RVE Data Generation
-   └─> create*Data.py: loading sequences → {F, PK1, cauchy}.npy
+   └─> create_*_data.py: loading sequences → {F, PK1, cauchy}.npy
 4. PRNN Training
    └─> train_*.py: JAX/Flax training → trained_models/
 5. Macro FE² Inference
@@ -103,12 +103,16 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 - Output stored in `yade/data/`
 
 **Materials System** (`scripts_materials/`):
-- `RVE_material.py`: Full 2D RVE homogenization with periodic BC (stress + tangent)
-- `PRNN_mat.py`: PRNN surrogate material (fast ML prediction)
-- `fe2mat.py`: Abstract FE² material interface with RVEStateManager
-- `fe2mat_heterogeneous_v2.py`: Parallel FE² with different RVEs per quadrature point
-- `neohooke.py`: Neo-Hookean material model (numpy + JAX variants)
-- `rve_mesher.py` / `createMeshes.py` / `createRVE.py`: RVE mesh generation utilities
+- `rve_material.py`: Full 2D RVE homogenization with periodic BC (stress + tangent)
+- `prnn_material.py`: PRNN surrogate material (fast ML prediction)
+- `fe2_material.py`: FE² material — parallel RVE solves with per-quadrature-point microstructure
+- `neohooke.py`: Neo-Hookean stress functions (UFL + JAX variants)
+- `rve_mesher.py` / `create_meshes.py` / `create_rve.py`: RVE mesh generation utilities
+
+**Training Data Generation** (`scripts_data_creation/`):
+- `create_uniaxial_data.py` / `create_mixed_data.py`: RVE simulations on synthetic ellipse meshes
+- `create_deposition_data.py` / `create_uniaxial_deposition_data.py`: RVE simulations on YADE-deposited meshes
+- `plot_uniaxial_deposition.py`: visualize create_uniaxial_deposition_data.py output
 
 **Neural Networks** (`scripts_surrogates/`):
 - `LDprnn.py`: Physics-informed RNN architectures (core ML module)
@@ -116,6 +120,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 - `LDnn.py`: Plain feed-forward NN baseline
 - `trainer.py`: JAX/Flax training framework
 - `data_utils.py`: Data processing, normalization, and dataset loading
+- `plot_LD_data.py` / `plot_uniaxial_data.py` / `plot_learncurve.py` / `plot_median_curves.py`: dataset and training-result plots
 
 **FEM Drivers** (`scripts_FEM/`):
 - `validate_bending.py`: 3-point bending — FE² ground truth vs surrogate models (deformation, stress maps, timing)
@@ -171,9 +176,10 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 
 ### File Naming Conventions
 - `LD*`: Large deformation formulations
-- `*_mat.py`: Material model implementations
-- `create*.py`: Data generation scripts
+- `*_material.py`: Material model implementations
+- `create_*.py`: Data generation scripts
 - `train_*.py`: Training scripts
+- `plot_*.py`: Plotting / visualization scripts
 
 ## Testing Approach
 

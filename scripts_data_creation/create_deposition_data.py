@@ -2,13 +2,13 @@
 
 For each sample, randomly draws a (mix, seed, mu) combination and a random
 loading direction, then runs an RVE simulation.  Matches the format of
-createMixedData.py so the output can be used with the same data pipeline.
+create_mixed_data.py so the output can be used with the same data pipeline.
 
 Matparam columns: mu  lambda  mix
 
 Usage:
-    python createDepositionData.py          # seed=1
-    python createDepositionData.py 3        # seed=3 (batch job)
+    python create_deposition_data.py          # seed=1
+    python create_deposition_data.py 3        # seed=3 (batch job)
 """
 
 import os
@@ -18,7 +18,7 @@ import numpy as np
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from scripts_materials.RVE_material import RVEMaterial
+from scripts_materials.rve_material import RVEMaterial
 from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 # Job seed (controls both sampling and reproducibility)
