@@ -1,10 +1,10 @@
 # Heavy data / generated outputs (not tracked in git)
 data/
 trained_models/
-scripts_surrogates/trained_models/
 results/
 meshes/
 yade/periodic/
 yade/periodic_3D/
+src/scienceplotstyles/
 __pycache__/
 *.pyc
