@@ -3,7 +3,7 @@
 Colour by 'type' (wood/filler) or 'clumpId' in ParaView.
 
 Usage:
-    python coords_3D_to_vtk.py data/single_runs/coords_3D_0_500_0.3.npy
+    python packing_to_vtk.py data/single_runs/coords_3D_0_500_0.3.npy
 """
 
 import sys

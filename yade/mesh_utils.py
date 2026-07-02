@@ -9,7 +9,7 @@ node counts on opposite boundaries.
 
 Plotting: render a meshed RVE (matrix vs inclusions) into a matplotlib axis.
 
-Used by mesh_rve_filler_2D.py and batch_filler_dataset.py.
+Used by packing_to_mesh.py and generate_rve_dataset.py.
 """
 
 import numpy as np

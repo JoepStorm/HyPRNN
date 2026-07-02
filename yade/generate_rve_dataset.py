@@ -1,12 +1,14 @@
 """Build a filler-fraction sweep: deposit + mesh one RVE per filler fraction.
 
-Runs yade_woodchip_filler.py for filler_fraction = 0.0, 0.1, ... 0.9 and meshes
-each resulting packing with mesh_rve_filler_2D.py, producing 10 .msh files in
+Runs deposit_rve.py for filler_fraction = 0.0, 0.1, ... 0.9 and meshes
+each resulting packing with packing_to_mesh.py, producing 10 .msh files in
 OUT_DIR (one per fraction). Afterwards it writes two PDFs:
     vfrac_vs_filler.pdf  - inclusion volume fraction vs filler fraction
     meshes_row.pdf       - the 10 meshes in a single row (matrix vs inclusions)
 
-Note: many default settings from yade_woodchip_filler are used.
+Note: many default settings from deposit_rve are used.
+
+Usage: first modify settings in this script. Then: python generate_rve_dataset.py
 """
 
 import os
@@ -43,7 +45,7 @@ for frac in FRACTIONS:
 
     # 1) DEM deposition + slice -> 2D packing .npy (+ _meta.npy)
     subprocess.run(
-        [YADE, "-x", "-n", "yade_woodchip_filler.py", "--",
+        [YADE, "-x", "-n", "deposit_rve.py", "--",
          "--seed", str(SEED),
          "--filler_fraction", f"{frac:.1f}",
          "--init_velocity", f"{vel:.2f}",
@@ -52,7 +54,7 @@ for frac in FRACTIONS:
 
     # 2) Strip filler + mesh -> .msh
     subprocess.run(
-        [sys.executable, "mesh_rve_filler_2D.py",
+        [sys.executable, "packing_to_mesh.py",
          "--input", str(npy),
          "--output", str(msh)],
         cwd=HERE, check=True)

@@ -30,9 +30,8 @@ the stable package.
 
 ## Workflow
 
-1. **Deposition + meshing** (`yade/`): `batch_filler_dataset.py` deposits one
-   RVE packing per filler fraction and meshes it. Run a single deposition
-   manually with `yadedaily yade_woodchip_filler.py -- --filler_fraction 0.3`.
+1. **Deposition + meshing** (`yade/`): deposit RVE packings with YADE and
+   mesh them with GMSH — see [RVE generation](#rve-generation-yade) below.
 2. **Training data** (`scripts_surrogates/`): `create*Data.py` run RVE
    simulations on the meshes and store `{F, PK1, cauchy}.npy` sequences.
 3. **Training** (`scripts_surrogates/`): `train_*.py` train PRNN / HyPRNN / NN
@@ -43,3 +42,33 @@ the stable package.
 
 Shared material constants (wood/fungi elastic properties) live in
 `material_params.py`. Run scripts from within their own folder.
+
+## RVE generation (`yade/`)
+
+Single deposition, run manually with args to inspect behavior (opens the YADE GUI):
+
+```bash
+cd yade
+yadedaily deposit_rve.py -- --seed 0 --filler_fraction 0.5
+```
+
+Batch data generation — deposit + mesh one RVE per filler fraction, with
+overview plots (spawns `yadedaily` as a subprocess, see `YADE_BIN` above):
+
+```bash
+python generate_rve_dataset.py
+```
+
+Inspect a settled 3D packing in ParaView:
+
+```bash
+python packing_to_vtk.py data/single_runs/coords_3D_0_500_0.5.npy
+```
+
+Mesh a single 2D packing (strip filler, convex-hull periodic GMSH mesh):
+
+```bash
+python packing_to_mesh.py --input data/single_runs/coords_2D_0_500_0.5.npy
+```
+
+Outputs land in `yade/data/`; the `.msh` meshes feed the training-data scripts.

@@ -51,16 +51,16 @@ python uniaxialDeposition.py       # Uniaxial runs on YADE-deposited meshes
 ```bash
 cd yade
 # Single deposition, run manually with args to inspect behavior (GUI)
-yadedaily yade_woodchip_filler.py -- --seed 0 --filler_fraction 0.5
+yadedaily deposit_rve.py -- --seed 0 --filler_fraction 0.5
 
 # Filler-fraction sweep: deposit + mesh one RVE per fraction, plus overview plots
-python batch_filler_dataset.py
+python generate_rve_dataset.py
 
 # Visualize a settled 3D packing in ParaView
-python coords_3D_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy
+python packing_to_vtk.py data/datasetv1/coords_3D_0_500_0.5.npy
 
 # Mesh a single packing (strip filler, convex-hull periodic mesh)
-python mesh_rve_filler_2D.py --input data/datasetv1/coords_2D_0_500_0.5.npy
+python packing_to_mesh.py --input data/datasetv1/coords_2D_0_500_0.5.npy
 ```
 
 ### Material Testing
@@ -81,9 +81,9 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 ### End-to-End Data Flow
 ```
 1. Particle Deposition (YADE)
-   └─> yade_woodchip_filler.py: periodic 2D RVE packings
+   └─> deposit_rve.py: periodic 2D RVE packings
 2. Mesh Generation
-   └─> mesh_rve_filler_2D.py: packing → periodic GMSH mesh
+   └─> packing_to_mesh.py: packing → periodic GMSH mesh
 3. RVE Data Generation
    └─> create*Data.py: loading sequences → {F, PK1, cauchy}.npy
 4. PRNN Training
@@ -95,11 +95,11 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 ### Core Components
 
 **Particle Deposition & Meshing** (`yade/`):
-- `yade_woodchip_filler.py`: 3D gravity deposition (wood chips + filler) → horizontal slice → relaxed periodic 2D sheet
-- `batch_filler_dataset.py`: filler-fraction sweep — deposit + mesh one RVE per fraction, with overview plots
-- `mesh_rve_filler_2D.py`: strip filler from a packing and mesh it (wood = inclusions, rest = matrix)
+- `deposit_rve.py`: 3D gravity deposition (wood chips + filler) → horizontal slice → relaxed periodic 2D sheet
+- `generate_rve_dataset.py`: filler-fraction sweep — deposit + mesh one RVE per fraction, with overview plots
+- `packing_to_mesh.py`: strip filler from a packing and mesh it (wood = inclusions, rest = matrix)
 - `mesh_utils.py`: supporting functions — convex-hull periodic meshing pipeline and mesh plotting
-- `coords_3D_to_vtk.py`: settled 3D packing → ParaView `.vtp`
+- `packing_to_vtk.py`: settled 3D packing → ParaView `.vtp`
 - Output stored in `yade/data/`
 
 **Materials System** (`scripts_materials/`):

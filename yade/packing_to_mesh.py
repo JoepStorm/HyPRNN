@@ -1,17 +1,22 @@
-"""Mesh 2D RVE packings that contain filler (output of yade_woodchip_filler.py).
+"""Mesh 2D RVE packings that contain filler (output of deposit_rve.py).
 
-The packing .npy has a 5th column tagging each sphere: 0 = wood, 1 = filler.
 Filler occupied space during DEM (holding voids open) but is treated as void
 here: only wood spheres become inclusions (tag 2). Everything else — including
 the regions the filler held open — falls into the matrix (tag 1) automatically,
 because the convex-hull pipeline defines the matrix as "the cell minus the wood".
 
-We simply strip the filler rows, write a wood-only temporary .npy, and reuse the
-meshing pipeline from mesh_utils.py unchanged.
+Settings:
+    shrink_factor:  default=0.85. How much the convex hulls are shrunk.
+    mesh_size:  default=0.02.
+    hull_resolution:  default=12.   Influences nodes on circles.
+    min_radius_factor:  default=0.25.  Very small spheres below this min_radius_factor are ignored.
 
-Usage:
-    python mesh_rve_filler_2D.py --input path/to/coords_2D_0_500_0.5.npy
-    python mesh_rve_filler_2D.py --input path/to/in.npy --output path/to/out.msh
+Note: gmsh does always produce periodic meshes, even from a periodic geometry.
+      This is not handled properly. A different geometry with new seed is used by manually replacing the file.
+
+Usage: set
+    python packing_to_mesh.py --input path/to/coords_2D_0_500_0.5.npy
+    python packing_to_mesh.py --input path/to/in.npy --output path/to/out.msh
 """
 
 import argparse

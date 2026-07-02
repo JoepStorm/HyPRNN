@@ -2,7 +2,7 @@
 """3D gravity deposition → horizontal slice → 2D periodic sheet, with filler.
 
 Filler particles interact mechanically with the wood during deposition and
-relaxation, but are tagged separately so the mesher (mesh_rve_filler_2D.py)
+relaxation, but are tagged separately so the mesher (packing_to_mesh.py)
  can drop them and treat the space they occupied as matrix/void.
 
 There is a single wood chip type: a slender single-row chip lying flat in the
@@ -22,7 +22,7 @@ Phase 1: Non-periodic gravity deposition into a box (wood + filler mixed).
 Phase 2: Slice at cut_height, extract 2D circles, periodic relaxation.
 
 Example usage:
-    yadedaily yade_woodchip_filler.py -- --filler_fraction 0.3 --angle 0.0 --base_radius 0.04 --num_chips 500
+    yadedaily deposit_rve.py -- --filler_fraction 0.3 --angle 0.0 --base_radius 0.04 --num_chips 500
 
 """
 
@@ -270,7 +270,7 @@ def slice_and_relax():
     print(f"\n=== Phase 2: Slicing at y={CUT_HEIGHT:.2f} ===")
 
     # Snapshot the settled 3D packing before it is sliced away, so it can be
-    # inspected later (see coords_3D_to_vtk.py).
+    # inspected later (see packing_to_vtk.py).
     save_3D_packing()
 
     # Collect all spheres and compute 2D circle intersections, keeping the
@@ -396,7 +396,7 @@ def save_3D_packing(tag='coords_3D'):
     Columns: [x, y, z, radius, clumpId, type]  (type 0 = wood, 1 = filler).
     Written alongside the 2D output with a `tag` name (default coords_3D for the
     settled packing); convert it to a ParaView-viewable .vtp with
-    coords_3D_to_vtk.py.
+    packing_to_vtk.py.
     """
     data = []
     for b in O.bodies:
