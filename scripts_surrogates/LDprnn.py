@@ -2,9 +2,8 @@ import jax
 import jax.numpy as jnp
 import flax.linen as nn
 import scripts_materials.neohooke as neohooke
-import scripts_materials.orthotropic as orthotropic
-import scripts_materials.bonet as bonet
 from scripts_surrogates.data_utils import matrix_to_tensor
+from material_params import WOOD_MU, WOOD_LAMBDA
 
 
 def _max_eigenvalue_2x2_spd(W):
@@ -1338,11 +1337,9 @@ class PRNN(nn.Module):
             lambdas = jnp.repeat(lambda_per_sample, self.n_matpts[0], axis=0)  # [b * m_i]
             micro_stresses_neo = neohooke.jit_vmap_neo_hooke_pk2_variable(C_neohooke, mus, lambdas)  # PK2 output, symmetric [b * m_i, 2, 2]
             # --- Apply Neo-Hookean material model for wood ---
-            wood_mu = 4.727e3
-            wood_lambda = 14.182e3
             n_wood_pts = C_rest.shape[0]  # Total number of wood material points (b * m_j)
-            wood_mus = jnp.full((n_wood_pts,), wood_mu)
-            wood_lambdas = jnp.full((n_wood_pts,), wood_lambda)
+            wood_mus = jnp.full((n_wood_pts,), WOOD_MU)
+            wood_lambdas = jnp.full((n_wood_pts,), WOOD_LAMBDA)
             micro_stresses_rest = neohooke.jit_vmap_neo_hooke_pk2_variable(C_rest, wood_mus, wood_lambdas)  # [b * m_j, 2, 2]
 
             # reshape individually back to [b, m, ..]

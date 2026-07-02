@@ -16,9 +16,9 @@ from LDprnn_shared_hyper import create_shared_hyper_prnn_model
 # -- Common settings (shared across all configs) -----------------------------
 
 COMMON = {
-    'savefolder': 'trained_models/compute_train_time/',
-    'data_path': '../data/RVE/vary_all/vary_all/mixed_t50_mergedv2',
-    'matdata_path': '../data/RVE/vary_all/vary_all/mixed_t50_mergedv2_matparam.data',
+    'savefolder': '../trained_models/compute_train_time/',
+    'data_path': '../data/vary_all/mixed_t50_mergedv2',
+    'matdata_path': '../data/vary_all/mixed_t50_mergedv2_matparam.data',
 
     'seq_length': 50,
     'train_batch_size': 2,

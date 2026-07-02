@@ -3,6 +3,7 @@ import jax.numpy as jnp
 import flax.linen as nn
 import scripts_materials.neohooke as neohooke
 from scripts_surrogates.data_utils import matrix_to_tensor
+from material_params import WOOD_MU, WOOD_LAMBDA
 
 
 def _get_activation(name):
@@ -316,11 +317,9 @@ class SharedHyperPRNN(nn.Module):
             lambda_per_pt = jnp.repeat(micro_params[:, self.material_micro_features[1]], self.n_matpts[0])
             micro_stresses_neo = neohooke.jit_vmap_neo_hooke_pk2_variable(C_neohooke, mu_per_pt, lambda_per_pt)
 
-            wood_mu = 4.727e3
-            wood_lambda = 14.182e3
             n_wood_pts = C_rest.shape[0]
             micro_stresses_rest = neohooke.jit_vmap_neo_hooke_pk2_variable(
-                C_rest, jnp.full((n_wood_pts,), wood_mu), jnp.full((n_wood_pts,), wood_lambda))
+                C_rest, jnp.full((n_wood_pts,), WOOD_MU), jnp.full((n_wood_pts,), WOOD_LAMBDA))
 
             micro_stresses_neo = micro_stresses_neo.reshape(b, self.n_matpts[0], 2, 2)
             micro_stresses_rest = micro_stresses_rest.reshape(b, self.n_matpts[1], 2, 2)

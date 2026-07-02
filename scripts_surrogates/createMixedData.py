@@ -3,6 +3,7 @@ import numpy as np
 import random
 import sys
 from scripts_materials.RVE_material import RVEMaterial
+from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 # Default settings
 seed = 1
@@ -30,13 +31,13 @@ def E_nu_from_mu_lambda(mu, lambda_):
     return E, nu
 
 
-# results_name = f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_{seed}'
-# results_name = f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops'
-# results_name = f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/lit_props_constant'
-# results_name = f'../data/RVE/vary_mu/vary_mu'
-# results_name = f'../data/RVE/vary_vfrac_ratio/vary_vfrac_ratio'
-results_name = f'../data/RVE/vary_all/vary_all'
-# results_name = f'../data/RVE/vfrac_ratio_E/{seed}'
+# results_name = f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_{seed}'
+# results_name = f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops'
+# results_name = f'../data/vfrac_ratio_smallmu_biggerdomain/lit_props_constant'
+# results_name = f'../data/vary_mu/vary_mu'
+# results_name = f'../data/vary_vfrac_ratio/vary_vfrac_ratio'
+results_name = f'../data/vary_all'
+# results_name = f'../data/vfrac_ratio_E/{seed}'
 try:
     os.makedirs(results_name, exist_ok=True)
 except Exception as e:
@@ -47,11 +48,11 @@ timesteps = 50
 dispIncr = 0.01
 keep_failed_runs = True
 materials = ['wood', 'fungi']
-lambda_val = 0.62
+lambda_val = FUNGI_LAMBDA
 # lambda_val = 0.15e3
 
 base_filename = f'mixed_t{timesteps}_seed{seed}'
-mesh_folder = f"../meshes/micro/vfrac_ratio_big/"
+mesh_folder = f"../meshes/vfrac_ratio_big/"
 max_retries = 0  # 40
 xy_factor = 1.0  # 0.5 # scale non-diagonal F terms with this factor to avoid excessive shear
 gen_mat_params = True
@@ -122,17 +123,17 @@ else:
         # # vary mu only
         # num_fib_array = [40]
         # shape_array = [2.0]
-        # mu_range = [0.51 / 5, .51 * 5]
+        # mu_range = [FUNGI_MU / 5, FUNGI_MU * 5]
 
         # # vary all except mu
         # num_fib_array = [10, 20, 30, 40, 50, 60, 70]
         # shape_array = [1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5]
-        # mu_range = [0.51, 0.51]
+        # mu_range = [FUNGI_MU, FUNGI_MU]
 
         # vary all
         num_fib_array = [10, 20, 30, 40, 50, 60, 70]
         shape_array = [1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5]
-        mu_range = [0.51 / 5, .51 * 5]
+        mu_range = [FUNGI_MU / 5, FUNGI_MU * 5]
 
         total_samples = 512
         fib_shape_mat_combinations = np.column_stack([
@@ -230,8 +231,7 @@ for sample_id in range(start_sample, samples):
         # 'fungi': {'mu': mu, 'lambda_': 150., 'tag': 1},
         'fungi': {'mu': mu, 'lambda_': lambda_val, 'tag': 1},
         # 'fungi': {'E': 1.3, 'nu': 0.3, 'tag': 1},           # E based on paper Stochastic continuum model for mycelium-based bio-foam.
-        'wood': {'E': 13.e3, 'nu': 0.375, 'tag': 2}
-        # 'wood': {'mu': 4.727e3, 'lambda_': 14.182e3, 'tag': 2}       # equivalent to E=13e3, nu=0.375
+        'wood': {'E': WOOD_E, 'nu': WOOD_NU, 'tag': 2}
     }
 
     # Initialize the RVE material model

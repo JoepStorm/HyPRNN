@@ -24,21 +24,21 @@ colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 
 # ================== Settings ==================
-# nonlin_folder   = 'trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/'
-nonlin_folder   = 'trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/'
+# nonlin_folder   = '../trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/'
+nonlin_folder   = '../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/'
 nonlin_samples  = 512
 
-linear_folder   = 'trained_models/train_vary_all_v2/prnn_lin_1L_6m/'
+linear_folder   = '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/'
 linear_samples  = 32
 
-linear512_folder  = 'trained_models/train_vary_all_v2/prnn_lin_1L_6m/'
+linear512_folder  = '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/'
 linear512_samples = 512
 
-nn32_folder    = 'trained_models/train_vary_all_v2/nn_64_4/'
+nn32_folder    = '../trained_models/train_vary_all_v2/nn_64_4/'
 nn32_samples   = 32
 
-# nn_folder    = 'trained_models/train_vary_all_v2/nn_64_3/'
-nn_folder    = 'trained_models/train_vary_all_v2/nn_64_4/'
+# nn_folder    = '../trained_models/train_vary_all_v2/nn_64_3/'
+nn_folder    = '../trained_models/train_vary_all_v2/nn_64_4/'
 nn_samples   = 512
 
 y_lims = [[-2, 0.1], [-0.1, 2.2], [-0.1, 1.7]]  # None

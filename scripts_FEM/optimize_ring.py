@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import numpy as np
 import jax.numpy as jnp
 from scipy.optimize import minimize
+from material_params import FUNGI_MU, FUNGI_LAMBDA
 from graded_ring_pressure import (
     GradedRingSimulation, plot_grading_overview, plot_grading_comparison,
     plot_stress_comparison, plot_radial_slice,
@@ -78,7 +79,7 @@ class RingOptimizer:
         self.bounds = (
             [(0.1, 0.5)] * n_ctrl
             + [(0.4, 2.5)] * n_ctrl
-            + ([(0.1, 0.51 * 5)] * n_ctrl if optimize_mu else [])
+            + ([(0.1, FUNGI_MU * 5)] * n_ctrl if optimize_mu else [])
         )
 
         self.eval_count = 0
@@ -283,7 +284,7 @@ class RingOptimizer:
         # Bounds per field: (lo, hi)
         bound_vfrac = (0.1, 0.5)
         bound_rc = (0.4, 2.5)
-        bound_mu = (0.1, 0.51 * 5)
+        bound_mu = (0.1, FUNGI_MU * 5)
         margin = 0.12  # relative padding beyond bounds
 
         panels = [
@@ -318,7 +319,7 @@ class RingOptimizer:
         plt.close(fig)
         print(f"Saved: {path}")
 
-    def _apply_random(self, vfrac, mu=0.51, seed=42):
+    def _apply_random(self, vfrac, mu=FUNGI_MU, seed=42):
         """Per-element random fiber angle and shape; homogeneous vfrac and mu."""
         rng = np.random.default_rng(seed)
         n = self.sim.num_ips
@@ -329,7 +330,7 @@ class RingOptimizer:
             'theta': jnp.array(theta),
             'ratio': jnp.array(ratio),
             'mu': jnp.full(n, float(mu)),
-            'lambda': jnp.full(n, 0.62),
+            'lambda': jnp.full(n, FUNGI_LAMBDA),
         }
         self.sim.output_name = "random"
         # For grading-comparison plots: store ratio magnitude as r_combi and
@@ -337,7 +338,7 @@ class RingOptimizer:
         self.sim._r_combi = np.where(ratio >= 1.0, ratio, 1.0 / ratio)
         self.sim._random_mode = True
 
-    def run_random_baseline(self, mu=0.51, seed=42, tol=1e-3,
+    def run_random_baseline(self, mu=FUNGI_MU, seed=42, tol=1e-3,
                             vfrac_lo=0.1, vfrac_hi=0.5):
         """Bisection over homogeneous vfrac to just satisfy the displacement cap.
 
@@ -506,7 +507,7 @@ def run_optimization(output_folder, prnn_model_loc, n_ctrl, label,
 def main_visualize_saved():
     """Load previously saved optimization results and re-plot grading only."""
     base_folder = "../results/graded_ring/optimized/v3"
-    prnn_model_loc = "../scripts_surrogates/trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
+    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
 
     common_kwargs = dict(
         macro_meshsize=0.03,
@@ -539,7 +540,7 @@ if __name__ == "__main__":
     # main_visualize_saved(); import sys; sys.exit(0)
 
     base_folder = "../results/graded_ring/optimized/v5"
-    prnn_model_loc = "../scripts_surrogates/trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
+    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
 
     common_kwargs = dict(
         macro_meshsize=0.03,

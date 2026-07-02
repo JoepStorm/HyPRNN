@@ -4,6 +4,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax import jit, vmap
+from material_params import FUNGI_LAMBDA
 
 # Enable float64 for inference (required for Newton-Raphson convergence)
 # Training scripts should NOT import this module to keep float32 training
@@ -151,7 +152,7 @@ class prnnMaterial(Material):
             )
 
         def get_material_for_sample(mu_val):
-            return neohooke.create_material(lambda_=0.62, mu_=mu_val)
+            return neohooke.create_material(lambda_=FUNGI_LAMBDA, mu_=mu_val)
 
         # Pre-compute Q matrices for all samples based on micro_variables
         self.Q_matrices = jnp.zeros((num_IP_points, 2, 2), dtype=jnp.float64)

@@ -17,8 +17,8 @@ non_highlight_linestyle = '-'
 
 output_name = f"6m3/{type}_comparison"
 
-save_folder = f'trained_models/train_{type}/'
-folder = f'trained_models/train_{type}/'
+save_folder = f'../trained_models/train_{type}/'
+folder = f'../trained_models/train_{type}/'
 training_samples = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 xticks = [2, 32, 64, 128, 192, 256, 512]
 xlim_xticks = [2, 8, 16, 24, 32, 64, 96, 128]

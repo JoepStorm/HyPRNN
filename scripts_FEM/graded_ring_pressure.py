@@ -44,6 +44,7 @@ rc('text', usetex=True)
 
 from scripts_materials.PRNN_mat import prnnMaterial
 from scripts_materials.fe2mat import create_fe2_material
+from material_params import FUNGI_LAMBDA
 
 
 def create_annulus_mesh(R_inner, R_outer, lc):
@@ -307,14 +308,14 @@ class GradedRingSimulation:
 
         return converged_steps
 
-    def apply_uniform_material(self, vfrac=0.3, theta=0.0, ratio=1.75, mu=1.30):  #0.51):
+    def apply_uniform_material(self, vfrac=0.3, theta=0.0, ratio=1.75, mu=1.30):  #FUNGI_MU):
         """Uniform material: fixed horizontal fiber direction throughout."""
         self.micro_variables = {
             'vfrac': jnp.ones(self.num_ips) * vfrac,
             'theta': jnp.ones(self.num_ips) * theta,
             'ratio': jnp.ones(self.num_ips) * ratio,
             'mu': jnp.ones(self.num_ips) * mu,
-            'lambda': jnp.ones(self.num_ips) * 0.62,
+            'lambda': jnp.ones(self.num_ips) * FUNGI_LAMBDA,
         }
         self.output_name = "uniform"
 
@@ -322,7 +323,7 @@ class GradedRingSimulation:
                                        mu_inner=0.1, mu_outer=2.5,
                                        vfrac_inner=0.1, vfrac_outer=0.5,
                                        ratio_inner=1.0, ratio_outer=2.5):
-                                        # mu_inner = 0.51, mu_outer = 0.51,
+                                        # mu_inner = FUNGI_MU, mu_outer = FUNGI_MU,
                                         # vfrac_inner = 0.1, vfrac_outer = 0.5,
                                         # ratio_inner = 2.5, ratio_outer = 1.0):
         """Graded: radial fiber orientation + vfrac and ratio increasing away from hole.
@@ -348,7 +349,7 @@ class GradedRingSimulation:
             'theta': jnp.array(theta),
             'ratio': jnp.array(ratio),
             'mu': jnp.array(mu),
-            'lambda': jnp.ones(self.num_ips) * 0.62,
+            'lambda': jnp.ones(self.num_ips) * FUNGI_LAMBDA,
         }
         self.output_name = "graded"
 
@@ -377,7 +378,7 @@ class GradedRingSimulation:
             'theta': jnp.array(theta),
             'ratio': jnp.array(ratio),
             'mu': jnp.array(np.asarray(mu)),
-            'lambda': jnp.ones(self.num_ips) * 0.62,
+            'lambda': jnp.ones(self.num_ips) * FUNGI_LAMBDA,
         }
         self.output_name = "radial_graded"
 
@@ -1006,10 +1007,10 @@ if __name__ == "__main__":
     output_folder = "../results/graded_ring/larger_disp/test2_quarter/"
     os.makedirs(output_folder, exist_ok=True)
 
-    # prnn_model_loc = ("../scripts_surrogates/trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
-    # prnn_model_loc = ("../scripts_surrogates/trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
-    # prnn_model_loc = ("../scripts_surrogates/trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run9")  # run 9 is median
-    prnn_model_loc = ("../scripts_surrogates/trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1")
+    # prnn_model_loc = ("../trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
+    # prnn_model_loc = ("../trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
+    # prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run9")  # run 9 is median
+    prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1")
 
 
     sim = GradedRingSimulation(
@@ -1029,7 +1030,7 @@ if __name__ == "__main__":
     # --- Run 2: Circumferential theta grading ---
     sim.reset()
     sim.apply_circumferential_grading()
-    # sim.apply_circumferential_grading(mu_inner=0.51, mu_outer=0.51)
+    # sim.apply_circumferential_grading(mu_inner=FUNGI_MU, mu_outer=FUNGI_MU)
     sim.run(write_output=True, write_name="ring_graded")
     vm_graded = sim.get_von_mises_at_qp()
     du_graded = sim.get_nodal_displacements()

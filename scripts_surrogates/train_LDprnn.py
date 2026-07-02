@@ -9,6 +9,7 @@ from data_utils import LDDataset, Config, save_settings, tensor_to_matrix
 from LDprnn import create_prnn_model
 from LDprnn_shared_hyper import create_shared_hyper_prnn_model
 from LDnn import create_nn_model
+from material_params import FUNGI_MU, FUNGI_LAMBDA
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -24,16 +25,16 @@ plot_uni = True  # plot uniaxial tension/compression curves per mix value after 
 mix_label = 'fil_frac' # 'mix'
 
 settings = {
-    # 'savefolder': f'trained_models/deposition/v10/nonlin_H1L_12m/',
-    'savefolder': f'trained_models/deposition/filler/combi_v4v6/',
+    # 'savefolder': f'../trained_models/deposition/v10/nonlin_H1L_12m/',
+    'savefolder': f'../trained_models/deposition/filler/combi_v4v6/',
 
-    # 'data_path': f'../data/RVE/vary_all/vary_all/mixed_t50_mergedv2',
-    # 'matdata_path': f'../data/RVE/vary_all/vary_all/mixed_t50_mergedv2_matparam.data',
+    # 'data_path': f'../data/vary_all/mixed_t50_mergedv2',
+    # 'matdata_path': f'../data/vary_all/mixed_t50_mergedv2_matparam.data',
 
-    # 'data_path': f'../data/RVE/deposition/v10/mixed_t50_merged',
-    # 'matdata_path': f'../data/RVE/deposition/v10/mixed_t50_merged_matparam.data',
-    'data_path': f'../data/RVE/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
-    'matdata_path': f'../data/RVE/deposition/filler/dataset_combi_v4v6/mixed_t50_merged_matparam.data',
+    # 'data_path': f'../data/deposition/v10/mixed_t50_merged',
+    # 'matdata_path': f'../data/deposition/v10/mixed_t50_merged_matparam.data',
+    'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
+    'matdata_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged_matparam.data',
 
     'seq_length': 50,
     'train_samples': 256,   # 128
@@ -264,8 +265,8 @@ elif mode == 'test':
         import jax.numpy as jnp
         mix_values = [0.0, 0.25, 0.5, 0.75, 1.0]
         # mix_values = [-10, 0.5, 10]
-        mu_val = 0.51
-        lambda_val = 0.62
+        mu_val = FUNGI_MU
+        lambda_val = FUNGI_LAMBDA
 
         # E = (F^T F - I) / 2 for uniaxial F stretched along `comp`:
         # E_cc = (lam^2 - 1) / 2, all other components = 0

@@ -33,9 +33,9 @@ RUNS_PER_MODEL = 3               # repeats per mat_points for averaging
 mix_label = 'fil_frac'
 
 COMMON = {
-    'savefolder': 'trained_models/deposition/filler/vary_matpoints/',
-    'data_path': '../data/RVE/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
-    'matdata_path': '../data/RVE/deposition/filler/dataset_combi_v4v6/mixed_t50_merged_matparam.data',
+    'savefolder': '../trained_models/deposition/filler/vary_matpoints/',
+    'data_path': '../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
+    'matdata_path': '../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged_matparam.data',
 
     'seq_length': 50,
     'train_samples': 256,

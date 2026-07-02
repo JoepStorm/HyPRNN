@@ -19,6 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from scripts_materials.RVE_material import RVEMaterial
+from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 # Job seed (controls both sampling and reproducibility)
 seed = int(sys.argv[1]) if len(sys.argv) > 1 else 1
@@ -35,8 +36,8 @@ TIMESTEPS    = 50
 DISP_INCR    = 0.01
 TOTAL_SAMPLES = 32
 XY_FACTOR    = 1.0        # scale off-diagonal F terms (1.0 = full shear)
-LAMBDA_VAL   = 0.62       # fixed matrix bulk parameter
-MU_RANGE     = [0.51, 0.51]
+LAMBDA_VAL   = FUNGI_LAMBDA       # fixed matrix bulk parameter
+MU_RANGE     = [FUNGI_MU, FUNGI_MU]
 MIX_VALUES   = [0.0, 0.25, 0.50, 0.75, 1.0]
 SHRINK_FACTOR = 0.85
 
@@ -45,11 +46,11 @@ SHRINK_FACTOR = 0.85
 CHECK_MESHES_ONLY = False
 
 # MESH_DIR   = Path("../yade/generated_meshes_2D_wet/v1")
-# OUTPUT_DIR = Path(f"../data/RVE/deposition/v1/p3")
+# OUTPUT_DIR = Path(f"../data/deposition/v1/p3")
 # MESH_DIR   = Path("../yade/generated_meshes_2D_wet/v5_bigrve")
-# OUTPUT_DIR = Path(f"../data/RVE/deposition/v5_bigrve/")
+# OUTPUT_DIR = Path(f"../data/deposition/v5_bigrve/")
 MESH_DIR   = Path("../yade/generated_meshes_2D_wet/v10")
-OUTPUT_DIR = Path(f"../data/RVE/deposition/v10/")
+OUTPUT_DIR = Path(f"../data/deposition/v10/")
 # Meshes with invalid PBC (unequal boundary DOFs) — exclude from pool.
 # Add entries as (mix, seed) tuples, e.g. (0.0, 2) or (0.75, 4).
 # INVALID_MESHES = {
@@ -84,7 +85,7 @@ pk1_path      = OUTPUT_DIR / f"{base_filename}_PK1.npy"
 matparam_path = OUTPUT_DIR / f"{base_filename}_matparam.data"
 
 MATERIAL_PROPS_TEMPLATE = {
-    'wood': {'E': 13.e3, 'nu': 0.375, 'tag': 2},
+    'wood': {'E': WOOD_E, 'nu': WOOD_NU, 'tag': 2},
 }
 
 

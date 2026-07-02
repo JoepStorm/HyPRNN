@@ -27,6 +27,7 @@ from dolfinx_materials.quadrature_map import QuadratureMap
 from dolfinx_materials.solvers import NonlinearMaterialProblem
 from dolfinx_materials.utils import create_quadrature_functionspace
 from scripts_materials.PRNN_mat import prnnMaterial
+from material_params import FUNGI_MU, FUNGI_LAMBDA
 from plotting_utils import plot_interpolation_field
 
 from matplotlib import pyplot as plt
@@ -42,8 +43,8 @@ rc('text', usetex=True)
 # ── Design constants ─────────────────────────────────────────────────────────
 
 # Fixed neo-Hookean reference parameters (the filler PRNN only grades fil_frac).
-MU_REF = 0.51
-LAMBDA_REF = 0.62
+MU_REF = FUNGI_MU
+LAMBDA_REF = FUNGI_LAMBDA
 
 # Orientation range (radians) that normalized theta controls map to. Symmetric
 # about 0 so a mirror sign flip keeps values in range.
@@ -1051,7 +1052,7 @@ if __name__ == "__main__":
     # MODE = 'optimize'
     # MODE = 'baseline'
 
-    prnn_model_loc = "../scripts_surrogates/trained_models/deposition/filler/vary_matpoints/matpts6_run2/"
+    prnn_model_loc = "../trained_models/deposition/filler/vary_matpoints/matpts6_run2/"
 
     hex_size = 0.1
     macro_meshsize = 0.02

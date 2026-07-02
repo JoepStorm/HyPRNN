@@ -10,6 +10,7 @@ import traceback
 import numpy as np
 import multiprocessing as mp
 from multiprocessing import Process, Pipe
+from material_params import WOOD_MU, WOOD_LAMBDA, FUNGI_MU, FUNGI_LAMBDA
 from mpi4py import MPI
 from dolfinx.common import Timer
 from dolfinx_materials.generic import Material, DataManager
@@ -550,10 +551,10 @@ if __name__ == "__main__":
         # 'lambda_fungi': np.ones(ngauss) * 57.69,   # E=100, nu=0.3 -> lambda=57.69
         # 'mu_wood': np.ones(ngauss) * 384.6,       # E=1000, nu=0.3 -> mu=384.6
         # 'lambda_wood': np.ones(ngauss) * 576.9,    # E=1000, nu=0.3 -> lambda=576.9
-        'mu_fungi': np.ones(ngauss) * 0.51,
-        'lambda_fungi': np.ones(ngauss) * 0.62,
-        'mu_wood': np.ones(ngauss) * 4.727e3,
-        'lambda_wood': np.ones(ngauss) * 14.182e3,
+        'mu_fungi': np.ones(ngauss) * FUNGI_MU,
+        'lambda_fungi': np.ones(ngauss) * FUNGI_LAMBDA,
+        'mu_wood': np.ones(ngauss) * WOOD_MU,
+        'lambda_wood': np.ones(ngauss) * WOOD_LAMBDA,
     }
 
     rve_config = {

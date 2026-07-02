@@ -8,7 +8,7 @@ This is a multi-scale computational mechanics project implementing **FE² (FE-sq
 
 ## Repository Cleanup (in progress)
 
-This repo was copied from another project and is being cleaned up: redundant files, stale results, and dead links to old experiment versions (e.g. `v5`, `v6`, `v7` folders in `results/`, `yade/generated_meshes_2D_wet/`, `data/RVE/deposition/`) are being removed. Not a git repository, so there's no history/blame to fall back on — treat file deletions as final and check with the user before removing anything non-obviously redundant.
+This repo was copied from another project and is being cleaned up: redundant files, stale results, and dead links to old experiment versions (e.g. `v5`, `v6`, `v7` folders in `results/`, `yade/generated_meshes_2D_wet/`, `data/deposition/`) are being removed. Git history only starts at the cleanup (heavy data dirs are gitignored) — treat deletions of data files as final and check with the user before removing anything non-obviously redundant.
 
 When helping with cleanup:
 - **Spotting unused files**: grep the whole repo for a file's name/module (import statements, string paths, CLI invocations) before flagging it as unused. A script with no incoming references and no `if __name__ == "__main__"` usage documented anywhere is a deletion candidate; report it rather than deleting outright.
@@ -184,12 +184,12 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 
 ## Mesh and Data Structure
 
-- **Macro meshes**: `meshes/macro/` (XDMF format)
-- **RVE meshes**: `meshes/micro/` (GMSH-generated)
+- **RVE meshes**: `meshes/` (GMSH-generated)
 - **2D RVE packings**: `yade/periodic/` (per shrink factor)
 - **3D RVE packings**: `yade/periodic_3D/` (per shrink factor)
 - **Training data**: `data/` (NumPy arrays: `F.npy`, `PK1.npy`, `cauchy.npy`)
-- **Model storage**: `trained_models/` (JAX/Flax checkpoints)
+- **Model storage**: `trained_models/` at repo root (JAX/Flax checkpoints)
+- **Shared material constants**: `material_params.py` at repo root (wood/fungi E, nu, Lamé constants) — import these instead of hardcoding values
 - **Simulation results**: `results/` (VTX `.bp` format for ParaView)
 
 ## Performance Considerations

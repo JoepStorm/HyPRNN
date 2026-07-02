@@ -21,11 +21,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from scripts_materials.RVE_material import RVEMaterial
+from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 # ── Fixed material properties ─────────────────────────────────────────────────
 MATERIAL_PROPS = {
-    'fungi': {'mu': 0.51, 'lambda_': 0.62,  'tag': 1},
-    'wood':  {'E': 13.e3,      'nu': 0.375, 'tag': 2},
+    'fungi': {'mu': FUNGI_MU, 'lambda_': FUNGI_LAMBDA,  'tag': 1},
+    'wood':  {'E': WOOD_E,      'nu': WOOD_NU, 'tag': 2},
 }
 
 # ── Loading ───────────────────────────────────────────────────────────────────
@@ -189,6 +190,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--mesh_dir",      type=str,   default="../yade/generated_meshes_2D_wet/v1")
     p.add_argument("--shrink_factor", type=float, default=0.85)
-    p.add_argument("--output_dir",    type=str,   default="../data/RVE/uniaxial_deposition/v1")
+    p.add_argument("--output_dir",    type=str,   default="../data/uniaxial_deposition/v1")
     args = p.parse_args()
     main(args.mesh_dir, args.shrink_factor, args.output_dir)

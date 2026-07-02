@@ -40,6 +40,7 @@ from dolfinx_materials.utils import create_quadrature_functionspace
 
 from scripts_materials.PRNN_mat import prnnMaterial
 from scripts_materials.fe2mat import create_fe2_material
+from material_params import WOOD_MU, WOOD_LAMBDA, FUNGI_LAMBDA
 
 
 # -- Simulation --------------------------------------------------------------
@@ -157,16 +158,14 @@ class ThreePointBendingSimulation:
         self.u_pre = fem.Function(self.V, name="u")
 
         if not self.use_surrogate:
-            E_w, nu_w = 13000.0, 0.375
             full_micro = {
                 'vfrac': self.micro_variables['vfrac'],
                 'theta': self.micro_variables['theta'],
                 'ratio': self.micro_variables['ratio'],
                 'mu_fungi': self.micro_variables['mu'],
                 'lambda_fungi': self.micro_variables['lambda'],
-                'mu_wood': jnp.ones(self.num_ips) * E_w / (2 * (1 + nu_w)),
-                'lambda_wood': jnp.ones(self.num_ips) * E_w * nu_w
-                                / ((1 + nu_w) * (1 - 2 * nu_w)),
+                'mu_wood': jnp.ones(self.num_ips) * WOOD_MU,
+                'lambda_wood': jnp.ones(self.num_ips) * WOOD_LAMBDA,
             }
             self.rve_config['gauss_coords'] = self.qp_coords
             self.material = create_fe2_material(mode='heterogeneous',
@@ -263,37 +262,37 @@ MODEL_LABELS_SHORT = {
 MODELS = {
     'prnn_1': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../scripts_surrogates/trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples32_run0',
-        'prnn_model_loc': '../scripts_surrogates/trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
+        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples32_run0',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../scripts_surrogates/trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples32_run0',
-        'prnn_model_loc': '../scripts_surrogates/trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
+        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples32_run0',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn_512': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../scripts_surrogates/trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples512_run0',
-        'prnn_model_loc': '../scripts_surrogates/trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples512_run0',
+        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples512_run0',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples512_run0',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn_nonlin': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../scripts_surrogates/trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0',
-        'prnn_model_loc': '../scripts_surrogates/trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid//samples512_run9',
+        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid//samples512_run9',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'nn': {
         'use_surrogate': True,
-#         'prnn_model_loc': '../scripts_surrogates/trained_models/train_vfrac_ratio/nn_64_3/samples512_run0',
-        'prnn_model_loc': '../scripts_surrogates/trained_models/train_vary_all_v2/nn_64_4/samples512_run8',
+#         'prnn_model_loc': '../trained_models/train_vfrac_ratio/nn_64_3/samples512_run0',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/nn_64_4/samples512_run8',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'nn_32': {
         'use_surrogate': True,
-        'prnn_model_loc': '../scripts_surrogates/trained_models/train_vary_all_v2/nn_64_4/samples32_run7',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/nn_64_4/samples32_run7',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'fe2': {
@@ -338,7 +337,7 @@ def apply_manual_grading(sim):
     # Half-beam represents left half (x=0 is the outside, x=half_L is the inside / center).
     mu_low, mu_high = 0.2, 1.2
     mu = mu_low + (mu_high - mu_low) * (x / half_L)
-    lam = 0.62 * np.ones_like(x)
+    lam = FUNGI_LAMBDA * np.ones_like(x)
 
     sim.micro_variables = {
         'vfrac': jnp.array(vfrac),

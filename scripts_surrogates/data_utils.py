@@ -799,7 +799,7 @@ if __name__ == "__main__":
     # Example base filename, adjust according to your dataset structure
     # base_filename = f"datasets/fungi/ellipsoid_fixed/mesh500_t50"
     # dataclass = LDDataset(base_filename, seq_length=50, num_samples=500, mat_file=None, mat_features=None, norm_stresses=True)
-    base_filename = f"../data/RVE/vfrac_ratio_smallmu_biggerdomain/2runs_1/mixed_t100"
+    base_filename = f"../data/vfrac_ratio_smallmu_biggerdomain/2runs_1/mixed_t100"
     dataclass = LDDataset(base_filename, seq_length=100, num_samples=686, mat_file=None, mat_features=None, norm_stresses=True)
     data = dataclass.get_all_batches()
     print(data['F'].shape, data['sig_F'].shape, data['stiff'].shape)

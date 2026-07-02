@@ -26,10 +26,10 @@ mode = 'train'
 # output_fig_name = "prnn_learning_curves"
 output_fig_name = "full"
 
-savefolder = 'trained_models/train_vary_all_v2/'
-# savefolder = 'trained_models/train_mu/'
-# savefolder = 'trained_models/train_vfrac_ratio/'
-# savefolder = 'trained_models/matparam_compare/'
+savefolder = '../trained_models/train_vary_all_v2/'
+# savefolder = '../trained_models/train_mu/'
+# savefolder = '../trained_models/train_vfrac_ratio/'
+# savefolder = '../trained_models/matparam_compare/'
 runs_per_setting = 10
 training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 # training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96] #, 128, 192, 256, 512]
@@ -41,22 +41,22 @@ training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 
 # Base settings shared by all configurations
 base_settings = {
-    # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_0/mixed_t100',
-    # 'matdata_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_0/mixed_t100_matparam.data',
-    # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t100_merged',
-    # 'matdata_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t100_merged_matparam.data',
+    # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_0/mixed_t100',
+    # 'matdata_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_0/mixed_t100_matparam.data',
+    # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t100_merged',
+    # 'matdata_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t100_merged_matparam.data',
     # 'seq_length': 100,
 
-    # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged',
-    # 'matdata_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged_matparam.data',
-    # 'data_path': f'../data/RVE/vary_mu/vary_mu/mixed_t50_merged',
-    # 'matdata_path': f'../data/RVE/vary_mu/vary_mu/mixed_t50_merged_matparam.data',
-    # 'data_path': f'../data/RVE/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged',
-    # 'matdata_path': f'../data/RVE/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged_matparam.data',
-    # 'data_path': f'../data/RVE/vary_all/vary_all/mixed_t50_merged',
-    # 'matdata_path': f'../data/RVE/vary_all/vary_all/mixed_t50_merged_matparam.data',
-    'data_path': f'../data/RVE/vary_all/vary_all/mixed_t50_mergedv2',
-    'matdata_path': f'../data/RVE/vary_all/vary_all/mixed_t50_mergedv2_matparam.data',
+    # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged',
+    # 'matdata_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged_matparam.data',
+    # 'data_path': f'../data/vary_mu/vary_mu/mixed_t50_merged',
+    # 'matdata_path': f'../data/vary_mu/vary_mu/mixed_t50_merged_matparam.data',
+    # 'data_path': f'../data/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged',
+    # 'matdata_path': f'../data/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged_matparam.data',
+    # 'data_path': f'../data/vary_all/mixed_t50_merged',
+    # 'matdata_path': f'../data/vary_all/mixed_t50_merged_matparam.data',
+    'data_path': f'../data/vary_all/mixed_t50_mergedv2',
+    'matdata_path': f'../data/vary_all/mixed_t50_mergedv2_matparam.data',
     'seq_length': 50,
 
     'train_batch_size': 2,

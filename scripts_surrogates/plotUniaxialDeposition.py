@@ -149,8 +149,8 @@ def main(data_dir, output_dir, mesh_dir, shrink_factor):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",      type=str,   default="../data/RVE/uniaxial_deposition")
-    p.add_argument("--output_dir",    type=str,   default="../data/RVE/uniaxial_deposition")
+    p.add_argument("--data_dir",      type=str,   default="../data/uniaxial_deposition")
+    p.add_argument("--output_dir",    type=str,   default="../data/uniaxial_deposition")
     p.add_argument("--mesh_dir",      type=str,   default="../yade/generated_meshes_2D_wet")
     p.add_argument("--shrink_factor", type=float, default=0.85)
     args = p.parse_args()

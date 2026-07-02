@@ -276,22 +276,22 @@ if __name__ == '__main__':
     from data_utils import LDDataset_PK1, LDDataset
 
     settings = {
-        # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/literature_matprops/mixed_t100',
-        # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged',
-        # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/triplets_1/mixed_t5_seed1',
-        # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/lit_props_constant/mixed_t50_seed0',
-        # 'data_path': f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/triplets_0/mixed_t50_seed0',
+        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/literature_matprops/mixed_t100',
+        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged',
+        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/triplets_1/mixed_t5_seed1',
+        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/lit_props_constant/mixed_t50_seed0',
+        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/triplets_0/mixed_t50_seed0',
         # 'data_path': f'../data/woodchip_conhull_batch/mixed_t50_seed0',
-        # 'data_path': f'../data/RVE/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged',
-        # 'data_path': f'../data/RVE/uniaxial_v2/uniaxial',
-        # 'data_path': f'../data/RVE/uniaxial_debug/uniaxial',
+        # 'data_path': f'../data/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged',
+        # 'data_path': f'../data/uniaxial_v2/uniaxial',
+        # 'data_path': f'../data/uniaxial_debug/uniaxial',
         # 'data_path': f'../data/woodchip/woodchip_periodic_relax_simple_100_compression',
         # 'data_path': f'../datasets/vfrac_ratio_smallmu_biggerdomain/shuffled_3430',
         # 'data_path': f'../datasets/no_geo/nfib25_0.0000_2.00_mesh384_t50',
-        # 'data_path': f'../data/RVE/deposition/v1/mixed_t50_merged',
-        # 'data_path': f'../data/RVE/deposition/v5_bigrve/mixed_t50_merged',
-        # 'data_path': f'../data/RVE/deposition/v10/mixed_t50_merged',
-        'data_path': f'../data/RVE/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
+        # 'data_path': f'../data/deposition/v1/mixed_t50_merged',
+        # 'data_path': f'../data/deposition/v5_bigrve/mixed_t50_merged',
+        # 'data_path': f'../data/deposition/v10/mixed_t50_merged',
+        'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
         'seq_length': 50,
     }
     settings['matdata_path'] = settings['data_path'] + '_matparam.data'
@@ -314,9 +314,9 @@ if __name__ == '__main__':
     #
     #
     # # # To compare with a different dataset, we load that dataset and pass it as the predicted values
-    # # # alternative_file = f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/uniaxial_1/uniaxial_tension_t50'
+    # # # alternative_file = f'../data/vfrac_ratio_smallmu_biggerdomain/uniaxial_1/uniaxial_tension_t50'
     # # alternative_file = f'../data/woodchip/woodchip_periodic_relax_simple_80_compression'
-    # # dataset_alternative = LDDataset_PK1(alternative_file, settings['seq_length']) #, mat_file=f'../data/RVE/vfrac_ratio_smallmu_biggerdomain/uniaxial_1/uniaxial_tension_t50_matparam.data')
+    # # dataset_alternative = LDDataset_PK1(alternative_file, settings['seq_length']) #, mat_file=f'../data/vfrac_ratio_smallmu_biggerdomain/uniaxial_1/uniaxial_tension_t50_matparam.data')
     # # testset_alternative = dataset_alternative.get_subset(test_indices)
     # # sigma_F_pred_alternative = testset_alternative['sig_F'][:]
     # # pred_stress_alternative = testset_alternative['sig_U_eq_unnorm'][:]

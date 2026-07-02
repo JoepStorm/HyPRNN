@@ -2,11 +2,12 @@ import os
 import numpy as np
 import sys
 from scripts_materials.RVE_material import RVEMaterial
+from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 theta = np.pi / 4 * 0 / 3  # angle in radians
 nfibs_vfrac_40 = 50  # Number of fibers giving vfrac = 40%
 
-results_name = f'../data/RVE/uniaxial_v2'
+results_name = f'../data/uniaxial_v2'
 try:
     os.makedirs(results_name, exist_ok=True)
 except Exception as e:
@@ -14,18 +15,18 @@ except Exception as e:
 
 timesteps = 50
 dispIncr = 0.01
-lambda_val = 0.62
-mesh_folder = f"../meshes/micro/vfrac_ratio_big/"
+lambda_val = FUNGI_LAMBDA
+mesh_folder = f"../meshes/vfrac_ratio_big/"
 
 # ================== Parameter combinations ==================
 # min/median/max for each variable, varied independently
 num_fib_array = [10, 20, 30, 40, 50, 60, 70]
 shape_array = [1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5]
-mu_range = [0.51 / 5, 0.51 * 5]
+mu_range = [FUNGI_MU / 5, FUNGI_MU * 5]
 
 nfib_min, nfib_med, nfib_max = num_fib_array[0], num_fib_array[len(num_fib_array) // 2], num_fib_array[-1]
 ratio_min, ratio_med, ratio_max = shape_array[0], shape_array[len(shape_array) // 2], shape_array[-1]
-mu_min, mu_med, mu_max = mu_range[0], 0.51, mu_range[1]
+mu_min, mu_med, mu_max = mu_range[0], FUNGI_MU, mu_range[1]
 
 # 7 combinations: 1 baseline (all median) + 2 per variable (min, max) × 3 variables
 # Each row: (nfib, ratio, mu, label)
@@ -117,7 +118,7 @@ for sample_id in range(start_sample, n_samples):
 
     material_props = {
         'fungi': {'mu': mu, 'lambda_': lambda_val, 'tag': 1},
-        'wood':  {'E': 13.e3, 'nu': 0.375, 'tag': 2},
+        'wood':  {'E': WOOD_E, 'nu': WOOD_NU, 'tag': 2},
     }
 
     rve = RVEMaterial(mesh_file=meshfile, material_properties=material_props, visualize=False)

@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import jax.numpy as jnp
+from material_params import FUNGI_LAMBDA
 
 from scripts_materials.PRNN_mat import prnnMaterial
 from validate_bending import MODELS, MODEL_LABELS
@@ -70,7 +71,7 @@ def evaluate(npz_path, output_folder=None):
         'theta':  jnp.asarray(data['micro_theta']),
         'ratio':  jnp.asarray(data['micro_ratio']),
         'mu':     jnp.asarray(data['micro_mu']),
-        'lambda': jnp.asarray(0.62 * np.ones(n_qp)),
+        'lambda': jnp.asarray(FUNGI_LAMBDA * np.ones(n_qp)),
     }
 
     F_flat = F_true.reshape(-1, 4)

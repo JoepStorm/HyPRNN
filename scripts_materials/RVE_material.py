@@ -753,7 +753,7 @@ if __name__ == "__main__":
     # Initialize the RVE material model
     rve = RVEMaterial(
         material_properties=material_props,
-        mesh_file='../meshes/micro/vfrac_ratio_big/nfib20_0.0000_2.00/rve_0.msh',
+        mesh_file='../meshes/vfrac_ratio_big/nfib20_0.0000_2.00/rve_0.msh',
         visualize=False,
         output_file="results/RVE_material.xdmf",
     )

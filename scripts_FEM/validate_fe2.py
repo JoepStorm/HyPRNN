@@ -25,6 +25,7 @@ from scripts_materials.PRNN_mat import prnnMaterial, complete_update_pk2, _conve
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
 from scripts_surrogates.LDprnn_shared_hyper import SharedHyperPRNN
 from scripts_surrogates.LDnn import StandardNN
+from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -140,7 +141,7 @@ def run_rve(F_path, micro, meshsize=0.0125, seed=0, geo_file=None):
     """
     lambda_val = micro['lambda']
     mu_val = micro['mu']
-    E_w, nu_w = 13e3, 0.375
+    E_w, nu_w = WOOD_E, WOOD_NU
 
     material_props = {
         'fungi': {'mu': mu_val, 'lambda_': lambda_val, 'tag': 1},
@@ -306,7 +307,7 @@ if __name__ == "__main__":
     os.makedirs(output_folder, exist_ok=True)
 
     # ── Paths (edit these) ───────────────────────────────────────────────
-    prnn_model_loc = '../scripts_surrogates/trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples512_run0'
+    prnn_model_loc = '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples512_run0'
 
     # ── Source selection (uncomment ONE) ─────────────────────────────────
 
@@ -316,7 +317,7 @@ if __name__ == "__main__":
     tension_ip = 0              # which integration point
 
     # Option 2: Load path from training data
-    training_data_path = None  # '../data/RVE/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged'
+    training_data_path = None  # '../data/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged'
     training_matparam_path = f'{training_data_path}_matparam.data' if training_data_path else None
     sample_idx = 0
 
@@ -326,8 +327,8 @@ if __name__ == "__main__":
         'vfrac': 0.3,
         'theta': 0.0,
         'ratio': 2.0,
-        'mu': 0.51,
-        'lambda': 0.62,
+        'mu': FUNGI_MU,
+        'lambda': FUNGI_LAMBDA,
     }
 
     # ── RVE mesh options ───────────────────────────────────────────────

@@ -315,7 +315,7 @@ if __name__ == "__main__":
         optimize_mu=True,
         macro_meshsize=0.03,  # 0.03
         rve_meshsize=0.0125,      # 0.0125?
-        prnn_model_loc="../scripts_surrogates/trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1",
+        prnn_model_loc="../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1",
         output_folder="../results/graded_ring/validate/v4/graded_debug_centraldiff",
         max_load=3.0,
         step_size_init=.2,

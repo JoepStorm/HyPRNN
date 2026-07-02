@@ -26,7 +26,7 @@ from trainer import Trainer
 # PRNN model settings
 # ============================================================
 training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
-nonlin_folder = 'trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/'
+nonlin_folder = '../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/'
 nonlin_samples = 512
 
 
@@ -55,7 +55,7 @@ train_dataset = LDDataset(
 # ============================================================
 # Load uniaxial dataset
 # ============================================================
-data_base = '../data/RVE/uniaxial_v2/uniaxial'
+data_base = '../data/uniaxial_v2/uniaxial'
 seq_length = 50
 
 dataset = LDDataset(
@@ -108,7 +108,7 @@ E_data  = data['x']              # (N, T, 2, 2)
 # ============================================================
 # Mesh loading
 # ============================================================
-mesh_folder = '../meshes/micro/vfrac_ratio_big/'
+mesh_folder = '../meshes/vfrac_ratio_big/'
 
 sample_to_mesh = {
     0:  f'{mesh_folder}nfib30_0.0000_1.75/rve_0.msh',
