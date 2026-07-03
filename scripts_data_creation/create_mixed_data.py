@@ -1,3 +1,16 @@
+"""
+Generate mixed-loading RVE data from ellipsoid generated meshes.
+
+Reads meshes from a single folder.
+
+Changing the type of dataset generated requires changing:
+- results_name
+- settings in the "if random_sampling:" block around line 140
+
+
+In the paper, 6 seeds create 512 samples each to generate 3072 samples. These are combined using "data/merge_datasets.py".
+Some samples can fail to converge.
+"""
 import os
 import numpy as np
 import random
@@ -31,13 +44,11 @@ def E_nu_from_mu_lambda(mu, lambda_):
     return E, nu
 
 
-# results_name = f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_{seed}'
-# results_name = f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops'
-# results_name = f'../data/vfrac_ratio_smallmu_biggerdomain/lit_props_constant'
-# results_name = f'../data/vary_mu/vary_mu'
-# results_name = f'../data/vary_vfrac_ratio/vary_vfrac_ratio'
-results_name = f'../data/vary_all'
-# results_name = f'../data/vfrac_ratio_E/{seed}'
+# results_name = f'../data/vary_mu'
+# results_name = f'../data/vary_vfrac_ratio'
+# results_name = f'../data/vary_all'
+results_name = f'../data/example'
+
 try:
     os.makedirs(results_name, exist_ok=True)
 except Exception as e:
@@ -49,7 +60,6 @@ dispIncr = 0.01
 keep_failed_runs = True
 materials = ['wood', 'fungi']
 lambda_val = FUNGI_LAMBDA
-# lambda_val = 0.15e3
 
 base_filename = f'mixed_t{timesteps}_seed{seed}'
 mesh_folder = f"../meshes/vfrac_ratio_big/"
@@ -210,16 +220,11 @@ for sample_id in range(start_sample, samples):
     while not F_valid:
         # Generate a 3-component vector with length 1 in random direction
         random_dir = randVector()
-        # We sample in U, keeping R=Identity. That way we cover the full possible space the surrogate will see.
-        # In practice this just means F=U while ensuring that the off-diagonal terms are the same
         F_id = np.eye(2) + np.array(
             [[random_dir[0], random_dir[1] * xy_factor], [random_dir[1] * xy_factor, random_dir[2]]])
         F_valid = is_valid_deformation_gradient(F_id)
     print(
         f"Trying: F = {F_id} for sample_id: {sample_id}/{samples} with nfib: {nfib}, mu: {mu}, ratio: {ratio}, mesh: {mesh_name}")
-
-    # if sample_id < 2:
-    #     continue
 
     # Set F-I to the BC's
     F_min_I = F_id - np.eye(2)
@@ -228,9 +233,7 @@ for sample_id in range(start_sample, samples):
     fibdir = [np.cos(theta), np.sin(theta)]
 
     material_props = {
-        # 'fungi': {'mu': mu, 'lambda_': 150., 'tag': 1},
         'fungi': {'mu': mu, 'lambda_': lambda_val, 'tag': 1},
-        # 'fungi': {'E': 1.3, 'nu': 0.3, 'tag': 1},           # E based on paper Stochastic continuum model for mycelium-based bio-foam.
         'wood': {'E': WOOD_E, 'nu': WOOD_NU, 'tag': 2}
     }
 
