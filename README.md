@@ -72,3 +72,59 @@ python packing_to_mesh.py --input data/single_runs/coords_2D_0_500_0.5.npy
 ```
 
 Outputs land in `yade/data/`; the `.msh` meshes feed the training-data scripts.
+
+## Training surrogates (`scripts_surrogates/`)
+
+Surrogate models are trained on the `{F, PK1, cauchy}.npy` sequences produced by
+`scripts_data_creation/`. Run every script from inside `scripts_surrogates/`.
+
+**Model and utility modules** (imported by the scripts below, not run directly):
+- `HyPRNN.py` — the (Hy)PRNN model: a physics-informed RNN whose material points
+  are Neo-Hookean, with an optional shared hypernetwork that adapts the network to
+  per-sample micro parameters. A linear vs. non-linear encoder selects a plain PRNN
+  vs. its non-linear variant (`encoder_type`); `model_type='hyprnn'`.
+- `StandardNN.py` — plain feed-forward NN baseline (`model_type='nn'`).
+- `trainer.py` — `Trainer` class holding the JAX/Flax training loop, learning-rate
+  schedule, masking, and early stopping.
+- `data_utils.py` — `LDDataset` (loads sequences, precomputes rotations, builds
+  E→PK2 training pairs) and the normalizers.
+
+**Train a single model** — edit the hyperparameters at the top of the file, set
+`mode = 'train'`, and run. Re-run with `mode = 'test'` to evaluate and plot its
+predictions. Saves params, normalizers, and settings into `trained_models/`:
+
+```bash
+cd scripts_surrogates
+python train_LDprnn.py
+```
+
+**Train a handful of models** (e.g. for training-time comparisons) — configure the
+`MODELS_TO_TRAIN` dict, then:
+
+```bash
+python train_LDprnn_batch.py
+```
+
+**Deposition filler study** — trains/tests HyPRNN on the deposition dataset while
+sweeping the number of material points. Set `MODE='train'`, run, then `MODE='test'`:
+
+```bash
+python train_LDprnn_deposit_batch.py
+```
+
+**Learning-curve sweep** (many configurations × sample counts × repeats) — meant for
+a cluster, where one job trains one configuration. Pass the configuration index as an
+argument; with no argument it evaluates all configurations:
+
+```bash
+python train_multiconfig_batch.py 0      # train configuration 0
+python train_multiconfig_batch.py        # test/evaluate all configurations
+```
+
+**Plotting:**
+- `plot_LD_data.py` — stress–strain curves of a dataset (`__main__` plots PK2 curves).
+- `plot_uniaxial_data.py` — uniaxial dataset with PRNN predictions overlaid, per
+  varied parameter (mu / vfrac / ratio), with RVE mesh thumbnails.
+- `plot_median_curves.py` — for one dataset, compare truth vs. non-linear PRNN,
+  linear PRNN, and NN on the median-error test sample.
+- `plot_learncurve.py` — learning curves from the saved `test_losses.txt` files.
