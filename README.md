@@ -28,6 +28,10 @@ training, FEM) runs in the conda environment. The batch script uses the
 `yadedaily` runner by default; override with `YADE_BIN=yade` if you installed
 the stable package.
 
+RVE meshing shells out to the GMSH command-line binary (`gmsh` by default). If
+your gmsh is not on `PATH` or you need a specific build, point to it with
+`GMSH_BIN=/path/to/gmsh`.
+
 ## Workflow
 
 1. **Deposition + meshing** (`yade/`): deposit RVE packings with YADE and
