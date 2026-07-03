@@ -12,8 +12,8 @@ colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 from matplotlib import rc
 rc('text', usetex=True)
 
-from graded_ring_pressure import GradedRingSimulation, plot_stress_comparison
-from optimize_ring import RingOptimizer
+from graded_disk_setup import GradedDiskSimulation, plot_stress_comparison
+from graded_ring_optimizer import GradedRingOptimizer
 
 
 def run_and_store(sim, output_folder, output_name):
@@ -146,7 +146,7 @@ def run_comparison(
     print("Running PRNN simulation")
     print("="*60)
 
-    sim_prnn = GradedRingSimulation(
+    sim_prnn = GradedDiskSimulation(
         macro_meshsize=macro_meshsize,
         R_inner=R_inner,
         R_outer=R_outer,
@@ -158,7 +158,7 @@ def run_comparison(
     sim_prnn.step_size_init = step_size_init
 
     # Apply optimized grading via the optimizer's interpolation
-    opt = RingOptimizer(
+    opt = GradedRingOptimizer(
         output_folder=output_folder,
         prnn_model_loc=prnn_model_loc,
         macro_meshsize=macro_meshsize,
@@ -194,7 +194,7 @@ def run_comparison(
         'reuse_meshes': False,
     }
 
-    sim_rve = GradedRingSimulation(
+    sim_rve = GradedDiskSimulation(
         macro_meshsize=macro_meshsize,
         R_inner=R_inner,
         R_outer=R_outer,

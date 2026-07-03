@@ -72,7 +72,7 @@ def create_annulus_mesh(R_inner, R_outer, lc):
     return domain
 
 
-class GradedRingSimulation:
+class GradedDiskSimulation:
     """Pressurized annulus with graded PRNN material.
 
     Outer boundary fixed; outward traction (pressure) at inner boundary.
@@ -1008,11 +1008,11 @@ if __name__ == "__main__":
 
     # prnn_model_loc = ("../trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
     # prnn_model_loc = ("../trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
-    # prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run9")  # run 9 is median
-    prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1")
+    prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run9")  # run 9 is median
+    # prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1")
 
 
-    sim = GradedRingSimulation(
+    sim = GradedDiskSimulation(
         macro_meshsize=0.02,
         R_inner=0.2,
         R_outer=0.5,

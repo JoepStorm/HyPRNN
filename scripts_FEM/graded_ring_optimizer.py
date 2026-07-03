@@ -15,8 +15,8 @@ import numpy as np
 import jax.numpy as jnp
 from scipy.optimize import minimize
 from material_params import FUNGI_MU, FUNGI_LAMBDA
-from graded_ring_pressure import (
-    GradedRingSimulation, plot_grading_overview, plot_grading_comparison,
+from graded_disk_setup import (
+    GradedDiskSimulation, plot_grading_overview, plot_grading_comparison,
     plot_stress_comparison, plot_radial_slice,
 )
 import matplotlib.pyplot as plt
@@ -42,7 +42,7 @@ rc('text', usetex=True)
 # print(f"idx: {idx}")
 # print(f"loss_his idx: {loss_hist[idx]}")
 
-class RingOptimizer:
+class GradedRingOptimizer:
     """Gradient-based optimization of radial grading for a pressurized ring.
 
     Parameters are vfrac and r_combi (and optionally mu) at N_ctrl radial
@@ -60,7 +60,7 @@ class RingOptimizer:
         self.max_displacement = max_displacement
         os.makedirs(output_folder, exist_ok=True)
 
-        self.sim = GradedRingSimulation(
+        self.sim = GradedDiskSimulation(
             macro_meshsize=macro_meshsize,
             R_inner=R_inner,
             R_outer=R_outer,
@@ -439,7 +439,7 @@ class RingOptimizer:
 
 def visualize_saved(output_folder, prnn_model_loc, n_ctrl, label, fname='optimization_results.npz', **kwargs):
     """Load saved x_best from a previous run and plot grading only (no FEM solve)."""
-    opt = RingOptimizer(
+    opt = GradedRingOptimizer(
         output_folder=output_folder,
         prnn_model_loc=prnn_model_loc,
         n_ctrl=n_ctrl,
@@ -469,7 +469,7 @@ def visualize_saved(output_folder, prnn_model_loc, n_ctrl, label, fname='optimiz
 def run_optimization(output_folder, prnn_model_loc, n_ctrl, label,
                      maxiter_cma=100, maxiter_lbfgsb=5, **kwargs):
     """Run hybrid optimization and return (optimizer, x_best, vm, du)."""
-    opt = RingOptimizer(
+    opt = GradedRingOptimizer(
         output_folder=output_folder,
         prnn_model_loc=prnn_model_loc,
         n_ctrl=n_ctrl,
@@ -554,7 +554,7 @@ if __name__ == "__main__":
     # --- Case 0: random control (homogeneous vfrac/mu, per-element random theta/ratio) ---
     init_kwargs = {k: v for k, v in common_kwargs.items()
                    if k not in ('maxiter_cma', 'maxiter_lbfgsb')}
-    opt_rand = RingOptimizer(
+    opt_rand = GradedRingOptimizer(
         output_folder=f"{base_folder}/random",
         prnn_model_loc=prnn_model_loc,
         n_ctrl=1,

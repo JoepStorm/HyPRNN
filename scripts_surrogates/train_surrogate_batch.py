@@ -1,7 +1,7 @@
 """
 Script to train a few models.
 
-This serves a similar function to train_multiconfig_batch, but is easier to run a few models directly.
+This serves a similar function to train_surrogate_multiconfig_batch, but is easier to run a few models directly.
 This is, for example, used to obtain the training time per model.
 """
 
@@ -50,7 +50,7 @@ COMMON = {
 
 # -- Per-model configurations ------------------------------------------------
 # Each entry = one row group in the CSV. Tweak settings here to match the
-# models referenced in validate_bending.py.
+# models referenced in bending_validation.py.
 
 PRNN_MAT_PARAMS = {
     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],

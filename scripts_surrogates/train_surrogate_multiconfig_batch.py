@@ -11,7 +11,7 @@ In this default setup, this is 130 training runs per model configuration; which 
 Usage:
 - Set settings at the top of this file, such as number of runs per model.
 - Comment in/out the specific hyperparameter configurations that should be ran
-- Run with mode = 'train' AND additional arguments with the configurations to run.  (e.g. python train_multiconfig_batch.py 3)  (~hours per single config)
+- Run with mode = 'train' AND additional arguments with the configurations to run.  (e.g. python train_surrogate_multiconfig_batch.py 3)  (~hours per single config)
 - Then, for evaluating, once all configurations have been trained, run again with mode = 'test'. (~minutes for ALL)
 - Finally, run again with mode = 'plot"
 

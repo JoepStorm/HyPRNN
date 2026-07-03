@@ -40,8 +40,8 @@ your gmsh is not on `PATH` or you need a specific build, point to it with
    simulations on the meshes and store `{F, PK1, cauchy}.npy` sequences.
 3. **Training** (`scripts_surrogates/`): `train_*.py` train PRNN / HyPRNN / NN
    surrogates into `trained_models/`.
-4. **FE² studies** (`scripts_FEM/`): `validate_*.py`, `graded_ring_pressure.py`,
-   `squeeze_hole.py`, `optimize_ring.py` compare surrogates against full FE²
+4. **FE² studies** (`scripts_FEM/`): `validate_*.py`, `graded_disk_setup.py`,
+   `hole_deformation_optimization.py`, `graded_ring_optimizer.py` compare surrogates against full FE²
    and run design optimizations.
 
 Shared material constants (wood/fungi elastic properties) live in
@@ -121,8 +121,8 @@ a cluster, where one job trains one configuration. Pass the configuration index 
 argument; with no argument it evaluates all configurations:
 
 ```bash
-python train_multiconfig_batch.py 0      # train configuration 0
-python train_multiconfig_batch.py        # test/evaluate all configurations
+python train_surrogate_multiconfig_batch.py 0      # train configuration 0
+python train_surrogate_multiconfig_batch.py        # test/evaluate all configurations
 ```
 
 **Plotting:**

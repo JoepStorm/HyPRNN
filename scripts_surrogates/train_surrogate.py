@@ -218,7 +218,7 @@ elif mode == 'test':
     test_loss_L2 = train_handler.eval_step_L2(train_handler._state, testset, test_denorm, material)
     print(f"Test loss (L1): {test_loss}, L2: {test_loss_L2}, relative: {test_loss_rel}")
 
-    # Save test losses to file (consistent with train_multiconfig_batch.py)
+    # Save test losses to file (consistent with train_surrogate_multiconfig_batch.py)
     np.savetxt(f"{settings['savefolder']}test_losses.txt", np.array([[test_loss]]), delimiter=',')
     np.savetxt(f"{settings['savefolder']}test_losses_rel.txt", np.array([[test_loss_rel]]), delimiter=',')
     np.savetxt(f"{settings['savefolder']}test_losses_L2.txt", np.array([[test_loss_L2]]), delimiter=',')

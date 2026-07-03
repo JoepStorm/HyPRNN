@@ -1,4 +1,4 @@
-"""Hole-squeeze design with a filler PRNN surrogate.
+"""Hole-bulge design with a filler PRNN surrogate.
 
 A plate with a central hole is compressed between two rigid platens (one-sided
 penalty contact on the top and bottom edges). The material at each element is a
@@ -100,7 +100,7 @@ def create_hole_mesh(length, height, hole_radius, lc):
 
 # ── Base simulation: plate with hole, penalty platens, PRNN material ─────────
 
-class SqueezeHole:
+class BulgeHole:
     """Plate-with-hole compressed by one-sided penalty platens on top/bottom.
 
     Subclasses populate ``self.micro_variables`` (keys fil_frac, mu, lambda, theta) via an ``apply_*`` method before calling ``run``.
@@ -122,7 +122,7 @@ class SqueezeHole:
         self.step_size_factor = 0.5
         self.step_size_min = 0.001
         self.max_disp = max_disp
-        self.output_name = "squeeze"
+        self.output_name = "bulge"
 
         self.domain = create_hole_mesh(self.plate_size, self.plate_height,
                                        self.hole_radius, macro_meshsize)
@@ -203,13 +203,13 @@ class SqueezeHole:
 
     # -- measurements --------------------------------------------------------
 
-    def get_hole_squeeze(self):
+    def get_hole_bulge(self):
         """Horizontal change in hole diameter (negative = contraction)."""
         ux = self.u.x.array[2 * self.all_hole_dofs]
         return float(ux[self._hole_ri] - ux[self._hole_li])
 
-    def squeeze_loss(self):
-        return float(abs(self.get_hole_squeeze()))
+    def bulge_loss(self):
+        return float(abs(self.get_hole_bulge()))
 
     def get_deformed_hole_coords(self):
         u = self.u.x.array
@@ -306,7 +306,7 @@ class SqueezeHole:
         }
         self.problem = NonlinearMaterialProblem(
             self.qmap, self.Res, self.u, bcs=self.bcs, J=self.Jac,
-            petsc_options_prefix="SQUEEZE", petsc_options=petsc_options,
+            petsc_options_prefix="BULGE", petsc_options=petsc_options,
         )
 
     def run(self, write_output=True, write_name=None):
@@ -314,9 +314,9 @@ class SqueezeHole:
         self._setup_material_and_problem()
         self._setup_solver()
         if write_name is None:
-            write_name = f"squeeze_{self.output_name}"
+            write_name = f"bulge_{self.output_name}"
 
-        print(f"\nStarting squeeze simulation ({self.output_name})...")
+        print(f"\nStarting bulge simulation ({self.output_name})...")
         if write_output:
             micro_funcs = self._create_micro_variable_functions()
             self._create_stress_function()
@@ -618,7 +618,7 @@ def plot_filler_angle_ellipses(sim, output_folder, fname='filler_angle_ellipses.
 
 # ── Hex-region grading ───────────────────────────────────────────────────────
 
-class HexSqueezeHole(SqueezeHole):
+class HexBulgeHole(BulgeHole):
     """Grading defined on hexagonal regions, optionally mirror-symmetric.
 
     Each region carries a filler fraction and an orientation; with quarter
@@ -734,7 +734,7 @@ class HexSqueezeHole(SqueezeHole):
             'lambda': jnp.ones(self.num_ips) * LAMBDA_REF,
             'theta': jnp.array(theta_field),
         }
-        self.output_name = "hex_graded_squeeze"
+        self.output_name = "hex_graded_bulge"
 
         if plot_grading:
             plot_interpolation_field(
@@ -754,12 +754,12 @@ class HexSqueezeHole(SqueezeHole):
         if isinstance(out, bool):
             print("Simulation failed to converge.")
             return None
-        return self.squeeze_loss()
+        return self.bulge_loss()
 
 
 # ── Baseline grading ─────────────────────────────────────────────────────────
 
-class BaselineSqueezeHole(SqueezeHole):
+class BaselineBulgeHole(BulgeHole):
     """Random, non-symmetric per-element theta with a uniform fil_frac."""
 
     def apply_random_grading(self, fil_value=0.0, seed=0, plot_grading=False):
@@ -775,7 +775,7 @@ class BaselineSqueezeHole(SqueezeHole):
             'lambda': jnp.ones(self.num_ips) * LAMBDA_REF,
             'theta': jnp.array(theta_field),
         }
-        self.output_name = "baseline_squeeze"
+        self.output_name = "baseline_bulge"
 
         if plot_grading:
             plot_interpolation_field(
@@ -795,7 +795,7 @@ def run_baseline(output_folder, prnn_model_loc, macro_meshsize=0.02,
     fil_value sets the uniform filler fraction (default 0; change to compare).
     """
     os.makedirs(output_folder, exist_ok=True)
-    sim = BaselineSqueezeHole(
+    sim = BaselineBulgeHole(
         macro_meshsize=macro_meshsize, output_folder=output_folder,
         prnn_model_loc=prnn_model_loc, hole_radius=hole_radius,
         plate_height=plate_height, max_disp=max_disp,
@@ -804,20 +804,20 @@ def run_baseline(output_folder, prnn_model_loc, macro_meshsize=0.02,
     plot_theta_ellipses(sim, output_folder)
     plot_filler_angle_ellipses(sim, output_folder, seed=seed)
 
-    sim.run(write_output=True, write_name='baseline_squeeze')  # ParaView .bp
-    loss = float(abs(sim.get_hole_squeeze()))
+    sim.run(write_output=True, write_name='baseline_bulge')  # ParaView .bp
+    loss = float(abs(sim.get_hole_bulge()))
     sim.plot_deformed_hole(output_folder, 'deformed_baseline.pdf',
-                           title=f'Baseline |squeeze| = {loss:.4f}')
+                           title=f'Baseline |bulge| = {loss:.4f}')
     plot_filler_angle_ellipses(sim, output_folder,
                                fname='filler_angle_ellipses_deformed.pdf', seed=seed, deformed=True)
-    print(f"\nBaseline (fil_frac={fil_value}, seed={seed}) |squeeze| = {loss:.6f}")
+    print(f"\nBaseline (fil_frac={fil_value}, seed={seed}) |bulge| = {loss:.6f}")
     return loss
 
 
 # ── Optimizer ────────────────────────────────────────────────────────────────
 
-class SqueezeOptimizer:
-    """Maximize |hole squeeze| via per-hex fil_frac + theta grading with CMA-ES."""
+class BulgeOptimizer:
+    """Maximize |hole bulge| via per-hex fil_frac + theta grading with CMA-ES."""
 
     def __init__(self, output_folder, prnn_model_loc, macro_meshsize=0.02,
                  hole_radius=0.25, plate_height=1.0, hex_size=0.1,
@@ -827,7 +827,7 @@ class SqueezeOptimizer:
         self.fil_bounds = fil_bounds
         os.makedirs(output_folder, exist_ok=True)
 
-        self.sim = HexSqueezeHole(
+        self.sim = HexBulgeHole(
             hex_size=hex_size, macro_meshsize=macro_meshsize,
             output_folder=output_folder, prnn_model_loc=prnn_model_loc,
             hole_radius=hole_radius, plate_height=plate_height,
@@ -874,7 +874,7 @@ class SqueezeOptimizer:
         self.worst_feasible = max(self.worst_feasible, raw)
         self.best_loss = min(self.best_loss, raw)
         self.history.append(raw)
-        print(f"  eval {self.eval_count}: |squeeze| = {raw:.6f}")
+        print(f"  eval {self.eval_count}: |bulge| = {raw:.6f}")
         self._plot_iteration(raw)
         return raw
 
@@ -893,7 +893,7 @@ class SqueezeOptimizer:
         ax.plot(pts_closed[:, 0], pts_closed[:, 1], '-', lw=1.5, label='Deformed')
         ax.set_aspect('equal')
         ax.legend(fontsize=9)
-        ax.set_title(f'Iter {idx}, |squeeze| = {loss:.6f}')
+        ax.set_title(f'Iter {idx}, |bulge| = {loss:.6f}')
         ax.axis('off')
         plt.savefig(os.path.join(contour_dir, f'contour_iter_{idx:04d}.pdf'),
                     bbox_inches='tight', dpi=150)
@@ -935,7 +935,7 @@ class SqueezeOptimizer:
 
         result = es.result
         print(f"\nCMA-ES finished after {self.eval_count} evaluations")
-        print(f"Best |squeeze|: {result.fbest:.6f}")
+        print(f"Best |bulge|: {result.fbest:.6f}")
         return result
 
     # -- reporting -----------------------------------------------------------
@@ -945,7 +945,7 @@ class SqueezeOptimizer:
         ax.plot(history, '-', lw=1, alpha=0.4, label='All evaluations')
         ax.plot(np.minimum.accumulate(history), '-', lw=2, label='Best so far')
         ax.set_xlabel('Function evaluation')
-        ax.set_ylabel('|squeeze|')
+        ax.set_ylabel('|bulge|')
         ax.legend()
         path = os.path.join(self.output_folder, fname)
         plt.savefig(path, bbox_inches='tight', dpi=150)
@@ -959,7 +959,7 @@ class SqueezeOptimizer:
                  x_best=x_best, fil_best=fil_best,
                  theta_norm_best=theta_norm_best,
                  theta_best=tmin + theta_norm_best * (tmax - tmin),
-                 squeeze_best=loss_best, history=np.array(history),
+                 bulge_best=loss_best, history=np.array(history),
                  n_regions=self.n_regions, theta_bounds=np.array(THETA_BOUNDS))
         print(f"Saved results: {os.path.join(self.output_folder, fname)}")
 
@@ -991,9 +991,9 @@ class SqueezeOptimizer:
             pass
         self._apply_and_plot_fields(fil, theta_norm)
         self.sim.run(write_output=write_output)
-        loss = self.sim.squeeze_loss()
+        loss = self.sim.bulge_loss()
         self.sim.plot_deformed_hole(self.output_folder, 'deformed_best.pdf',
-                                    title=f'Best |squeeze| = {loss:.4f}')
+                                    title=f'Best |bulge| = {loss:.4f}')
         plot_filler_angle_ellipses(self.sim, self.output_folder,
                                    fname='filler_angle_ellipses_deformed.pdf', deformed=True)
         return loss
@@ -1015,13 +1015,13 @@ class SqueezeOptimizer:
         self.sim._mirror_sign = np.ones(self.sim.num_ips)  # canonical == theta
         self.plot_theta_ellipses(fname='theta_ellipses_vertical.pdf')
         self.plot_filler_angle_ellipses(fname='filler_angle_ellipses_vertical.pdf')
-        self.sim.run(write_output=True, write_name='squeeze_hex_graded_vertical')
-        loss = self.sim.squeeze_loss()
+        self.sim.run(write_output=True, write_name='bulge_hex_graded_vertical')
+        loss = self.sim.bulge_loss()
         self.sim.plot_deformed_hole(self.output_folder, 'deformed_vertical.pdf',
-                                    title=f'Vertical |squeeze| = {loss:.4f}')
+                                    title=f'Vertical |bulge| = {loss:.4f}')
         plot_filler_angle_ellipses(self.sim, self.output_folder,
                                    fname='filler_angle_ellipses_vertical_deformed.pdf', deformed=True)
-        print(f"Vertical |squeeze| = {loss:.6f}")
+        print(f"Vertical |bulge| = {loss:.6f}")
         return loss
 
     def replot_from_results(self, fname='optimization_results.npz', run_sim=False):
@@ -1034,12 +1034,12 @@ class SqueezeOptimizer:
         self._apply_and_plot_fields(fil, theta_norm)
         if run_sim:
             self.sim.run(write_output=True)
-            loss = self.sim.squeeze_loss()
+            loss = self.sim.bulge_loss()
             self.sim.plot_deformed_hole(self.output_folder, 'deformed_best.pdf',
-                                        title=f'|squeeze| = {loss:.4f}')
+                                        title=f'|bulge| = {loss:.4f}')
             plot_filler_angle_ellipses(self.sim, self.output_folder,
                                        fname='filler_angle_ellipses_deformed.pdf', deformed=True)
-            print(f"|squeeze| = {loss:.6f}")
+            print(f"|bulge| = {loss:.6f}")
         return fil, theta_norm
 
 
@@ -1063,12 +1063,12 @@ if __name__ == "__main__":
     baseline_fil = 0.0   # uniform filler fraction for the baseline (change to compare)
 
     if MODE == 'baseline':
-        output_folder = f"../results/squeeze_hole/baseline_hole_{hole_radius}_fil{baseline_fil}_disp{max_disp}_seed{seed}/"
+        output_folder = f"../results/bulge_hole/baseline_hole_{hole_radius}_fil{baseline_fil}_disp{max_disp}_seed{seed}/"
         run_baseline(output_folder=output_folder, prnn_model_loc=prnn_model_loc,macro_meshsize=macro_meshsize, hole_radius=hole_radius, plate_height=plate_height, fil_value=baseline_fil, seed=seed, max_disp=max_disp,
         )
     else:
-        output_folder = f"../results/squeeze_hole/hole_{hole_radius}_hex_{hex_size}_disp{max_disp}_seed{seed}/"
-        optimizer = SqueezeOptimizer(output_folder=output_folder, prnn_model_loc=prnn_model_loc, macro_meshsize=macro_meshsize, hole_radius=hole_radius, plate_height=plate_height, hex_size=hex_size, symmetric_h=True, symmetric_v=True, fil_bounds=(0.0, 1.0), max_disp=max_disp)
+        output_folder = f"../results/bulge_hole/hole_{hole_radius}_hex_{hex_size}_disp{max_disp}_seed{seed}/"
+        optimizer = BulgeOptimizer(output_folder=output_folder, prnn_model_loc=prnn_model_loc, macro_meshsize=macro_meshsize, hole_radius=hole_radius, plate_height=plate_height, hex_size=hex_size, symmetric_h=True, symmetric_v=True, fil_bounds=(0.0, 1.0), max_disp=max_disp)
         print(f"Hex regions (1/4 domain): {optimizer.n_regions}, "
               f"total params: {optimizer.n_params}")
 
@@ -1085,6 +1085,6 @@ if __name__ == "__main__":
             optimizer.visualize_best(result.xbest)
 
             fil_best, theta_norm_best = optimizer._decode(result.xbest)
-            print(f"\nBest squeeze: {result.fbest:.6f}")
+            print(f"\nBest bulge: {result.fbest:.6f}")
             print(f"Best fil_frac: {np.round(fil_best, 3)}")
             print(f"Best theta (norm): {np.round(theta_norm_best, 3)}")

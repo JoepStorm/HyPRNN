@@ -87,7 +87,7 @@ class PolarGradedHole(GradedHoleSimulation):
             )
 
     def run_optimization_trial(self, design_vars, plot_grading=False):
-        """Run a single optimization trial: reset, apply grading, solve, return squeeze."""
+        """Run a single optimization trial: reset, apply grading, solve, return bulge."""
         try:
             self.reset()
             print(f"Problem reset for next trial..")
@@ -100,16 +100,16 @@ class PolarGradedHole(GradedHoleSimulation):
         if isinstance(out, bool):
             print("Simulation failed to converge.")
             if self.direction == 'maximize':
-                return self.get_hole_squeeze()  # Failed simulations still return their squeeze when maximizing
+                return self.get_hole_bulge()  # Failed simulations still return their bulge when maximizing
             else:
-                # When minimizing, not converging can be advantageous. So we can't use the actual squeeze, and instead give a fixed penalty.
+                # When minimizing, not converging can be advantageous. So we can't use the actual bulge, and instead give a fixed penalty.
                 return .15
 
-        return self.get_hole_squeeze()
+        return self.get_hole_bulge()
 
 
 class OptimizationProblem:
-    """Wrapper for Optuna optimization of hole squeeze."""
+    """Wrapper for Optuna optimization of hole bulge."""
 
     PARAM_NAMES = [
         # Radial parameters (5)
@@ -152,14 +152,14 @@ class OptimizationProblem:
             'ratio_a': trial.suggest_float('ratio_a', -0.5, 0.5),
         }
 
-        squeeze = self.sim.run_optimization_trial(design_vars, plot_grading=False)
-        print(f"Trial {trial.number}: squeeze = {squeeze:.6f}")
-        return squeeze
+        bulge = self.sim.run_optimization_trial(design_vars, plot_grading=False)
+        print(f"Trial {trial.number}: bulge = {bulge:.6f}")
+        return bulge
 
     def save_results(self, study, save_loc):
         """Save optimization results to CSV."""
         with open(f"{save_loc}/all_trials.csv", "w") as f:
-            header = "squeeze," + ",".join(self.PARAM_NAMES) + "\n"
+            header = "bulge," + ",".join(self.PARAM_NAMES) + "\n"
             f.write(header)
             for trial in study.trials:
                 if trial.value is not None:
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     problem.save_results(study, save_loc)
 
-    print(f"\nBest squeeze: {study.best_value:.6f}")
+    print(f"\nBest bulge: {study.best_value:.6f}")
     print(f"Best params: {study.best_params}")
 
 
