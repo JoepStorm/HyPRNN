@@ -31,11 +31,9 @@ python train_surrogate_deposit_batch.py   # Batch on the deposition filler datas
 ```bash
 cd scripts_FEM
 python bending_validation.py               # 3-point bending: FE² ground truth vs surrogates
-python validate_fe2.py                     # RVE vs PRNN stress response on identical load paths
 python graded_disk_setup.py                # Pressurized annulus with graded PRNN material
 python graded_disk_optimizer.py            # Optimize radial grading of the annulus
 python hole_deformation_optimization.py    # Hole-bulge design with filler PRNN surrogate
-python validate_disk.py                    # Validate optimized disk grading against FE²
 ```
 
 ### Data Generation
@@ -123,8 +121,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 
 **FEM Drivers** (`scripts_FEM/`):
 - `bending_validation.py`: 3-point bending — FE² ground truth vs surrogate models (deformation, stress maps, timing)
-- `validate_fe2.py`: RVE vs PRNN stress response on identical load paths
-- `graded_disk_setup.py` / `graded_disk_optimizer.py` / `validate_disk.py`: graded annulus study — simulate, optimize, validate
+- `graded_disk_setup.py` / `graded_disk_optimizer.py`: graded pressurized-annulus study — simulate and optimize the radial grading
 - `hole_deformation_optimization.py`: hole-bulge design optimization with a filler PRNN surrogate
 - `plotting_utils.py`: shared plotting helpers
 
@@ -181,7 +178,7 @@ The PRNN models use custom JAX layers enforcing physical constraints:
 
 ## Testing Approach
 
-- Use `validate_fe2.py` / `bending_validation.py` for FE² vs surrogate validation
+- Use `bending_validation.py` for FE² vs surrogate validation
 - Material models have standalone test capabilities via `if __name__ == "__main__"`
 - No formal pytest structure; testing is integration-focused
 
