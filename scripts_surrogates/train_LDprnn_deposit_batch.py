@@ -4,7 +4,7 @@ varying only the number of material points.
 Run once with MODE='train' to train all configs, then again with MODE='test'
 to evaluate and produce a plot of average performance per mat_points.
 
-Only a shared_prnn model with a Linear (hypernetwork) encoder is considered;
+Only a hyprnn model with a Linear (hypernetwork) encoder is considered;
 the sole variation is the number of material points (4..12). The material
 parametrization uses the deposition filler settings (fil_frac).
 """
@@ -43,7 +43,7 @@ COMMON = {
     'num_samples': 512,
     'val_test_samples': 128,
 
-    'model_type': 'shared_prnn',
+    'model_type': 'hyprnn',
     'encoder_type': 'Linear',
     'decoder_type': 'HyperSparseLayer',
 

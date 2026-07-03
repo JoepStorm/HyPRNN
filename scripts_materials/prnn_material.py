@@ -118,7 +118,7 @@ class PRNNMaterial(Material):
         proxyData.stress_normalizer = _convert_to_float64(proxyData.stress_normalizer)
         proxyData.M_normalizer = _convert_to_float64(proxyData.M_normalizer)
 
-        model_type = settings.get('model_type', 'shared_prnn')
+        model_type = settings.get('model_type', 'hyprnn')
 
         # Load model parameters and convert to float64 for inference precision
         params_f32 = load_params(params_file)

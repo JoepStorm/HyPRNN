@@ -15,6 +15,7 @@ Usage:
 - Then, for evaluating, once all configurations have been trained, run again with mode = 'test'. (~minutes for ALL)
 - Finally, run again with mode = 'plot"
 
+'plot_learncurve.py' can be used after models have been trained & test losses have been computed for more plotting settings.
 """
 
 import sys
@@ -174,7 +175,7 @@ configurations = [
     # # - Nonlinear -
     # {
     #     'name': 'prnn_nonlin_3L8_6m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -189,7 +190,7 @@ configurations = [
     # },
     # # {
     # #     'name': 'prnn_nonlin_3L8_6m3',
-    # #     'model_type': 'shared_prnn',
+    # #     'model_type': 'hyprnn',
     # #     'encoder_type': 'NonLinear',
     # #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     # #     'norm_matparams': [False, False, True, True],
@@ -204,7 +205,7 @@ configurations = [
     # # },
     # {
     #     'name': 'prnn_nonlin_3L8_3m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -219,7 +220,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_3L8_2m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -234,7 +235,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_3L8_12m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -249,7 +250,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_3L8_24m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -264,7 +265,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1HL8_3L_6m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -279,7 +280,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1HL8_1L_6m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -294,7 +295,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1L8_3m_sigmoid',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -309,7 +310,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1L8_6m_sigmoid',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -324,7 +325,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1HL8_1L_6m_sigmoid',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -339,7 +340,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1L8_6m_sigmoid_scaleMu',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -355,7 +356,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_1L8_12m_sigmoid',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -370,7 +371,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_3L8_3m_sigmoid',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -385,7 +386,7 @@ configurations = [
     # },
     {
         'name': 'prnn_nonlin_3L8_6m_sigmoid',
-        'model_type': 'shared_prnn',
+        'model_type': 'hyprnn',
         'encoder_type': 'NonLinear',
         'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
         'norm_matparams': [False, False, True, True],
@@ -400,7 +401,7 @@ configurations = [
     },
     # {
     #     'name': 'prnn_nonlin_3L8_12m_sigmoid',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -415,7 +416,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_3L8_6m_relu',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -430,7 +431,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_nonlin_3L8relu_6m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'NonLinear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -446,7 +447,7 @@ configurations = [
     # # - Linear -
     # # {
     # #     'name': 'prnn_lin_3L_6m3',
-    # #     'model_type': 'shared_prnn',
+    # #     'model_type': 'hyprnn',
     # #     'encoder_type': 'Linear',
     # #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     # #     'norm_matparams': [False, False, True, True],
@@ -458,7 +459,7 @@ configurations = [
     # # },
     # {
     #     'name': 'prnn_lin_3L_6m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'Linear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -470,7 +471,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_lin_3L_3m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'Linear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -482,7 +483,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_lin_3L_2m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'Linear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -494,7 +495,7 @@ configurations = [
     # },
     # {
     #     'name': 'prnn_lin_3L_12m',
-    #     'model_type': 'shared_prnn',
+    #     'model_type': 'hyprnn',
     #     'encoder_type': 'Linear',
     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
     #     'norm_matparams': [False, False, True, True],
@@ -506,7 +507,7 @@ configurations = [
     # },
     {
         'name': 'prnn_lin_1L_6m',
-        'model_type': 'shared_prnn',
+        'model_type': 'hyprnn',
         'encoder_type': 'Linear',
         'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
         'norm_matparams': [False, False, True, True],
@@ -518,7 +519,7 @@ configurations = [
     },
     {
         'name': 'prnn_lin_1L_3m',
-        'model_type': 'shared_prnn',
+        'model_type': 'hyprnn',
         'encoder_type': 'Linear',
         'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
         'norm_matparams': [False, False, True, True],
@@ -620,7 +621,7 @@ configurations = [
 #     # # - Nonlinear -
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -635,7 +636,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_6m3',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -650,7 +651,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_3m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -665,7 +666,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_2m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -680,7 +681,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_12m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -695,7 +696,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_24m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -710,7 +711,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_1L8_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -725,7 +726,7 @@ configurations = [
 #     # },
 #     {
 #         'name': 'prnn_nonlin_3L8_3m_sigmoid',
-#         'model_type': 'shared_prnn',
+#         'model_type': 'hyprnn',
 #         'encoder_type': 'NonLinear',
 #         'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #         'norm_matparams': [False, False, True, True],
@@ -740,7 +741,7 @@ configurations = [
 #     },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_6m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -755,7 +756,7 @@ configurations = [
 #     # },
 #     {
 #         'name': 'prnn_nonlin_1L8_3m_sigmoid',
-#         'model_type': 'shared_prnn',
+#         'model_type': 'hyprnn',
 #         'encoder_type': 'NonLinear',
 #         'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #         'norm_matparams': [False, False, True, True],
@@ -770,7 +771,7 @@ configurations = [
 #     },
 #     # {
 #     #     'name': 'prnn_nonlin_1L8_6m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -785,7 +786,7 @@ configurations = [
 #     # },
 #     {
 #         'name': 'prnn_nonlin_1L8_12m_sigmoid',
-#         'model_type': 'shared_prnn',
+#         'model_type': 'hyprnn',
 #         'encoder_type': 'NonLinear',
 #         'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #         'norm_matparams': [False, False, True, True],
@@ -800,7 +801,7 @@ configurations = [
 #     },
 #     # {
 #     #     'name': 'prnn_nonlin_3L16_6m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -815,7 +816,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_12m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -830,7 +831,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8_6m_relu',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -845,7 +846,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L8relu_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -861,7 +862,7 @@ configurations = [
 #     # # - Linear -
 #     # {
 #     #     'name': 'prnn_lin_3L_6m3',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -873,7 +874,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_3L_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -885,7 +886,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_3L_3m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -897,7 +898,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_3L_2m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -909,7 +910,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_3L_12m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -921,7 +922,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_1L_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda', 'vfrac', 'ratio'],
 #     #     'norm_matparams': [False, False, True, True],
@@ -1031,7 +1032,7 @@ configurations = [
 #     # # - Nonlinear -
 #     # {
 #     #     'name': 'prnn_nonlin_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1044,7 +1045,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_6m3',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1057,7 +1058,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1070,7 +1071,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_2m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1083,7 +1084,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_12m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1096,7 +1097,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_24m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1109,7 +1110,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1122,7 +1123,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_6m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1135,7 +1136,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_12m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1148,7 +1149,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_1L8_3m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1161,7 +1162,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_1L8_6m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1174,7 +1175,7 @@ configurations = [
 #     # },
 #     {
 #         'name': 'prnn_nonlin_1L8_6m_sigmoid_scaleMU',
-#         'model_type': 'shared_prnn',
+#         'model_type': 'hyprnn',
 #         'encoder_type': 'NonLinear',
 #         'mat_parameters': ['mu', 'lambda'],
 #         'norm_matparams': [False, False],
@@ -1188,7 +1189,7 @@ configurations = [
 #     },
 #     # {
 #     #     'name': 'prnn_nonlin_1L8_12m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1201,7 +1202,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_3L16_6m_sigmoid',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1214,7 +1215,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_nonlin_6m_relu',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'NonLinear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1228,7 +1229,7 @@ configurations = [
 #     # # # - Linear -
 #     # # {
 #     # #     'name': 'prnn_lin_6m3',
-#     # #     'model_type': 'shared_prnn',
+#     # #     'model_type': 'hyprnn',
 #     # #     'encoder_type': 'Linear',
 #     # #     'mat_parameters': ['mu', 'lambda'],
 #     # #     'norm_matparams': [False, False],
@@ -1238,7 +1239,7 @@ configurations = [
 #     # # },
 #     # {
 #     #     'name': 'prnn_lin_6m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1248,7 +1249,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_3m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1258,7 +1259,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_2m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1268,7 +1269,7 @@ configurations = [
 #     # },
 #     # {
 #     #     'name': 'prnn_lin_12m',
-#     #     'model_type': 'shared_prnn',
+#     #     'model_type': 'hyprnn',
 #     #     'encoder_type': 'Linear',
 #     #     'mat_parameters': ['mu', 'lambda'],
 #     #     'norm_matparams': [False, False],
@@ -1428,7 +1429,7 @@ else:
                         activation=settings['nn_activation'],
                         use_bias=settings['nn_bias']
                     )
-                elif settings['model_type'] == 'shared_prnn':
+                elif settings['model_type'] == 'hyprnn':
                     model, params, material = create_shared_hyper_prnn_model(
                         random_key=key,
                         n_micro_raw=len(settings['mat_parameters']),

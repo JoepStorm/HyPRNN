@@ -1,3 +1,10 @@
+"""
+Script to train a few models.
+
+This serves a similar function to train_multiconfig_batch, but is easier to run a few models directly.
+This is, for example, used to obtain the training time per model.
+"""
+
 import os
 import csv
 import time
@@ -12,10 +19,11 @@ from StandardNN import create_nn_model
 from HyPRNN import create_shared_hyper_prnn_model
 
 
+RUNS_PER_MODEL = 2
 # -- Common settings (shared across all configs) -----------------------------
 
 COMMON = {
-    'savefolder': '../trained_models/compute_train_time/',
+    'savefolder': '../trained_models/example/',
     'data_path': '../data/vary_all/mixed_t50_mergedv2',
     'matdata_path': '../data/vary_all/mixed_t50_mergedv2_matparam.data',
 
@@ -58,7 +66,7 @@ NN_MAT_PARAMS = {
 
 MODELS_TO_TRAIN = {
     'prnn_lin_32': {
-        'model_type': 'shared_prnn',
+        'model_type': 'hyprnn',
         'train_samples': 32,
         'encoder_type': 'Linear',
         'mat_points': 6,
@@ -67,7 +75,7 @@ MODELS_TO_TRAIN = {
         **PRNN_MAT_PARAMS,
     },
     'prnn_lin_512': {
-        'model_type': 'shared_prnn',
+        'model_type': 'hyprnn',
         'train_samples': 512,
         'encoder_type': 'Linear',
         'mat_points': 6,
@@ -76,7 +84,7 @@ MODELS_TO_TRAIN = {
         **PRNN_MAT_PARAMS,
     },
     'prnn_nonlin_512': {
-        'model_type': 'shared_prnn',
+        'model_type': 'hyprnn',
         'train_samples': 512,
         'encoder_type': 'NonLinear',
         'mat_points': 12,
@@ -96,9 +104,6 @@ MODELS_TO_TRAIN = {
         **NN_MAT_PARAMS,
     },
 }
-
-RUNS_PER_MODEL = 3
-
 
 # -- Setup -------------------------------------------------------------------
 
@@ -160,7 +165,7 @@ for model_name, model_cfg in MODELS_TO_TRAIN.items():
         settings['savename'] = f"{COMMON['savefolder']}{model_name}_run{run_i}"
 
         # Build model.
-        if model_cfg['model_type'] == 'shared_prnn':
+        if model_cfg['model_type'] == 'hyprnn':
             model, params, material = create_shared_hyper_prnn_model(
                 random_key=key,
                 n_micro_raw=len(settings['mat_parameters']),

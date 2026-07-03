@@ -199,7 +199,7 @@ def run_prnn(F_path, micro, prnn_model_loc):
 
     params = _convert_to_float64(load_params(prnn_model_loc))
 
-    model_type = settings.get('model_type', 'shared_prnn')
+    model_type = settings.get('model_type', 'hyprnn')
     if model_type == 'nn':
         model = StandardNN(
             n_outputs=3,

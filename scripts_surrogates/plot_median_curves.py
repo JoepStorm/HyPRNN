@@ -84,7 +84,7 @@ def load_model_and_predict(folder, run, eval_indices):
     )
     subset = dataset.get_subset(eval_indices)
 
-    model_type = settings.get('model_type', 'shared_prnn')
+    model_type = settings.get('model_type', 'hyprnn')
     if model_type == 'nn':
         model, params, material = create_nn_model(
             random_key=key,
@@ -93,7 +93,7 @@ def load_model_and_predict(folder, run, eval_indices):
             activation=settings['nn_activation'],
             use_bias=settings['nn_bias'],
         )
-    elif model_type == 'shared_prnn':
+    else:  # 'hyprnn' (also accepts legacy 'shared_prnn' from older saved settings)
         model, params, material = create_shared_hyper_prnn_model(
             random_key=key,
             n_micro_raw=len(settings['mat_parameters']),
@@ -110,8 +110,6 @@ def load_model_and_predict(folder, run, eval_indices):
             encoder_n_layers=settings.get('encoder_n_layers', 3),
             encoder_activation=settings.get('encoder_activation', 'softplus'),
         )
-    else:
-        raise ValueError(f"Unknown model_type: {model_type}")
 
     lr_config = Config(
         warmup_epochs=settings['warmup_epochs'],

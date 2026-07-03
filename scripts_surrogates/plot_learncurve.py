@@ -225,13 +225,7 @@ for mtype in model_types.values():
             mtype['curves_rel'].append((name, training_samples, losses_rel))
         except FileNotFoundError:
             pass  # relative losses are optional
-        # try:
-        #     losses_l2 = np.loadtxt(path_l2, delimiter=',')
-        #     if losses_l2.ndim == 1:
-        #         losses_l2 = losses_l2.reshape(-1, 1)
-        #     mtype['curves_l2'].append((name, training_samples, losses_l2))
-        # except FileNotFoundError:
-        #     pass  # L2 losses are optional
+
 
 # plot
 

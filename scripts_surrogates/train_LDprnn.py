@@ -1,3 +1,10 @@
+"""
+Train a single surrogate model.
+
+Edit the hyperparameters in this file directly, and run it to train a model & visualize its predictions.
+Switch between mode = 'train' and mode = 'test'.
+
+"""
 import os
 import random
 import numpy as np
@@ -16,22 +23,19 @@ plt.style.use(['science', 'bright'])
 colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 rc('text', usetex=True)
 
-# mode = 'train'
-mode = 'test'
+mode = 'train'
+# mode = 'test'
 
 plot_uni = True  # plot uniaxial tension/compression curves per mix value after test
 
 mix_label = 'fil_frac' # 'mix'
 
 settings = {
-    # 'savefolder': f'../trained_models/deposition/v10/nonlin_H1L_12m/',
-    'savefolder': f'../trained_models/deposition/filler/combi_v4v6/',
+    'savefolder': f'../trained_models/deposition/example/',
 
     # 'data_path': f'../data/vary_all/mixed_t50_mergedv2',
     # 'matdata_path': f'../data/vary_all/mixed_t50_mergedv2_matparam.data',
 
-    # 'data_path': f'../data/deposition/v10/mixed_t50_merged',
-    # 'matdata_path': f'../data/deposition/v10/mixed_t50_merged_matparam.data',
     'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
     'matdata_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged_matparam.data',
 
@@ -42,7 +46,8 @@ settings = {
     # 'num_samples': 6144,
     'val_test_samples': 128,
     # 'val_test_samples': 2048,
-    'model_type': 'shared_prnn',  # 'shared_prnn' or 'nn'
+
+    'model_type': 'hyprnn',
     # 'model_type': 'nn',
 
     # 'encoder_type': 'NonLinear',
@@ -53,7 +58,7 @@ settings = {
     'norm_stresses': True,
     'stress_scaling_feature': None,  #'mu',  # None  # e.g. 'mu': divide stresses by this mat param before normalization to equalize magnitudes
 
-    'mat_points': 12,
+    'mat_points': 6,
 
     'lr_schedule_steps': 10000,          # interval over which learning rate is scheduled. Ideally finish around this # of update steps. Linked to epochs through num batches
     'max_epochs': 3000,  # 2000
@@ -78,7 +83,7 @@ if settings['model_type'] == 'nn':
     settings['nn_hidden_sizes'] = [64, 64, 64]
     settings['nn_activation'] = 'sigmoid'
     settings['nn_bias'] = True
-if settings['model_type'] == 'shared_prnn':
+if settings['model_type'] == 'hyprnn':
     # settings['mat_parameters'] = ['mu', 'lambda', 'vfrac', 'ratio']
     # settings['norm_matparams'] = [False, False, True, True]
     # settings['shared_micro_features'] = [2, 3]  # vfrac, ratio feed the shared hypernet
@@ -144,7 +149,7 @@ if settings['stress_scaling_feature'] is not None and settings['mat_parameters']
             print(f"WARNING: stress_scaling_feature '{settings['stress_scaling_feature']}' is normalized "
                   f"(norm_matparams[{stress_scaling_index}]=True). PRNN internal scaling requires un-normalized values.")
 
-if settings['model_type'] == 'shared_prnn':
+if settings['model_type'] == 'hyprnn':
     model, params, material = create_shared_hyper_prnn_model(
         n_micro_raw=len(settings['mat_parameters']),
         shared_micro_features=settings['shared_micro_features'],
@@ -240,11 +245,6 @@ elif mode == 'test':
         plot_PK2_curves(E_true, cur_dataset['PK2_eq_unnorm'][sample], predicted_stresses[0], savename=plot_savename, png=png)
         return
 
-    # # Plotting train curve
-    # # NOTE: consider not getting the best_params from training
-    # train_sample = 0
-    # process_stress_prediction( trainset, train_sample, train_handler, params, material, dataset, settings, f"{settings['savefolder']}train_curve_{train_sample}", png=True )
-    #
     # Plotting test curve(s):
     for idx in range(5):
         sample = idx + 1    # doing -0 does not give desired behavior
