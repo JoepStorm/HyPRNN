@@ -40,7 +40,8 @@ your gmsh is not on `PATH` or you need a specific build, point to it with
    simulations on the meshes and store `{F, PK1, cauchy}.npy` sequences —
    see [Training data](#training-data-scripts_data_creation) below.
 3. **Training** (`scripts_surrogates/`): `train_*.py` train PRNN / HyPRNN / NN
-   surrogates into `trained_models/`.
+   surrogates into `trained_models/` — see
+   [Training surrogates](#training-surrogates-scripts_surrogates) below.
 4. **Macroscale simulations** (`scripts_FEM/`): use the trained surrogate at each
    macro Gauss point in bending, pressurized-disk, and hole-bulge studies — see
    [Macroscale simulations](#macroscale-simulations-scripts_fem) below.
@@ -153,7 +154,7 @@ python train_surrogate_multiconfig_batch.py        # test/evaluate all configura
 ```
 
 **Plotting:**
-- `plot_LD_data.py` — stress–strain curves of a dataset (`__main__` plots PK2 curves).
+- `plot_dataset.py` — stress–strain curves of a dataset (`__main__` plots PK2 curves).
 - `plot_uniaxial_data.py` — uniaxial dataset with PRNN predictions overlaid, per
   varied parameter (mu / vfrac / ratio), with RVE mesh thumbnails.
 - `plot_median_curves.py` — for one dataset, compare truth vs. non-linear PRNN,

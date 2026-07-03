@@ -12,8 +12,6 @@ dependencies:
   - dolfinx_mpc=0.10.0
   - matplotlib
   - pandas
-  - jupyterlab
-  - ipykernel
   - pip:
     - jax
     - jaxmat

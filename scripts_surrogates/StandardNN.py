@@ -1,3 +1,8 @@
+"""Plain feed-forward neural-network baseline (no physics constraints).
+
+Maps a deformation-gradient history to a stress sequence; used as a reference
+against the physics-informed (Hy)PRNN. Use `create_nn_model` to build one.
+"""
 import jax
 import jax.numpy as jnp
 import flax.linen as nn

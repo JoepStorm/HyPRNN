@@ -1,3 +1,6 @@
+"""Shared plotting helpers for the FEM drivers: fast mesh, field, and
+interpolation-grading plots.
+"""
 import os
 import numpy as np
 from matplotlib import pyplot as plt

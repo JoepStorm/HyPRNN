@@ -1,3 +1,9 @@
+"""(Hy)PRNN surrogate material for macro-scale FE.
+
+Loads a trained (Hy)PRNN (settings + normalizers + params) and exposes it as a
+dolfinx_materials `Material`, returning homogenized stress and tangent at each
+macro quadrature point — a fast drop-in replacement for the RVE.
+"""
 from dolfinx.common import Timer
 
 import numpy as np

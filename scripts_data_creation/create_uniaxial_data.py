@@ -1,3 +1,9 @@
+"""Generate uniaxial-loading RVE training data on synthetic ellipse meshes.
+
+Runs tension + compression RVE homogenizations over a grid of microstructures
+(fibre count, aspect ratio) and matrix stiffness (mu), saving {F, PK1, cauchy}
+sequences plus a matparam table for surrogate training.
+"""
 import os
 import numpy as np
 import sys

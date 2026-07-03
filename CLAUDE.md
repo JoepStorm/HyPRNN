@@ -87,7 +87,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 4. PRNN Training
    └─> train_*.py: JAX/Flax training → trained_models/
 5. Macro FE² Inference
-   └─> validate_*.py / design scripts: PRNN replaces RVE at each Gauss point
+   └─> bending_validation.py / design scripts: PRNN replaces RVE at each Gauss point
 ```
 
 ### Core Components
@@ -117,7 +117,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 - `StandardNN.py`: Plain feed-forward NN baseline
 - `trainer.py`: JAX/Flax training framework
 - `data_utils.py`: Data processing, normalization, and dataset loading
-- `plot_LD_data.py` / `plot_uniaxial_data.py` / `plot_learncurve.py` / `plot_median_curves.py`: dataset and training-result plots
+- `plot_dataset.py` / `plot_uniaxial_data.py` / `plot_learncurve.py` / `plot_median_curves.py`: dataset and training-result plots
 
 **FEM Drivers** (`scripts_FEM/`):
 - `bending_validation.py`: 3-point bending — FE² ground truth vs surrogate models (deformation, stress maps, timing)

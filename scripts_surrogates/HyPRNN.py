@@ -1,3 +1,10 @@
+"""Physics-informed (Hy)PRNN surrogate architecture.
+
+A recurrent network whose material points are Neo-Hookean (fibre + matrix),
+wrapped in an F = R·U decomposition. An optional shared hypernetwork adapts the
+material points to sample-level micro features (vfrac, aspect ratio, filler
+fraction, ...). Use `create_shared_hyper_prnn_model` to build and initialize one.
+"""
 import jax
 import jax.numpy as jnp
 import flax.linen as nn
