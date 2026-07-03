@@ -1,12 +1,21 @@
+"""
+Create an RVE with randomly placed ellipses.
+
+First, ellipses are placed randomly without overlap.
+Then, the resulting geometry is meshed using GMSH.
+
+Usage:
+    - Call using create_meshes.py for creating a dataset
+    - Called by rve_mesher.py to generate meshes in an FE2 simulation
+
+"""
 import numpy as np
 import random
 import os
 from string import Template
 
-# GMSH command-line binary used to turn .geo files into MSH2.2 (.msh) meshes.
 # Defaults to `gmsh` (on PATH); override with e.g. GMSH_BIN=/path/to/gmsh if your
-# gmsh is elsewhere or you need a specific build. The `-format msh22` flag below
-# is required — the downstream mesh reader assumes the legacy MSH2 ASCII layout.
+# gmsh is elsewhere or you need a specific build.
 GMSH_BIN = os.environ.get("GMSH_BIN", "gmsh")
 
 

@@ -13,7 +13,7 @@ from material_params import FUNGI_LAMBDA
 
 from scripts_materials.prnn_material import PRNNMaterial
 from validate_bending import MODELS, MODEL_LABELS
-from scripts_surrogates.plot_LD_data import plot_PK2_curves
+from scripts_surrogates.plot_dataset import plot_PK2_curves
 
 
 def _vec_to_mat(v):

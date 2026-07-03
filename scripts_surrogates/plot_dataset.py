@@ -86,45 +86,36 @@ if __name__ == '__main__':
     from data_utils import LDDataset
 
     settings = {
-        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/literature_matprops/mixed_t100',
-        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/10runs_literature_matprops/mixed_t50_merged',
-        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/triplets_1/mixed_t5_seed1',
-        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/lit_props_constant/mixed_t50_seed0',
-        # 'data_path': f'../data/vfrac_ratio_smallmu_biggerdomain/triplets_0/mixed_t50_seed0',
-        # 'data_path': f'../data/woodchip_conhull_batch/mixed_t50_seed0',
-        # 'data_path': f'../data/vary_vfrac_ratio/vary_vfrac_ratio/mixed_t50_merged',
-        # 'data_path': f'../data/uniaxial_v2/uniaxial',
-        # 'data_path': f'../data/uniaxial_debug/uniaxial',
-        # 'data_path': f'../data/woodchip/woodchip_periodic_relax_simple_100_compression',
-        # 'data_path': f'../datasets/vfrac_ratio_smallmu_biggerdomain/shuffled_3430',
-        # 'data_path': f'../datasets/no_geo/nfib25_0.0000_2.00_mesh384_t50',
-        # 'data_path': f'../data/deposition/v1/mixed_t50_merged',
-        # 'data_path': f'../data/deposition/v5_bigrve/mixed_t50_merged',
-        # 'data_path': f'../data/deposition/v10/mixed_t50_merged',
-        'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
+        'data_path': f'../data/vary_all/mixed_t50_mergedv2',
+        # 'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
         'seq_length': 50,
     }
     settings['matdata_path'] = settings['data_path'] + '_matparam.data'
 
-    # dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'])
-    # dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'], mat_features=['mix'])
-    dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'], mat_features=['fil_frac'])
+    # Vary all
+    dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'])
+    # # Deposition
+    # dataset = LDDataset(settings['data_path'], settings['seq_length'], mat_file=settings['matdata_path'], mat_features=['fil_frac'])
+
     # dataset = LDDataset(settings['data_path'], settings['seq_length'])
     test_indices = np.arange(dataset.F.shape[0])
     testset = dataset.get_subset(test_indices)
-    # plot_PK2_curves(
-    #     E_true=testset['x'],
-    #     PK2_true=testset['PK2_eq_unnorm'],
-    #     savename=settings['data_path'] + '_PK2_curves',
-    #     png=True
-    # )
 
+    # Standard
     plot_PK2_curves(
         E_true=testset['x'],
         PK2_true=testset['PK2_eq_unnorm'],
         savename=settings['data_path'] + '_PK2_curves',
-        color_variable=testset['m'][:, 0],  # color by 'mix' material parameter
-        # color_label='mix',
-        color_label='Pellet fraction',
         png=True
     )
+
+    # # Custom color
+    # plot_PK2_curves(
+    #     E_true=testset['x'],
+    #     PK2_true=testset['PK2_eq_unnorm'],
+    #     savename=settings['data_path'] + '_PK2_curves',
+    #     color_variable=testset['m'][:, 0],  # color by 'mix' material parameter
+    #     # color_label='mix',
+    #     color_label='Pellet fraction',
+    #     png=True
+    # )

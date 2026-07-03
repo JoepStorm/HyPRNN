@@ -205,7 +205,7 @@ if mode == 'train':
     print(f"Loss curves saved to {settings['savefolder']}loss_curves.png")
 
 elif mode == 'test':
-    from plot_LD_data import plot_PK2_curves
+    from plot_dataset import plot_PK2_curves
     # Load model
     params = train_handler.load(settings['savefolder'] + 'params') #, set_best_params=False)
     # params = train_handler.load(settings['savefolder'] + 'samples32_run0') #, set_best_params=False)
