@@ -16,7 +16,7 @@ jax.config.update('jax_platform_name', 'cpu')
 
 from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings
-from LDprnn_shared_hyper import create_shared_hyper_prnn_model
+from HyPRNN import create_shared_hyper_prnn_model
 
 import matplotlib.pyplot as plt
 from matplotlib import rc

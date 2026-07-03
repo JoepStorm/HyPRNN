@@ -115,8 +115,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 - `plot_uniaxial_deposition.py`: visualize create_uniaxial_deposition_data.py output
 
 **Neural Networks** (`scripts_surrogates/`):
-- `LDprnn.py`: Physics-informed RNN architectures (core ML module)
-- `LDprnn_shared_hyper.py`: HyPRNN — shared hypernetwork PRNN variant
+- `HyPRNN.py`: HyPRNN — physics-informed shared-hypernetwork PRNN (core ML module)
 - `LDnn.py`: Plain feed-forward NN baseline
 - `trainer.py`: JAX/Flax training framework
 - `data_utils.py`: Data processing, normalization, and dataset loading

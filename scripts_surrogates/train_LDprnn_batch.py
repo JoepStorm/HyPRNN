@@ -8,9 +8,8 @@ jax.config.update('jax_platform_name', 'cpu')
 
 from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings
-from LDprnn import create_prnn_model
 from LDnn import create_nn_model
-from LDprnn_shared_hyper import create_shared_hyper_prnn_model
+from HyPRNN import create_shared_hyper_prnn_model
 
 
 # -- Common settings (shared across all configs) -----------------------------
@@ -161,19 +160,7 @@ for model_name, model_cfg in MODELS_TO_TRAIN.items():
         settings['savename'] = f"{COMMON['savefolder']}{model_name}_run{run_i}"
 
         # Build model.
-        if model_cfg['model_type'] == 'prnn':
-            model, params, material = create_prnn_model(
-                random_key=key,
-                n_matpts=settings['mat_points'],
-                encoder_type=settings['encoder_type'],
-                decoder_type=settings['decoder_type'],
-                stress_normalizer=dataset.stress_normalizer,
-                num_mat_features=len(settings['mat_parameters']),
-                enc_m_feats=settings['encoder_micro_features'],
-                dec_m_feats=settings['decoder_micro_features'],
-                mat_m_feats=settings['mat_micro_features'],
-            )
-        elif model_cfg['model_type'] == 'shared_prnn':
+        if model_cfg['model_type'] == 'shared_prnn':
             model, params, material = create_shared_hyper_prnn_model(
                 random_key=key,
                 n_micro_raw=len(settings['mat_parameters']),

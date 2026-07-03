@@ -7,9 +7,8 @@ jax.config.update('jax_platform_name', 'cpu')
 
 from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings
-from LDprnn import create_prnn_model
 from LDnn import create_nn_model
-from LDprnn_shared_hyper import create_shared_hyper_prnn_model
+from HyPRNN import create_shared_hyper_prnn_model
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -1415,20 +1414,7 @@ else:
                 settings['seed'] = seed
 
                 # Create model
-                if settings['model_type'] == 'prnn':
-                    model, params, material = create_prnn_model(
-                        random_key=key,
-                        n_matpts=settings['mat_points'],
-                        encoder_type=settings['encoder_type'],
-                        decoder_type=settings['decoder_type'],
-                        stress_normalizer=dataset.stress_normalizer,
-                        num_mat_features=len(settings['mat_parameters']),
-                        enc_m_feats=settings['encoder_micro_features'],
-                        dec_m_feats=settings['decoder_micro_features'],
-                        mat_m_feats=settings['mat_micro_features'],
-                        stress_scaling_index=stress_scaling_index,
-                    )
-                elif settings['model_type'] == 'nn':
+                if settings['model_type'] == 'nn':
                     model, params, material = create_nn_model(
                         random_key=key,
                         hidden_sizes=settings['nn_hidden_sizes'],

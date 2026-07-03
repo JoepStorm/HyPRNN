@@ -232,7 +232,7 @@ class SharedSparseDecoder(nn.Module):
 # Main PRNN class
 # ---------------------------------------------------------------------------
 
-class SharedHyperPRNN(nn.Module):
+class HyPRNN(nn.Module):
     """PRNN with a single shared hypernetwork feeding both encoder and decoder.
     """
     n_matpts: int              # int for single material, tuple for multiple materials
@@ -367,11 +367,11 @@ def create_shared_hyper_prnn_model(
     encoder_activation='softplus',
     stress_scaling_index=None,
 ):
-    """Create and initialize a SharedHyperPRNN."""
+    """Create and initialize a HyPRNN."""
     use_multiple_materials = isinstance(n_matpts, list)
     total_matpts = int(sum(n_matpts)) if use_multiple_materials else n_matpts
 
-    model = SharedHyperPRNN(
+    model = HyPRNN(
         n_matpts=tuple(n_matpts) if use_multiple_materials else n_matpts,
         n_outputs=n_outputs,
         encoder_type=encoder_type,
@@ -399,12 +399,12 @@ def create_shared_hyper_prnn_model(
     if len(shared_micro_features) > 0:
         hyper_desc = (f'fixed{hyper_hidden_sizes}' if hyper_hidden_sizes is not None
                       else f'{shared_hidden_mult}m×{shared_output_mult}m')
-        print(f'SharedHyperPRNN: encoder={encoder_type}  m={n_matpts}  '
+        print(f'HyPRNN: encoder={encoder_type}  m={n_matpts}  '
               f'hyper={hyper_desc}({hyper_activation})'
               f'enc_layers={encoder_n_layers}({encoder_activation})  hidden_dim={hidden_dim}  '
               f'multiple_materials={use_multiple_materials}')
     else:
-        print(f'SharedHyperPRNN (fixed, no hyper): encoder={encoder_type}  m={n_matpts}  '
+        print(f'HyPRNN (fixed, no hyper): encoder={encoder_type}  m={n_matpts}  '
               f'enc_layers={encoder_n_layers}({encoder_activation})  hidden_dim={hidden_dim}  '
               f'multiple_materials={use_multiple_materials}')
 

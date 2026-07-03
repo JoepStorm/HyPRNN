@@ -23,7 +23,7 @@ from scripts_materials.rve_material import RVEMaterial
 from scripts_materials.rve_mesher import RVEMeshConfig
 from scripts_materials.prnn_material import PRNNMaterial, complete_update_pk2, _convert_to_float64
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
-from scripts_surrogates.LDprnn_shared_hyper import SharedHyperPRNN
+from scripts_surrogates.HyPRNN import HyPRNN
 from scripts_surrogates.LDnn import StandardNN
 from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
@@ -210,7 +210,7 @@ def run_prnn(F_path, micro, prnn_model_loc):
     else:
         use_multiple_materials = isinstance(settings['mat_points'], list)
         n_matpts = tuple(settings['mat_points']) if use_multiple_materials else settings['mat_points']
-        model = SharedHyperPRNN(
+        model = HyPRNN(
             n_matpts=n_matpts,
             n_outputs=3,
             encoder_type=settings['encoder_type'],

@@ -6,8 +6,7 @@ jax.config.update('jax_platform_name', 'cpu')  # force jax to use cpu; which sho
 
 from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings, tensor_to_matrix
-from LDprnn import create_prnn_model
-from LDprnn_shared_hyper import create_shared_hyper_prnn_model
+from HyPRNN import create_shared_hyper_prnn_model
 from LDnn import create_nn_model
 from material_params import FUNGI_MU, FUNGI_LAMBDA
 
@@ -43,9 +42,8 @@ settings = {
     # 'num_samples': 6144,
     'val_test_samples': 128,
     # 'val_test_samples': 2048,
-    # 'model_type': 'prnn',  # 'prnn' # 'nn'
-    'model_type': 'shared_prnn',  # 'prnn' # 'nn'
-    # 'model_type': 'nn',  # 'prnn' # 'nn'
+    'model_type': 'shared_prnn',  # 'shared_prnn' or 'nn'
+    # 'model_type': 'nn',
 
     # 'encoder_type': 'NonLinear',
     'encoder_type': 'Linear',
@@ -80,13 +78,7 @@ if settings['model_type'] == 'nn':
     settings['nn_hidden_sizes'] = [64, 64, 64]
     settings['nn_activation'] = 'sigmoid'
     settings['nn_bias'] = True
-elif settings['model_type'] == 'prnn':
-    settings['mat_parameters'] = ['mu', 'lambda', 'vfrac', 'ratio']
-    settings['norm_matparams'] = [False, False, True, True]
-    settings['encoder_micro_features'] = [2, 3]
-    settings['decoder_micro_features'] = [2, 3]
-    settings['mat_micro_features'] = [0, 1]
-elif settings['model_type'] == 'shared_prnn':
+if settings['model_type'] == 'shared_prnn':
     # settings['mat_parameters'] = ['mu', 'lambda', 'vfrac', 'ratio']
     # settings['norm_matparams'] = [False, False, True, True]
     # settings['shared_micro_features'] = [2, 3]  # vfrac, ratio feed the shared hypernet
@@ -152,9 +144,7 @@ if settings['stress_scaling_feature'] is not None and settings['mat_parameters']
             print(f"WARNING: stress_scaling_feature '{settings['stress_scaling_feature']}' is normalized "
                   f"(norm_matparams[{stress_scaling_index}]=True). PRNN internal scaling requires un-normalized values.")
 
-if settings['model_type'] == 'prnn':
-    model, params, material = create_prnn_model(random_key=key, n_matpts=settings['mat_points'], encoder_type=settings['encoder_type'], decoder_type=settings['decoder_type'], stress_normalizer = dataset.stress_normalizer, num_mat_features=len(settings['mat_parameters']), enc_m_feats=settings['encoder_micro_features'], dec_m_feats=settings['decoder_micro_features'], mat_m_feats=settings['mat_micro_features'], stress_scaling_index=stress_scaling_index)
-elif settings['model_type'] == 'shared_prnn':
+if settings['model_type'] == 'shared_prnn':
     model, params, material = create_shared_hyper_prnn_model(
         n_micro_raw=len(settings['mat_parameters']),
         shared_micro_features=settings['shared_micro_features'],

@@ -90,41 +90,6 @@ def load_params(filename):
     return params
 
 
-class boundNormalizer:
-    """Normalization for strain features.
-
-    Scales strain data to a [-1,1] interval
-    TODO: this is probably wrong, we need to take the absolute of the maximum of both!
-    """
-
-    def __init__(self, X):
-        self.min = X.min(axis=0).values
-        self.max = X.max(axis=0).values
-
-    def normalize(self, x):
-        return 2.0 * ((x - self.min) / (self.max-self.min)) - 1.0
-
-
-class meanunitNormalizer:
-    """Normalization of general data.
-    scales data to zero mean and unit variance.
-    """
-    def __init__(self, X, normalize=True):
-        if not normalize:
-            self.mean = 0.0
-            self.std = 1.0
-            return
-        else:
-            self.mean = X.mean()
-            self.std = X.std()
-
-    def normalize(self, x):
-        return (x - self.mean) / self.std
-
-    def denormalize(self, x):
-        return x * self.std + self.mean
-
-
 class meanUnitNormalizer_dim1:
     def __init__(self, X, normalize=True):
         # Handle both single boolean and list of booleans
@@ -192,29 +157,6 @@ class norm_LDstresses:
             return lambda x: self.denormalize(x, scale)
         return self.denormalize
 
-class Normalize_set:
-    """
-    Normalize a train, validation and optionally test set based only on the training set samples.
-    """
-    def __init__(self, dataset, norm_input=True, norm_output=True):
-        """
-        :param dataset:
-        """
-        self.norm_input = norm_input
-        self.norm_output = norm_output
-
-        if norm_input:
-            self.in_normalizer = boundNormalizer(dataset[:,0])
-        if norm_output:
-            self.out_normalizer = boundNormalizer(dataset[:,1])
-
-    def normalize(self, dataset):
-        new_dataset = dataset.copy()
-        if self.norm_input:
-            new_dataset[:,0] = self.in_normalizer.normalize(dataset[:,0])
-        if self.norm_output:
-            new_dataset[:,1] = self.out_normalizer.normalize(dataset[:,1])
-        return new_dataset
 
 def extract_normalizer_info(normalizer):
     """Extract normalization parameters from a normalizer object for saving."""
@@ -262,69 +204,6 @@ def create_normalizer_from_info(info):
     else:
         print(f"Warning: Unknown normalizer type {normalizer_type}, cannot reconstruct")
         return None
-
-
-def polar_decomposition(F):
-    """Perform polar decomposition on a deformation gradient tensor F."""
-
-    # The identity case is handled separately to avoid NaNs in the AD jacrev/jacfwd SVD computation.
-    # When F is the identity, return identity for both U and R. We still do F @ I to keep the dependency on F for AD.
-    # This is dirty workaround, and ideally a better solution should be found.
-    def identity_case(F):
-        U = F @ jnp.eye(2)
-        R = F @ jnp.eye(2)
-        return U, R
-
-    def svd_case(F):
-        U_svd, S, Vh = jnp.linalg.svd(F, full_matrices=False)
-
-        if F.ndim == 2:
-            R = jnp.dot(U_svd, Vh)
-            S_diag = jnp.diag(S)
-            U = jnp.dot(Vh.T, jnp.dot(S_diag, Vh))
-        else:
-            R = jnp.einsum('...ij,...jk->...ik', U_svd, Vh)
-            S_diag = jnp.zeros_like(F)
-            for i in range(F.shape[-1]):
-                S_diag = S_diag.at[..., i, i].set(S[..., i])
-            U = jnp.einsum('...ji,...jk,...kl->...il', Vh, S_diag, Vh)
-
-        return U, R
-
-    # Use lax.cond for JIT-compatible branching
-    # Having an identity matrix somehow causes NaNs in the SVD, so we handle that case separately
-    is_identity = jnp.allclose(F, jnp.eye(2))
-    return jax.lax.cond(is_identity, identity_case, svd_case, F)
-
-
-def sqrt_matrix(C):
-    # Take the square root of a 2x2 matrix. Works with batched inputs.
-
-    # Extract components
-    a = C[..., 0, 0]  # Shape (N,)
-    b = C[..., 0, 1]  # Shape (N,)
-    c = C[..., 1, 1]  # Shape (N,)
-
-    # Calculate determinant and trace
-    det = a * c - b**2
-    tr = a + c
-
-    # Calculate s and t
-    s = jnp.sqrt(det)     # s = sqrt(det(C)) = sqrt(ac - b^2)
-    t = jnp.sqrt(tr + 2 * s)  # t = sqrt(tr(C) + 2s) = sqrt(a + c + 2s)
-
-    # Reshape s and t to (N, 1, 1) for broadcasting
-    s = s[..., None, None]
-    t = t[..., None, None]
-
-    # Create a batch of identity matrices through broadcasting
-    I = jnp.eye(2)
-
-    # Apply the formula: U = (1/t) * (C + s*I)
-    U = (C + s * I) / t
-
-    return U
-
 
 
 class LDDataset:
@@ -397,8 +276,6 @@ class LDDataset:
                     print(f"Material features not specified.")
             else:
                 print(f"Material features not specified.")
-
-        self.U, self.R = polar_decomposition(self.F)
 
         # Compute the equivalent stretch tensor rotated by the local rotation Q
         # broadcast Q to the sequence length to match the shape of F
@@ -498,18 +375,6 @@ class LDDataset:
         Save all parameters required for later use.
         This includes normalization types and parameters
         """
-        import json
-        import numpy as np
-
-        # Convert numpy arrays to lists for JSON serialization
-        def convert_to_serializable(obj):
-            if isinstance(obj, dict):
-                return {k: convert_to_serializable(v) for k, v in obj.items()}
-            elif isinstance(obj, (jnp.ndarray, np.ndarray)):
-                return obj.tolist()
-            else:
-                return obj
-
         data = {
             'stress_normalizer': convert_to_serializable(extract_normalizer_info(self.stress_normalizer)),
             'mat_features': self.mat_features if hasattr(self, 'mat_features') else None,
@@ -529,8 +394,6 @@ class LDDataset:
         Load all parameters required for later use.
         This includes normalization types and parameters
         """
-        import json
-
         with open(f"{filename}.json", 'r') as f:
             data = json.load(f)
 
@@ -550,71 +413,20 @@ class LDDataset:
         return
 
 if __name__ == "__main__":
-    # Some test code to verify the LDDataset class works as expected, especially the polar decomposition and stress conversion.
-    # Example base filename, adjust according to your dataset structure
-    # base_filename = f"datasets/fungi/ellipsoid_fixed/mesh500_t50"
-    # dataclass = LDDataset(base_filename, seq_length=50, num_samples=500, mat_file=None, mat_features=None, norm_stresses=True)
-    base_filename = f"../data/vfrac_ratio_smallmu_biggerdomain/2runs_1/mixed_t100"
-    dataclass = LDDataset(base_filename, seq_length=100, num_samples=686, mat_file=None, mat_features=None, norm_stresses=True)
-    data = dataclass.get_all_batches()
-    print(data['F'].shape, data['sig_F'].shape, data['stiff'].shape)
-    print("full input F")
-    print(data['F'][0,30])
-    print(data['x'][0,30])
-    print(data['R'][0,30])
-    print("Recomputed F")
-    print(data['R'][0,30] @ (data['x'][0,30] + jnp.eye(2)))  # should equal F
+    # Smoke test: load a dataset, print batch shapes, and verify the
+    # normalizer save/load roundtrip.
+    base_filename = "../data/uniaxial_v2/uniaxial"
+    dataset = LDDataset(base_filename, seq_length=50, norm_stresses=True)
+    data = dataset.get_all_batches()
+    print("batch keys:", list(data))
+    print("F:", data['F'].shape, " E (x):", data['x'].shape, " target t:", data['t'].shape)
 
-    print(f"output sig_F")
-    print(data['sig_F'][0,30])
-    print(f"output target")
-    print(data['t'][0,30])
-
-    # Recompute sig_F from target
-    print("Recomputing sig_F from target")
-    t = data['t'][0,30]
-
-    # denormalize
-    # TODO: this might be outdated - does not include the Q rotation
-    sig_u_voigt_unnorm = dataclass.stress_normalizer.denormalize(t)
-    # convert from voigt to matrix
-    sig_u_unnorm = jnp.zeros((2,2))
-    sig_u_unnorm = sig_u_unnorm.at[0,0].set(sig_u_voigt_unnorm[0])  # sigma_x
-    sig_u_unnorm = sig_u_unnorm.at[1,1].set(sig_u_voigt_unnorm[1])  # sigma_y
-    sig_u_unnorm = sig_u_unnorm.at[0,1].set(sig_u_voigt_unnorm[2])  # sigma_xy
-    sig_u_unnorm = sig_u_unnorm.at[1,0].set(sig_u_voigt_unnorm[2])  # sigma_xy
-    print("recomputed sig_U from target")
-    print(sig_u_unnorm)
-    print(f"original sig_U_eq")
-    print(data['sig_U_eq_unnorm'][0,30])
-    # now denormalize
-    # now rotate back to sig_F by
-    # applying R sig_U R^T
-    tmp2 = data['R'][0,30] @ sig_u_unnorm @ data['R'][0,30].T
-    # tmp2 = data['R'][0,30] @ data['sig_U_unnorm'][0,30] @ data['R'][0,30].T
-    print("recomputed sig_F")
-    print(tmp2)
-    tmp2_voigt = jnp.zeros((3,))
-    tmp2_voigt = tmp2_voigt.at[0].set(tmp2[0,0])  # sigma_xx
-    tmp2_voigt = tmp2_voigt.at[1].set(tmp2[1,1])  # sigma_yy
-    tmp2_voigt = tmp2_voigt.at[2].set(tmp2[0,1])  # sigma_xy (assumed equal to sigma_yx)
-    print(tmp2_voigt)
-    print(f"True original sig_F: {data['sig_F'][0,30]}")
-    assert jnp.allclose(tmp2_voigt, data['sig_F'][0,30]), "Recomputed sig_F does not match original sig_F"
-
-    # Test saving and loading of dataset parameters
-
-    # Save dataset normalizers
-    dataclass.saveDataparams('datasets/fungi/ellipsoid_fixed/normparams')
-
-    # Load new dataset:
-    newdataclass = LDDataset.__new__(LDDataset)
-    newdataclass.loadDataparams('datasets/fungi/ellipsoid_fixed/normparams')
-
-    # assert whether newdataclass has the same normalizer parameters
-    assert newdataclass.stress_normalizer is not None, "Stress normalizer not loaded"
-    assert jnp.allclose(newdataclass.stress_normalizer.norm_max, dataclass.stress_normalizer.norm_max), "Stress normalizer parameters do not match"
-    assert newdataclass.mat_features == dataclass.mat_features, "Material features do not match"
+    dataset.saveDataparams(f"{base_filename}_normparams")
+    reloaded = LDDataset.__new__(LDDataset)
+    reloaded.loadDataparams(f"{base_filename}_normparams")
+    assert jnp.allclose(reloaded.stress_normalizer.norm_max,
+                        dataset.stress_normalizer.norm_max), "normalizer roundtrip mismatch"
+    print("normalizer save/load roundtrip OK")
 
 
 

@@ -161,23 +161,6 @@ class Trainer:
         return loss, num_nans
 
     @staticmethod
-    @jax.jit
-    def eval_step_L1_norm(state, batch, material=None):
-        x = batch['x']
-        t = batch['t']
-        m = batch.get('m', None)
-        mask = batch.get('mask')
-
-        y = state.apply_fn(state.params, x, material, micro_params=m)
-
-        nan_mask = ~jnp.isnan(y)
-        combined_mask = mask * nan_mask
-
-        loss = jnp.sum(jnp.abs(y - t) * combined_mask) / jnp.sum(combined_mask)
-
-        return loss
-
-    @staticmethod
     # @jax.jit
     def eval_step_L1(state, batch, denormalizer, material=None):
         x = batch['x']
@@ -217,40 +200,6 @@ class Trainer:
         return loss
 
     @staticmethod
-    # @jax.jit
-    def eval_relative(state, batch, denormalizer, material):
-        """
-        Following Kovacs et al. 2025, the relative error is computed as: MSE(sigma) / max(abs(sigma))
-        However, we perform this component wise first, before averaging over components.
-        """
-        x = batch['x']
-        t = batch['t']
-        m = batch.get('m', None)
-        mask = batch.get('mask')
-
-        y = state.apply_fn(state.params, x, material, micro_params=m)
-
-        nan_mask = ~jnp.isnan(y)
-        combined_mask = mask * nan_mask
-
-        y_denorm = denormalizer(y)
-        t_denorm = denormalizer(t)
-        # rel_loss = jnp.sum(jnp.abs((y_denorm - t_denorm) / t_denorm) * mask) / jnp.sum(mask)
-
-        # Compute MSE per component.
-        mse_per_component = jnp.sum((y_denorm - t_denorm) ** 2 * combined_mask, axis=1) / jnp.sum(combined_mask, axis=1)
-        rmse_per_component = jnp.sqrt(mse_per_component)
-
-        # Compute max absolute value per component
-        max_abs_per_batch_component = jnp.max(jnp.abs(t_denorm), axis=1)
-        max_abs_per_batch = jnp.max(max_abs_per_batch_component, axis=1, keepdims=True)
-
-        # Compute relative error per component and average
-        rel_loss = jnp.mean(rmse_per_component / max_abs_per_batch)
-
-        return rel_loss
-
-    @staticmethod
     def eval_relative_norm(state, batch, denormalizer, material):
         """Relative L1 error based on the vector norm of the stress, avoiding component-wise blow-up."""
         x = batch['x']
@@ -281,37 +230,6 @@ class Trainer:
         rel_loss = jnp.sum(rel_error) / jnp.sum(mask_reduced)
 
         return rel_loss
-
-    @staticmethod
-    # @jax.jit
-    def eval_relative_component(state, batch, denormalizer, material):
-        """
-        Perform component wise relative error, before averaging over components.
-        """
-        x = batch['x']
-        t = batch['t']
-        m = batch.get('m', None)
-        mask = batch.get('mask')
-
-        y = state.apply_fn(state.params, x, material, micro_params=m)
-
-        nan_mask = ~jnp.isnan(y)
-        combined_mask = mask * nan_mask
-
-        y_denorm = denormalizer(y)
-        t_denorm = denormalizer(t)
-
-        # Compute MSE per component.
-        mse_per_component = jnp.sum((y_denorm - t_denorm) ** 2 * combined_mask, axis=1) / jnp.sum(combined_mask, axis=1)
-
-        # Compute max absolute value per component
-        max_abs_per_component = jnp.max(jnp.abs(t_denorm), axis=1)
-
-        # Compute relative error per component and average
-        rel_loss = jnp.mean(mse_per_component / max_abs_per_component)
-
-        return rel_loss
-
 
     def train(self, training_data, validation_data, test_data=None, **kwargs):
         """Train the model with early stopping."""

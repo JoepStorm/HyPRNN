@@ -10,8 +10,7 @@ from material_params import FUNGI_LAMBDA
 # Training scripts should NOT import this module to keep float32 training
 jax.config.update("jax_enable_x64", True)
 
-# from scripts_surrogates.LDprnn import PRNN
-from scripts_surrogates.LDprnn_shared_hyper import SharedHyperPRNN
+from scripts_surrogates.HyPRNN import HyPRNN
 from scripts_surrogates.LDnn import StandardNN
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
 
@@ -135,7 +134,7 @@ class PRNNMaterial(Material):
         else:
             use_multiple_materials = isinstance(settings['mat_points'], list)
             n_matpts = tuple(settings['mat_points']) if use_multiple_materials else settings['mat_points']
-            self.model = SharedHyperPRNN(
+            self.model = HyPRNN(
                 n_matpts=n_matpts,
                 n_outputs=3,
                 encoder_type=settings['encoder_type'],

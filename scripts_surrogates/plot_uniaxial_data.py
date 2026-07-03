@@ -19,7 +19,7 @@ rc('text', usetex=True)
 jax.config.update('jax_platform_name', 'cpu')
 
 from data_utils import LDDataset, load_settings, Config, tensor_to_matrix
-from LDprnn_shared_hyper import create_shared_hyper_prnn_model
+from HyPRNN import create_shared_hyper_prnn_model
 from trainer import Trainer
 
 # ============================================================
