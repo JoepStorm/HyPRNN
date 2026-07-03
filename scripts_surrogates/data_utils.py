@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Utility classes for training PRNNs using JAX"""
+"""
+Utility classes for data handling when training surrogate models.
+This class takes in RVE-simulated data, and converts it to clean inputs and targets for the PRNN.
+Rotation matrices are pre-computed in this class. 
+"""
 
 import jax.numpy as jnp
 import numpy as np
@@ -329,9 +333,6 @@ class LDDataset:
         # expand from Nxt to Nxtxo:
         self.mask = jnp.repeat(self.mask[:, :, jnp.newaxis], self.PK2_tensor_unnormalized.shape[-1], axis=-1)  # Shape: (N, seq_length, o)
 
-        # Remove timesteps from training by setting a mask (inefficient since we still compute all, but easy)
-        # self.mask = self.mask.at[:, :-20, :].set(False)
-
     def get_all_batches(self):
         """Get all batches as a dictionary of arrays"""
         data = {
@@ -408,28 +409,4 @@ class LDDataset:
             self.mat_params = False
             self.M_normalizer = None
 
-        # print(f"Loaded normalizers: stress_normalizer={self.stress_normalizer}, M_normalizer={self.M_normalizer}")
-        # print(f"Material features: {self.mat_features}")
         return
-
-if __name__ == "__main__":
-    # Smoke test: load a dataset, print batch shapes, and verify the
-    # normalizer save/load roundtrip.
-    base_filename = "../data/uniaxial_v2/uniaxial"
-    dataset = LDDataset(base_filename, seq_length=50, norm_stresses=True)
-    data = dataset.get_all_batches()
-    print("batch keys:", list(data))
-    print("F:", data['F'].shape, " E (x):", data['x'].shape, " target t:", data['t'].shape)
-
-    dataset.saveDataparams(f"{base_filename}_normparams")
-    reloaded = LDDataset.__new__(LDDataset)
-    reloaded.loadDataparams(f"{base_filename}_normparams")
-    assert jnp.allclose(reloaded.stress_normalizer.norm_max,
-                        dataset.stress_normalizer.norm_max), "normalizer roundtrip mismatch"
-    print("normalizer save/load roundtrip OK")
-
-
-
-
-
-

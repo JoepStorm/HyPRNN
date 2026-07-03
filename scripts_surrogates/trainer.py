@@ -1,3 +1,7 @@
+"""
+Class with main training loop and functionality, which is called by "train_..." scripts.
+"""
+
 import functools
 import numpy as np
 import jax
@@ -113,11 +117,6 @@ class Trainer:
 
             loss = jnp.sum((y - t) ** 2 * combined_mask) / jnp.sum(combined_mask)
 
-            # # MSE loss in log-space to reduce emphasis on extreme values
-            # y_log = Trainer._signed_log(y)
-            # t_log = Trainer._signed_log(t)
-            # loss = jnp.sum((y_log - t_log) ** 2 * combined_mask) / jnp.sum(combined_mask)
-
             # Debug info
             num_nans = jnp.sum(~nan_mask)
             # print(f"loss: {loss.item():.6f}, mask_sum: {mask_sum.item()}, num_nans: {num_nans.item()}/{y.size}")
@@ -152,11 +151,6 @@ class Trainer:
         num_nans = jnp.sum(~nan_mask)
 
         loss = jnp.sum((y - t) ** 2 * combined_mask) / jnp.sum(combined_mask)
-
-        # # MSE loss in log-space to reduce emphasis on extreme values
-        # y_log = Trainer._signed_log(y)
-        # t_log = Trainer._signed_log(t)
-        # loss = jnp.sum((y_log - t_log) ** 2 * combined_mask) / jnp.sum(combined_mask)
 
         return loss, num_nans
 
@@ -307,7 +301,7 @@ class Trainer:
         return self.train_losses[:self._epoch], self.val_losses[:self._epoch], self.test_losses[:self._epoch]
 
     def save(self, filename):
-        """Save model state to file using NumPy instead of TensorFlow"""
+        """Save model state to file using NumPy"""
         import numpy as np
         from pathlib import Path
 
