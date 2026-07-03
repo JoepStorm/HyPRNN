@@ -21,10 +21,10 @@ When helping with cleanup:
 ### Training PRNN Models
 ```bash
 cd scripts_surrogates
-python train_LDprnn.py                 # Train a single (Hy)PRNN surrogate
+python train_surrogate.py                 # Train a single (Hy)PRNN surrogate
 python train_multiconfig_batch.py      # Train multiple architectures for comparison
-python train_LDprnn_batch.py           # Timed batch runs (PRNN / HyPRNN / NN)
-python train_LDprnn_deposit_batch.py   # Batch on the deposition filler dataset
+python train_surrogate_batch.py           # Timed batch runs (PRNN / HyPRNN / NN)
+python train_surrogate_deposit_batch.py   # Batch on the deposition filler dataset
 ```
 
 ### FE² Validation and Design Studies

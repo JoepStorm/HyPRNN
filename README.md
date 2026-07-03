@@ -99,21 +99,21 @@ predictions. Saves params, normalizers, and settings into `trained_models/`:
 
 ```bash
 cd scripts_surrogates
-python train_LDprnn.py
+python train_surrogate.py
 ```
 
 **Train a handful of models** (e.g. for training-time comparisons) — configure the
 `MODELS_TO_TRAIN` dict, then:
 
 ```bash
-python train_LDprnn_batch.py
+python train_surrogate_batch.py
 ```
 
 **Deposition filler study** — trains/tests HyPRNN on the deposition dataset while
 sweeping the number of material points. Set `MODE='train'`, run, then `MODE='test'`:
 
 ```bash
-python train_LDprnn_deposit_batch.py
+python train_surrogate_deposit_batch.py
 ```
 
 **Learning-curve sweep** (many configurations × sample counts × repeats) — meant for
