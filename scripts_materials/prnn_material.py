@@ -11,7 +11,7 @@ from material_params import FUNGI_LAMBDA
 jax.config.update("jax_enable_x64", True)
 
 from scripts_surrogates.HyPRNN import HyPRNN
-from scripts_surrogates.LDnn import StandardNN
+from scripts_surrogates.StandardNN import StandardNN
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
 
 from dolfinx_materials.generic import Material

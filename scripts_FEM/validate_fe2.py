@@ -24,7 +24,7 @@ from scripts_materials.rve_mesher import RVEMeshConfig
 from scripts_materials.prnn_material import PRNNMaterial, complete_update_pk2, _convert_to_float64
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
 from scripts_surrogates.HyPRNN import HyPRNN
-from scripts_surrogates.LDnn import StandardNN
+from scripts_surrogates.StandardNN import StandardNN
 from material_params import WOOD_E, WOOD_NU, FUNGI_MU, FUNGI_LAMBDA
 
 

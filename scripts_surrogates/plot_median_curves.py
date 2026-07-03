@@ -10,7 +10,7 @@ jax.config.update('jax_platform_name', 'cpu')
 from trainer import Trainer
 from data_utils import LDDataset, Config, load_settings, tensor_to_matrix
 from HyPRNN import create_shared_hyper_prnn_model
-from LDnn import create_nn_model
+from StandardNN import create_nn_model
 
 import matplotlib.pyplot as plt
 from matplotlib import rc

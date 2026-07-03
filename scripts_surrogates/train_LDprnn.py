@@ -7,7 +7,7 @@ jax.config.update('jax_platform_name', 'cpu')  # force jax to use cpu; which sho
 from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings, tensor_to_matrix
 from HyPRNN import create_shared_hyper_prnn_model
-from LDnn import create_nn_model
+from StandardNN import create_nn_model
 from material_params import FUNGI_MU, FUNGI_LAMBDA
 
 import matplotlib.pyplot as plt

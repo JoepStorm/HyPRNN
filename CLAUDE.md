@@ -116,7 +116,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 
 **Neural Networks** (`scripts_surrogates/`):
 - `HyPRNN.py`: HyPRNN — physics-informed shared-hypernetwork PRNN (core ML module)
-- `LDnn.py`: Plain feed-forward NN baseline
+- `StandardNN.py`: Plain feed-forward NN baseline
 - `trainer.py`: JAX/Flax training framework
 - `data_utils.py`: Data processing, normalization, and dataset loading
 - `plot_LD_data.py` / `plot_uniaxial_data.py` / `plot_learncurve.py` / `plot_median_curves.py`: dataset and training-result plots
