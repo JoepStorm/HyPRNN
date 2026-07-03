@@ -126,7 +126,6 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 - `validate_fe2.py`: RVE vs PRNN stress response on identical load paths
 - `graded_disk_setup.py` / `graded_ring_optimizer.py` / `validate_ring.py`: graded annulus study — simulate, optimize, validate
 - `hole_deformation_optimization.py`: hole-bulge design optimization with a filler PRNN surrogate
-- `evaluate_fe2_surrogates.py`: surrogate losses on saved FE² strain trajectories
 - `plotting_utils.py`: shared plotting helpers
 
 ### Physics-Informed Architecture
