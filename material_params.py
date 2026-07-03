@@ -1,7 +1,6 @@
 """Canonical material properties shared across the project.
 
 NOTE: the models in trained_models/ were trained with these values.
-Do not change them without retraining.
 """
 
 # Wood (chips): Neo-Hookean, Lame constants derived from E and nu.

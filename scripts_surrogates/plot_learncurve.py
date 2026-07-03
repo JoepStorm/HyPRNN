@@ -11,7 +11,7 @@ except:
     print("not using custom colors")
 
 type = 'vary_all_v2'  # 'vfrac_ratio' 'vary_all_v2' 'mu'
-highlight_keyword = 'm3'  #'scaleMU'  #'scaleMu'  #'_relu'  #'_sigmoid'  # configs matching this get higher opacity (set to None to disable)
+highlight_keyword = None  # 'm3'  #'scaleMU'  #'scaleMu'  #'_relu'  #'_sigmoid'  # configs containing this string get higher opacity (set to None to disable)
 highlight_alpha = 1.0
 non_highlight_linestyle = '-'
 

@@ -12,6 +12,7 @@ step, write VTX output, and produce:
   * a single plot with the deformations of all models overlaid,
   * a FE^2 stress map (ground truth) and one error map per surrogate,
   * a timing / call-count summary using dolfinx.common.Timer.
+        Note that the 1st model has extra overhead. For a fair comparison, do not count the first model being run.
 """
 import os
 import sys
@@ -688,7 +689,7 @@ def run_comparison(
 
 
 def _write_timings_csv(timings, output_folder):
-    path = f"{output_folder}/timings3.csv"
+    path = f"{output_folder}/timings.csv"
     with open(path, 'w') as f:
         f.write("model,total_wall_s,setup_wall_s,loop_wall_s,"
                 "step_first_wall_s,step_rest_wall_s,n_steps_rest,"
@@ -1132,17 +1133,17 @@ def replot_from_saved(output_folder, extra_folder=None):
 # -- Entry point --------------------------------------------------------------
 
 if __name__ == "__main__":
-    replot_only = True
-    # output_folder = "../results/bending_model_comparison/v5_surrogate_time"
-    output_folder = "../results/bending_model_comparison/v7_combine_v4_v5"
-    extra_folder = "../results/bending_model_comparison/v6_nn32_comparison" # None
+    replot_only = False
+    output_folder = "../results/bending_model_comparison/new"
+    extra_folder = None  #"../results/bending_model_comparison/v6_nn32_comparison" # None
 
     if replot_only:
         replot_from_saved(output_folder, extra_folder=extra_folder)
     else:
         run_comparison(
             # model_keys=['prnn_1', 'prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32'], #, 'fe2'],
-            model_keys=['nn_32'], #, 'fe2'],
+            model_keys=['prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32', 'fe2'],
+            # model_keys=['nn_32'], #, 'fe2'],
             max_load=0.05,
             step_size_init=-0.01,
             step_size_min=-0.0001,
