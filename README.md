@@ -41,7 +41,7 @@ your gmsh is not on `PATH` or you need a specific build, point to it with
 3. **Training** (`scripts_surrogates/`): `train_*.py` train PRNN / HyPRNN / NN
    surrogates into `trained_models/`.
 4. **FE² studies** (`scripts_FEM/`): `validate_*.py`, `graded_disk_setup.py`,
-   `hole_deformation_optimization.py`, `graded_ring_optimizer.py` compare surrogates against full FE²
+   `hole_deformation_optimization.py`, `graded_disk_optimizer.py` compare surrogates against full FE²
    and run design optimizations.
 
 Shared material constants (wood/fungi elastic properties) live in

@@ -26,7 +26,7 @@ colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 rc('text', usetex=True)
 
 # # Find out which optimization iteration was the best
-# base_folder = "../results/graded_ring/optimized/v5"
+# base_folder = "../results/graded_disk/optimized/v5"
 #
 # a = np.load(f"{base_folder}/homogeneous/optimization_results.npz")
 # loss_hist = a['history']
@@ -42,8 +42,8 @@ rc('text', usetex=True)
 # print(f"idx: {idx}")
 # print(f"loss_his idx: {loss_hist[idx]}")
 
-class GradedRingOptimizer:
-    """Gradient-based optimization of radial grading for a pressurized ring.
+class GradedDiskOptimizer:
+    """Gradient-based optimization of radial grading for a pressurized disk.
 
     Parameters are vfrac and r_combi (and optionally mu) at N_ctrl radial
     control points, linearly interpolated to quadrature points.
@@ -389,7 +389,7 @@ class GradedRingOptimizer:
         except Exception:
             pass
         self._apply_random(vfrac_best, mu=mu, seed=seed)
-        self.sim.run(write_output=True, write_name='ring_random')
+        self.sim.run(write_output=True, write_name='disk_random')
         vm = self.sim.get_von_mises_at_qp()
         du = self.sim.get_nodal_displacements()
         print(f"Random — vfrac={vfrac_best:.4f}, peak VM={vm.max():.4f}, "
@@ -407,7 +407,7 @@ class GradedRingOptimizer:
             np.full(self.sim.num_ips, r_combi),
             np.full(self.sim.num_ips, mu),
         )
-        self.sim.run(write_output=True, write_name='ring_uniform')
+        self.sim.run(write_output=True, write_name='disk_uniform')
         vm = self.sim.get_von_mises_at_qp()
         du = self.sim.get_nodal_displacements()
         print(f"Uniform — peak VM: {vm.max():.4f}, mean: {vm.mean():.4f}")
@@ -420,7 +420,7 @@ class GradedRingOptimizer:
         except Exception:
             pass
         self._apply(x_best)
-        self.sim.run(write_output=True, write_name='ring_optimized')
+        self.sim.run(write_output=True, write_name='disk_optimized')
 
         vm = self.sim.get_von_mises_at_qp()
         du = self.sim.get_nodal_displacements()
@@ -439,7 +439,7 @@ class GradedRingOptimizer:
 
 def visualize_saved(output_folder, prnn_model_loc, n_ctrl, label, fname='optimization_results.npz', **kwargs):
     """Load saved x_best from a previous run and plot grading only (no FEM solve)."""
-    opt = GradedRingOptimizer(
+    opt = GradedDiskOptimizer(
         output_folder=output_folder,
         prnn_model_loc=prnn_model_loc,
         n_ctrl=n_ctrl,
@@ -469,7 +469,7 @@ def visualize_saved(output_folder, prnn_model_loc, n_ctrl, label, fname='optimiz
 def run_optimization(output_folder, prnn_model_loc, n_ctrl, label,
                      maxiter_cma=100, maxiter_lbfgsb=5, **kwargs):
     """Run hybrid optimization and return (optimizer, x_best, vm, du)."""
-    opt = GradedRingOptimizer(
+    opt = GradedDiskOptimizer(
         output_folder=output_folder,
         prnn_model_loc=prnn_model_loc,
         n_ctrl=n_ctrl,
@@ -506,7 +506,7 @@ def run_optimization(output_folder, prnn_model_loc, n_ctrl, label,
 
 def main_visualize_saved():
     """Load previously saved optimization results and re-plot grading only."""
-    base_folder = "../results/graded_ring/optimized/v3"
+    base_folder = "../results/graded_disk/optimized/v3"
     prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
 
     common_kwargs = dict(
@@ -539,7 +539,7 @@ if __name__ == "__main__":
     # uncomment this line:
     # main_visualize_saved(); import sys; sys.exit(0)
 
-    base_folder = "../results/graded_ring/optimized/v5"
+    base_folder = "../results/graded_disk/optimized/v5"
     prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
 
     common_kwargs = dict(
@@ -554,7 +554,7 @@ if __name__ == "__main__":
     # --- Case 0: random control (homogeneous vfrac/mu, per-element random theta/ratio) ---
     init_kwargs = {k: v for k, v in common_kwargs.items()
                    if k not in ('maxiter_cma', 'maxiter_lbfgsb')}
-    opt_rand = GradedRingOptimizer(
+    opt_rand = GradedDiskOptimizer(
         output_folder=f"{base_folder}/random",
         prnn_model_loc=prnn_model_loc,
         n_ctrl=1,

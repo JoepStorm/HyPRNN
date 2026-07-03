@@ -1,5 +1,5 @@
 """
-Validate optimized ring grading: run with PRNN surrogate, then with FE² RVEs, and compare.
+Validate optimized disk grading: run with PRNN surrogate, then with FE² RVEs, and compare.
 """
 import os
 os.environ['JAX_PLATFORMS'] = 'cpu'
@@ -13,11 +13,11 @@ from matplotlib import rc
 rc('text', usetex=True)
 
 from graded_disk_setup import GradedDiskSimulation, plot_stress_comparison
-from graded_ring_optimizer import GradedRingOptimizer
+from graded_disk_optimizer import GradedDiskOptimizer
 
 
 def run_and_store(sim, output_folder, output_name):
-    """Run simulation with adaptive stepping, storing nodal coords, F, and PK1 at each step."""
+    """Run simulation with adaptive stepping, stodisk nodal coords, F, and PK1 at each step."""
     sim._setup_material_and_problem()
     sim._setup_solver()
 
@@ -128,7 +128,7 @@ def run_comparison(
     R_outer=0.5,
     prnn_model_loc="../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1",
     rve_meshsize=0.0125,
-    output_folder="../results/graded_ring/validate",
+    output_folder="../results/graded_disk/validate",
     max_load=1.0,
     step_size_init=1.0,
 ):
@@ -158,7 +158,7 @@ def run_comparison(
     sim_prnn.step_size_init = step_size_init
 
     # Apply optimized grading via the optimizer's interpolation
-    opt = GradedRingOptimizer(
+    opt = GradedDiskOptimizer(
         output_folder=output_folder,
         prnn_model_loc=prnn_model_loc,
         macro_meshsize=macro_meshsize,
@@ -177,7 +177,7 @@ def run_comparison(
         np.interp(r_qp_prnn, r_ctrl, mu_ctrl),
     )
 
-    prnn_coords, prnn_F, prnn_vm_peak = run_and_store(sim_prnn, output_folder, 'ring_prnn')
+    prnn_coords, prnn_F, prnn_vm_peak = run_and_store(sim_prnn, output_folder, 'disk_prnn')
     prnn_vm = sim_prnn.get_von_mises_at_qp()
     prnn_du = sim_prnn.get_nodal_displacements()
     print(f"PRNN: {prnn_coords.shape[0]} configurations stored")
@@ -214,7 +214,7 @@ def run_comparison(
         np.interp(r_qp_rve, r_ctrl, mu_ctrl),
     )
 
-    rve_coords, rve_F, rve_vm_peak = run_and_store(sim_rve, output_folder, 'ring_rve')
+    rve_coords, rve_F, rve_vm_peak = run_and_store(sim_rve, output_folder, 'disk_rve')
     rve_vm = sim_rve.get_von_mises_at_qp()
     rve_du = sim_rve.get_nodal_displacements()
     print(f"RVE: {rve_coords.shape[0]} configurations stored")
@@ -222,13 +222,13 @@ def run_comparison(
     # Save comparison data
     mesh_cells = sim_prnn.V.mesh.geometry.dofmap
     qp_coords = sim_prnn.qp_coords
-    np.savez(f"{output_folder}/ring_comparison.npz",
+    np.savez(f"{output_folder}/disk_comparison.npz",
              prnn_coords=prnn_coords, rve_coords=rve_coords,
              prnn_F=prnn_F, rve_F=rve_F,
              prnn_vm_peak=prnn_vm_peak, rve_vm_peak=rve_vm_peak,
              mesh_cells=mesh_cells, qp_coords=qp_coords,
              x_best=x_best)
-    print(f"\nSaved to {output_folder}/ring_comparison.npz")
+    print(f"\nSaved to {output_folder}/disk_comparison.npz")
 
     # Stress comparison
     print(f"\n{'='*60}")
@@ -252,7 +252,7 @@ def run_comparison(
 
 
 def plot_trajectories(prnn_coords, rve_coords, output_folder, mesh_cells=None):
-    """Plot nodal displacement trajectories comparing PRNN and RVE."""
+    """Plot nodal displacement trajectories compadisk PRNN and RVE."""
     n_dofs = prnn_coords.shape[1]
     fig, ax = plt.subplots(figsize=(4, 4))
 
@@ -277,9 +277,9 @@ def plot_trajectories(prnn_coords, rve_coords, output_folder, mesh_cells=None):
     ax.axis('off')
     ax.legend()
     plt.tight_layout()
-    plt.savefig(f"{output_folder}/ring_trajectories.pdf", bbox_inches='tight')
-    plt.savefig(f"{output_folder}/ring_trajectories.png", bbox_inches='tight', dpi=300)
-    print(f"Saved: {output_folder}/ring_trajectories")
+    plt.savefig(f"{output_folder}/disk_trajectories.pdf", bbox_inches='tight')
+    plt.savefig(f"{output_folder}/disk_trajectories.png", bbox_inches='tight', dpi=300)
+    print(f"Saved: {output_folder}/disk_trajectories")
     plt.close()
 
 
@@ -303,20 +303,20 @@ def plot_displacement_error(prnn_coords, rve_coords, output_folder):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     plt.tight_layout()
-    plt.savefig(f"{output_folder}/ring_displacement_error.pdf", bbox_inches='tight')
-    print(f"Saved: {output_folder}/ring_displacement_error.pdf")
+    plt.savefig(f"{output_folder}/disk_displacement_error.pdf", bbox_inches='tight')
+    print(f"Saved: {output_folder}/disk_displacement_error.pdf")
     plt.close()
 
 
 if __name__ == "__main__":
     run_comparison(
-        results_file="../results/graded_ring/optimized/v4/graded/optimization_results.npz",
+        results_file="../results/graded_disk/optimized/v4/graded/optimization_results.npz",
         n_ctrl=4,
         optimize_mu=True,
         macro_meshsize=0.03,  # 0.03
         rve_meshsize=0.0125,      # 0.0125?
         prnn_model_loc="../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1",
-        output_folder="../results/graded_ring/validate/v4/graded_debug_centraldiff",
+        output_folder="../results/graded_disk/validate/v4/graded_debug_centraldiff",
         max_load=3.0,
         step_size_init=.2,
     )

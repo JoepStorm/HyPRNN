@@ -33,9 +33,9 @@ cd scripts_FEM
 python bending_validation.py               # 3-point bending: FE² ground truth vs surrogates
 python validate_fe2.py                     # RVE vs PRNN stress response on identical load paths
 python graded_disk_setup.py                # Pressurized annulus with graded PRNN material
-python graded_ring_optimizer.py            # Optimize radial grading of the annulus
+python graded_disk_optimizer.py            # Optimize radial grading of the annulus
 python hole_deformation_optimization.py    # Hole-bulge design with filler PRNN surrogate
-python validate_ring.py                    # Validate optimized ring grading against FE²
+python validate_disk.py                    # Validate optimized disk grading against FE²
 ```
 
 ### Data Generation
@@ -124,7 +124,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 **FEM Drivers** (`scripts_FEM/`):
 - `bending_validation.py`: 3-point bending — FE² ground truth vs surrogate models (deformation, stress maps, timing)
 - `validate_fe2.py`: RVE vs PRNN stress response on identical load paths
-- `graded_disk_setup.py` / `graded_ring_optimizer.py` / `validate_ring.py`: graded annulus study — simulate, optimize, validate
+- `graded_disk_setup.py` / `graded_disk_optimizer.py` / `validate_disk.py`: graded annulus study — simulate, optimize, validate
 - `hole_deformation_optimization.py`: hole-bulge design optimization with a filler PRNN surrogate
 - `plotting_utils.py`: shared plotting helpers
 

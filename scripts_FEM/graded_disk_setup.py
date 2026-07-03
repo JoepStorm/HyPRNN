@@ -1,5 +1,5 @@
 """
-Pressurized annulus (true ring) with graded PRNN material.
+Pressurized annulus with graded PRNN material.
 
 Demonstrates the effect of circumferential fiber-orientation grading vs. uniform
 material under internal outward pressure.
@@ -61,7 +61,7 @@ def create_annulus_mesh(R_inner, R_outer, lc):
     gmsh.model.occ.synchronize()
 
     vols = gmsh.model.getEntities(gdim)
-    gmsh.model.addPhysicalGroup(gdim, [vols[0][1]], 1, name="Ring")
+    gmsh.model.addPhysicalGroup(gdim, [vols[0][1]], 1, name="Disk")
     gmsh.option.setNumber("Mesh.CharacteristicLengthMin", lc)
     gmsh.option.setNumber("Mesh.CharacteristicLengthMax", lc)
     gmsh.model.mesh.generate(gdim)
@@ -233,7 +233,7 @@ class GradedDiskSimulation:
         }
         self.problem = NonlinearMaterialProblem(
             self.qmap, self.Res, self.u, bcs=self.bcs,
-            J=self.Jac, petsc_options_prefix="RING",
+            J=self.Jac, petsc_options_prefix="DISK",
             petsc_options=petsc_options,
         )
 
@@ -247,7 +247,7 @@ class GradedDiskSimulation:
         converged_steps = 0
 
         if write_name is None:
-            write_name = f"ring_{self.output_name}"
+            write_name = f"disk_{self.output_name}"
 
         print(f"\nStarting annulus pressure simulation ({self.output_name})...")
 
@@ -1003,7 +1003,7 @@ def plot_stress_comparison(sim, *args, output_folder=None, disp_scale=10.0,
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    output_folder = "../results/graded_ring/larger_disp/test2_quarter/"
+    output_folder = "../results/graded_disk/larger_disp/test2_quarter/"
     os.makedirs(output_folder, exist_ok=True)
 
     # prnn_model_loc = ("../trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
@@ -1022,7 +1022,7 @@ if __name__ == "__main__":
 
     # --- Run 1: Uniform material (theta=0 everywhere) ---
     sim.apply_uniform_material(vfrac=0.3, ratio=2.0)
-    sim.run(write_output=True, write_name="ring_uniform")
+    sim.run(write_output=True, write_name="disk_uniform")
     vm_uniform = sim.get_von_mises_at_qp()
     du_uniform = sim.get_nodal_displacements()
 
@@ -1030,7 +1030,7 @@ if __name__ == "__main__":
     sim.reset()
     sim.apply_circumferential_grading()
     # sim.apply_circumferential_grading(mu_inner=FUNGI_MU, mu_outer=FUNGI_MU)
-    sim.run(write_output=True, write_name="ring_graded")
+    sim.run(write_output=True, write_name="disk_graded")
     vm_graded = sim.get_von_mises_at_qp()
     du_graded = sim.get_nodal_displacements()
 
