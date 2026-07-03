@@ -37,12 +37,13 @@ your gmsh is not on `PATH` or you need a specific build, point to it with
 1. **Deposition + meshing** (`yade/`): deposit RVE packings with YADE and
    mesh them with GMSH — see [RVE generation](#rve-generation-yade) below.
 2. **Training data** (`scripts_data_creation/`): `create_*.py` run RVE
-   simulations on the meshes and store `{F, PK1, cauchy}.npy` sequences.
+   simulations on the meshes and store `{F, PK1, cauchy}.npy` sequences —
+   see [Training data](#training-data-scripts_data_creation) below.
 3. **Training** (`scripts_surrogates/`): `train_*.py` train PRNN / HyPRNN / NN
    surrogates into `trained_models/`.
-4. **FE² studies** (`scripts_FEM/`): `validate_*.py`, `graded_disk_setup.py`,
-   `hole_deformation_optimization.py`, `graded_disk_optimizer.py` compare surrogates against full FE²
-   and run design optimizations.
+4. **Macroscale simulations** (`scripts_FEM/`): use the trained surrogate at each
+   macro Gauss point in bending, pressurized-disk, and hole-bulge studies — see
+   [Macroscale simulations](#macroscale-simulations-scripts_fem) below.
 
 Shared material constants (wood/fungi elastic properties) live in
 `material_params.py`. Run scripts from within their own folder.
@@ -76,6 +77,32 @@ python packing_to_mesh.py --input data/single_runs/coords_2D_0_500_0.5.npy
 ```
 
 Outputs land in `yade/data/`; the `.msh` meshes feed the training-data scripts.
+
+## Training data (`scripts_data_creation/`)
+
+Each script runs RVE homogenization (`scripts_materials/rve_material.py`) over many
+loading paths and saves `{F, PK1, cauchy}.npy` sequences plus a `_matparam.data`
+table of the per-sample material parameters. Two mesh sources are supported:
+synthetic ellipse RVEs (`scripts_materials/create_meshes.py`) and YADE-deposited
+packings (`yade/`). Run each script from inside `scripts_data_creation/`.
+
+```bash
+cd scripts_data_creation
+python create_uniaxial_data.py     # uniaxial tension/compression, synthetic ellipse RVEs
+python create_mixed_data.py        # mixed random loading paths, synthetic ellipse RVEs
+```
+
+The two deposition variants read the YADE-generated `.msh` meshes instead:
+
+```bash
+python create_deposition_data.py          # mixed loading; filler-fraction parametrized
+python create_uniaxial_deposition_data.py # uniaxial; small/large-chip mix parametrized
+```
+
+Large datasets are generated as independent seeds and combined afterwards — each
+run takes a `seed` argument (e.g. `python create_mixed_data.py 3`) and the subsets
+are merged with `data/merge_datasets.py`. Some samples may fail to converge and are
+dropped. Inspect deposition runs with `plot_uniaxial_deposition.py`.
 
 ## Training surrogates (`scripts_surrogates/`)
 
@@ -132,3 +159,29 @@ python train_surrogate_multiconfig_batch.py        # test/evaluate all configura
 - `plot_median_curves.py` — for one dataset, compare truth vs. non-linear PRNN,
   linear PRNN, and NN on the median-error test sample.
 - `plot_learncurve.py` — learning curves from the saved `test_losses.txt` files.
+
+## Macroscale simulations (`scripts_FEM/`)
+
+Macro-scale FE studies where a trained surrogate replaces the RVE at every Gauss
+point (via `scripts_materials/prnn_material.py`). Each script points at a model in
+`trained_models/`; edit the `prnn_model_loc` / settings at the bottom of the file
+and run it from inside `scripts_FEM/`.
+
+```bash
+cd scripts_FEM
+python bending_validation.py            # 3-point bending: surrogate models vs. FE² ground truth
+python graded_disk_setup.py             # pressurized annulus, fiber-orientation grading vs. uniform
+python graded_disk_optimizer.py         # optimize radial grading to minimize peak von Mises stress
+python hole_deformation_optimization.py # hole-bulge design: CMA-ES over per-hex filler + orientation
+```
+
+- `bending_validation.py` — compares the surrogates against a full FE² solve on a
+  manually graded beam, producing deformation overlays, stress/error maps, and a
+  timing summary.
+- `graded_disk_setup.py` — defines the pressurized-annulus problem (`GradedDiskSimulation`)
+  and its grading/stress plots; imported by the optimizer.
+- `graded_disk_optimizer.py` — gradient-based optimization of the 1D radial grading
+  (`GradedDiskOptimizer`).
+- `hole_deformation_optimization.py` — plate-with-hole bulge study with `optimize` /
+  `plot` / `baseline` entry points (select via `MODE` at the bottom).
+- `plotting_utils.py` — shared mesh/field plotting helpers used by the above.
