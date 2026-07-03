@@ -1,3 +1,11 @@
+"""
+Run this script to plot a specified dataset in the __main__ section at the bottom of the file.
+This generates component-wise views of 2D stress strain curves (for _xx, _yy, _xy)
+
+Predictions from a surrogate model can be added to plot the performance over a full dataset
+Stress strain curves can be colored based on a parameter in the dataset
+"""
+
 import numpy as np
 import jax
 jax.config.update('jax_platform_name', 'cpu')  # force jax to use cpu; which showed to be faster
