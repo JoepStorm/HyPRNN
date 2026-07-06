@@ -1,0 +1,55 @@
+{
+  "data_path": "../data/RVE/vary_all/vary_all/mixed_t50_mergedv2",
+  "matdata_path": "../data/RVE/vary_all/vary_all/mixed_t50_mergedv2_matparam.data",
+  "seq_length": 50,
+  "train_batch_size": 2,
+  "num_samples": 3072,
+  "val_test_samples": 512,
+  "norm_stresses": true,
+  "stress_scaling_feature": null,
+  "lr_schedule_steps": 10000,
+  "max_epochs": 5000,
+  "warmup_epochs": 0,
+  "base_lr": 0.001,
+  "min_lr_factor": 1,
+  "patience": 50,
+  "interval": 1,
+  "feature_dim": 3,
+  "verbose": false,
+  "seed": 130,
+  "name": "prnn_nonlin_1L8_12m_sigmoid",
+  "model_type": "shared_prnn",
+  "encoder_type": "NonLinear",
+  "mat_parameters": [
+    "mu",
+    "lambda",
+    "vfrac",
+    "ratio"
+  ],
+  "norm_matparams": [
+    false,
+    false,
+    true,
+    true
+  ],
+  "shared_micro_features": [
+    2,
+    3
+  ],
+  "mat_micro_features": [
+    0,
+    1
+  ],
+  "mat_points": 12,
+  "hyper_hidden_sizes": [
+    8,
+    8,
+    8
+  ],
+  "hyper_activation": "sigmoid",
+  "encoder_n_layers": 1,
+  "encoder_activation": "sigmoid",
+  "hidden_dim": 8,
+  "train_samples": 512,
+  "savename": "trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run9"
+}

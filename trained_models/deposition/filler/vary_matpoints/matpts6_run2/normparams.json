@@ -1,0 +1,30 @@
+{
+  "stress_normalizer": {
+    "type": "norm_LDstresses",
+    "do_norm": true,
+    "norm_max": [
+      4.992856979370117,
+      7.469763278961182,
+      3.013692855834961
+    ]
+  },
+  "mat_features": [
+    "mu",
+    "lambda",
+    "fil_frac"
+  ],
+  "stress_scaling_feature": null,
+  "M_normalizer": {
+    "type": "meanUnitNormalizer_dim1",
+    "mean": [
+      0.0,
+      0.0,
+      0.43925783038139343
+    ],
+    "std": [
+      1.0,
+      1.0,
+      0.28865566849708557
+    ]
+  }
+}

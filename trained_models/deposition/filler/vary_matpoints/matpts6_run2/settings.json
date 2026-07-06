@@ -1,0 +1,48 @@
+{
+  "savefolder": "trained_models/deposition/filler/vary_matpoints/",
+  "data_path": "../data/RVE/deposition/filler/dataset_combi/mixed_t50_merged",
+  "matdata_path": "../data/RVE/deposition/filler/dataset_combi/mixed_t50_merged_matparam.data",
+  "seq_length": 50,
+  "train_samples": 256,
+  "train_batch_size": 2,
+  "num_samples": 512,
+  "val_test_samples": 128,
+  "model_type": "shared_prnn",
+  "encoder_type": "Linear",
+  "decoder_type": "HyperSparseLayer",
+  "norm_stresses": true,
+  "stress_scaling_feature": null,
+  "mat_parameters": [
+    "mu",
+    "lambda",
+    "fil_frac"
+  ],
+  "norm_matparams": [
+    false,
+    false,
+    true
+  ],
+  "shared_micro_features": [
+    2
+  ],
+  "mat_micro_features": [
+    0,
+    1
+  ],
+  "hyper_hidden_sizes": [
+    8
+  ],
+  "hyper_activation": "sigmoid",
+  "lr_schedule_steps": 10000,
+  "max_epochs": 3000,
+  "warmup_epochs": 0,
+  "base_lr": 0.001,
+  "min_lr_factor": 1,
+  "patience": 50,
+  "interval": 1,
+  "feature_dim": 3,
+  "verbose": false,
+  "seed": 6,
+  "mat_points": 6,
+  "savename": "trained_models/deposition/filler/vary_matpoints/matpts6_run2"
+}
