@@ -19,6 +19,7 @@ dependencies:
     - git+https://github.com/bleyerj/dolfinx_materials.git
     - gmsh
     - optuna
+    - cma
     - pypdf2
     - pytest
     - pyvistaqt
