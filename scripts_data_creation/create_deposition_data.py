@@ -48,8 +48,8 @@ MU_RANGE     = [FUNGI_MU, FUNGI_MU]     # if minimum=maximum  -> fixed mu.
 MIX_VALUES   = [0.0, 0.25, 0.50, 0.75, 1.0]
 SHRINK_FACTOR = 0.85
 
-MESH_DIR   = Path("../yade/data/dataset_combi_v4v6")
-# OUTPUT_DIR = Path(f"../data/RVE/deposition/filler/dataset_combi_v4v6/")
+MESH_DIR   = Path("../yade/data/dataset_combi")
+# OUTPUT_DIR = Path(f"../data/RVE/deposition/filler/dataset_combi/")
 OUTPUT_DIR = Path(f"../data/deposition/example/")
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

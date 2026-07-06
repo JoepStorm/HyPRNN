@@ -36,8 +36,8 @@ settings = {
     # 'data_path': f'../data/vary_all/mixed_t50_mergedv2',
     # 'matdata_path': f'../data/vary_all/mixed_t50_mergedv2_matparam.data',
 
-    'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
-    'matdata_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged_matparam.data',
+    'data_path': f'../data/deposition/filler/dataset_combi/mixed_t50_merged',
+    'matdata_path': f'../data/deposition/filler/dataset_combi/mixed_t50_merged_matparam.data',
 
     'seq_length': 50,
     'train_samples': 256,   # 128

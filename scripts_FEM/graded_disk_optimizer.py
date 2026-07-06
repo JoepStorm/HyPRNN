@@ -25,23 +25,6 @@ plt.style.use(['science', 'bright'])
 colours = plt.rcParams['axes.prop_cycle'].by_key()['color']
 rc('text', usetex=True)
 
-# # Find out which optimization iteration was the best
-# base_folder = "../results/graded_disk/optimized/v5"
-#
-# a = np.load(f"{base_folder}/homogeneous/optimization_results.npz")
-# loss_hist = a['history']
-# loss_best = a['loss_best']
-# idx = np.where(loss_hist == loss_best)
-# print(f"idx: {idx}")
-# print(f"loss_his idx: {loss_hist[idx]}")
-#
-# b = np.load(f"{base_folder}/graded/optimization_results.npz")
-# loss_hist = b['history']
-# loss_best = b['loss_best']
-# idx = np.where(loss_hist == loss_best)
-# print(f"idx: {idx}")
-# print(f"loss_his idx: {loss_hist[idx]}")
-
 class GradedDiskOptimizer:
     """Gradient-based optimization of radial grading for a pressurized disk.
 

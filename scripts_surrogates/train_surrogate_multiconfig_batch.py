@@ -57,8 +57,6 @@ training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 
 # Base settings shared by all configurations
 base_settings = {
-    # 'data_path': f'../data/vary_all/mixed_t50_merged',
-    # 'matdata_path': f'../data/vary_all/mixed_t50_merged_matparam.data',
     'data_path': f'../data/vary_all/mixed_t50_mergedv2',
     'matdata_path': f'../data/vary_all/mixed_t50_mergedv2_matparam.data',
     'seq_length': 50,

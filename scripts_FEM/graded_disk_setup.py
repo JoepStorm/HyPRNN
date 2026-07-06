@@ -1006,10 +1006,7 @@ if __name__ == "__main__":
     output_folder = "../results/graded_disk/larger_disp/test2_quarter/"
     os.makedirs(output_folder, exist_ok=True)
 
-    # prnn_model_loc = ("../trained_models/train_vary_all/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
-    # prnn_model_loc = ("../trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0")
     prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run9")  # run 9 is median
-    # prnn_model_loc = ("../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1")
 
 
     sim = GradedDiskSimulation(

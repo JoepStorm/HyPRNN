@@ -1048,9 +1048,9 @@ class BulgeOptimizer:
 if __name__ == "__main__":
     # 'optimize' runs CMA-ES then plots; 'plot' reloads saved results and only
     # redraws the field plots; 'baseline' runs the random-orientation comparison.
-    MODE = 'plot'
+    # MODE = 'plot'
     # MODE = 'optimize'
-    # MODE = 'baseline'
+    MODE = 'baseline'
 
     prnn_model_loc = "../trained_models/deposition/filler/vary_matpoints/matpts6_run2/"
 

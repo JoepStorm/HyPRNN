@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     settings = {
         'data_path': f'../data/vary_all/mixed_t50_mergedv2',
-        # 'data_path': f'../data/deposition/filler/dataset_combi_v4v6/mixed_t50_merged',
+        # 'data_path': f'../data/deposition/filler/dataset_combi/mixed_t50_merged',
         'seq_length': 50,
     }
     settings['matdata_path'] = settings['data_path'] + '_matparam.data'

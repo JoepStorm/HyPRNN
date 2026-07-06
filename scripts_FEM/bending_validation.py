@@ -262,31 +262,26 @@ MODEL_LABELS_SHORT = {
 MODELS = {
     'prnn_1': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples32_run0',
         'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples32_run0',
         'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn_512': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_lin_3L_6m/samples512_run0',
         'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples512_run0',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn_nonlin': {
         'use_surrogate': True,
-        # 'prnn_model_loc': '../trained_models/train_vfrac_ratio/prnn_nonlin_1L8_6m_sigmoid/samples512_run0',
         'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid//samples512_run9',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'nn': {
         'use_surrogate': True,
-#         'prnn_model_loc': '../trained_models/train_vfrac_ratio/nn_64_3/samples512_run0',
         'prnn_model_loc': '../trained_models/train_vary_all_v2/nn_64_4/samples512_run8',
         'timer_name': 'PRNN: Constitutive integration',
     },
@@ -1141,9 +1136,8 @@ if __name__ == "__main__":
         replot_from_saved(output_folder, extra_folder=extra_folder)
     else:
         run_comparison(
-            # model_keys=['prnn_1', 'prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32'], #, 'fe2'],
+            # model_keys=['prnn_1', 'prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32'], #, 'fe2'],   # prnn_1 == prnn, but adding a model makes subsequent time comparisons fairer.
             model_keys=['prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32', 'fe2'],
-            # model_keys=['nn_32'], #, 'fe2'],
             max_load=0.05,
             step_size_init=-0.01,
             step_size_min=-0.0001,

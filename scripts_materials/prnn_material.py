@@ -2,7 +2,7 @@
 
 Loads a trained (Hy)PRNN (settings + normalizers + params) and exposes it as a
 dolfinx_materials `Material`, returning homogenized stress and tangent at each
-macro quadrature point — a fast drop-in replacement for the RVE.
+macro quadrature point
 """
 from dolfinx.common import Timer
 
@@ -91,12 +91,9 @@ def complete_update_pk2(model, F_vec, material, dataset, params, Q, micro_params
 class PRNNMaterial(Material):
     """PRNN-based material model for FE² multiscale analysis.
 
-    This material uses a Physics-informed Recurrent Neural Network (PRNN)
-    as a surrogate for expensive RVE computations.
-
     Precision handling:
         - Training is done in float32 for efficiency
-        - Inference uses float64 for Newton-Raphson convergence
+        - Inference uses float64 - necessary for Newton-Raphson convergence
         - Model parameters are automatically converted to float64 on load
         - All inputs/outputs are float64 compatible with dolfinx/PETSc
     """
