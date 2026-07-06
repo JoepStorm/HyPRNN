@@ -7,3 +7,6 @@ src/scienceplotstyles/
 __pycache__/
 *.pyc
 .idea/
+
+# Local Claude Code guidance (not published)
+CLAUDE.md
