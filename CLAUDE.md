@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a multi-scale computational mechanics project implementing **FE² (FE-squared) analysis** with **Physics-informed Recurrent Neural Networks (PRNNs)** as material surrogates. The project combines finite element analysis with machine learning to accelerate expensive Representative Volume Element (RVE) computations in heterogeneous woodchip composite materials (wood chips in a fungal mycelium matrix), in a 2D large-deformation setting.
+This is a multi-scale computational mechanics project implementing **FE² (FE-squared) analysis** with **Physically Recurrent Neural Networks (PRNNs)** as material surrogates. The project combines finite element analysis with machine learning to accelerate expensive Representative Volume Element (RVE) computations in heterogeneous woodchip composite materials (wood chips in a fungal mycelium matrix), in a 2D large-deformation setting.
 
 ## Repository Cleanup (in progress)
 
@@ -113,7 +113,7 @@ Macro FEM (dolfinx) → Material Models → Micro RVE (dolfinx) / PRNN Surrogate
 - `plot_uniaxial_deposition.py`: visualize create_uniaxial_deposition_data.py output
 
 **Neural Networks** (`scripts_surrogates/`):
-- `HyPRNN.py`: HyPRNN — physics-informed shared-hypernetwork PRNN (core ML module)
+- `HyPRNN.py`: HyPRNN — Hypernetwork Physically Recurrent Neural Network (core ML module)
 - `StandardNN.py`: Plain feed-forward NN baseline
 - `trainer.py`: JAX/Flax training framework
 - `data_utils.py`: Data processing, normalization, and dataset loading
