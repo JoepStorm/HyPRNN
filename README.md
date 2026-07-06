@@ -49,6 +49,36 @@ your gmsh is not on `PATH` or you need a specific build, point to it with
 Shared material constants (wood/fungi elastic properties) live in
 `material_params.py`. Run scripts from within their own folder.
 
+## Reproducing the figures
+
+The full generation pipeline (deposition → meshing → data → training sweep) is
+heavy and mostly not tracked in git. To let the macroscale figures be reproduced
+without rerunning it, a minimal subset is bundled in the repo:
+
+- **Training data** — the two datasets the surrogate scripts train on:
+  `data/vary_all/mixed_t50_mergedv2_*` (synthetic ellipse RVEs) and
+  `data/deposition/filler/dataset_combi/mixed_t50_merged_*` (YADE-deposited RVEs).
+- **Pretrained models** — the handful of models the `scripts_FEM/` drivers load,
+  under `trained_models/train_vary_all_v2/` and `trained_models/deposition/`.
+
+With these, the macroscale studies run out of the box on the surrogate path:
+
+```bash
+cd scripts_FEM
+python bending_validation.py            # drop 'fe2' from model_keys to skip the ground-truth solve
+python graded_disk_setup.py
+python hole_deformation_optimization.py
+```
+
+The FE² *ground truth* in `bending_validation.py` needs no bundled meshes — it
+regenerates its RVE meshes on the fly (requires GMSH, see above).
+
+Not bundled (regenerate locally, or fetch from the external data archive): the
+RVE meshes (`meshes/`, `yade/data/`), the `vary_mu` / `vary_vfrac_ratio`
+datasets, and the full training sweep behind the learning-curve and median-curve
+plots. Retrain from the bundled data with the `scripts_surrogates/` scripts, or
+regenerate data with the `scripts_data_creation/` and `yade/` steps below.
+
 ## RVE generation (`yade/`)
 
 Single deposition, run manually with args to inspect behavior (opens the YADE GUI):
