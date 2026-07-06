@@ -4,6 +4,7 @@ RVE Mesh Generation
 Discrepancies were observed between GMSH python direct mesh creation compared with system gmsh writing to a file.
 Therefore, we force to use the same meshing as used in data creation
 """
+import os
 import numpy as np
 from scripts_materials.create_rve import createRVEs_ellipse
 
