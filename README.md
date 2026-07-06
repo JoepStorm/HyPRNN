@@ -42,27 +42,6 @@ your gmsh is not on `PATH`, point to it with `GMSH_BIN=/path/to/gmsh`.
 Shared material constants (wood/fungi elastic properties) live in
 `material_params.py`. Run scripts from within their own folder.
 
-## Reproducing the figures
-
-Some datasets and trained models are bundled in the repo that can be used to run macroscopic results and train some models.
-The scripts to generate all datasets are provided, although they require some manual configuration.
-
-- **Training data** — two datasets the surrogate scripts train on:
-  `data/vary_all/mixed_t50_mergedv2_*` (synthetic ellipse RVEs) and
-  `data/deposition/filler/dataset_combi/mixed_t50_merged_*` (YADE-deposited RVEs).
-- **Pretrained models** — the handful of models needed for macroscale simulations,
-  under `trained_models/train_vary_all_v2/` and `trained_models/deposition/`.
-
-With these, the macroscale studies run out of the box on the surrogate path:
-
-```bash
-cd scripts_FEM
-python bending_validation.py            # drop 'fe2' from model_keys to skip the expensive ground-truth solve
-python graded_disk_setup.py
-python hole_deformation_optimization.py
-```
-The data for other figures can be regenerated using the provided scripts.
-
 ## RVE generation (`yade/`)
 
 The yade script performs a 3D depostion, followed by a 2D relaxation, and outputs spherical coordinates from which a mesh can be created.
@@ -98,20 +77,14 @@ Outputs land in `yade/data/`; the `.msh` meshes feed the training-data scripts.
 
 ## RVE generation — synthetic ellipses (`scripts_materials/`)
 
-An alternative to the YADE deposition that skips the DEM step: wood chips are
-idealized as ellipses placed at random in a periodic square cell by rejection
-sampling (a new ellipse is accepted only if it does not overlap any existing one),
-then meshed with GMSH — wood chips become the inclusions, the rest is matrix. No
-filler is modeled here. A microstructure is set by the fiber count (equivalently
-the volume fraction), the ellipse aspect ratio, and the orientation angle; the
-fiber area is fixed so that 50 chips give `vfrac = 0.4` in a unit cell. These
-synthetic RVEs back the `vary_all` / `vary_mu` / `vary_vfrac_ratio` datasets.
+Wood chips are idealized as ellipses placed at random in a periodic square cell by rejection
+sampling, then meshed with GMSH — wood chips become the inclusions, the rest is matrix. These
+synthetic RVEs back the $D_{all}$, $D_{geo}$, $D_{mat}$ datasets.
 
 - `create_rve.py` — `createRVEs_ellipse`, the core place-and-mesh routine.
 - `create_meshes.py` — driver that sweeps aspect ratio and fiber count to write a
   whole mesh dataset into `meshes/`; edit the settings at the top and run it.
-- `rve_mesher.py` — `RVEMeshConfig`, the same routine wrapped for on-the-fly FE²
-  meshing (computes the fiber count from a target `vfrac`).
+- `rve_mesher.py` — `RVEMeshConfig`, the same routine wrapped for on-the-fly FE² meshing.
 
 ```bash
 cd scripts_materials
@@ -131,18 +104,16 @@ packings (`yade/`). Run each script from inside `scripts_data_creation/`.
 
 ```bash
 cd scripts_data_creation
-python create_uniaxial_data.py     # uniaxial tension/compression, synthetic ellipse RVEs
 python create_mixed_data.py        # mixed random loading paths, synthetic ellipse RVEs
 ```
 
-The two deposition variants read the YADE-generated `.msh` meshes instead:
+The deposition variant reads the YADE-generated `.msh` meshes instead:
 
 ```bash
 python create_deposition_data.py          # mixed loading; filler-fraction parametrized
-python create_uniaxial_deposition_data.py # uniaxial; small/large-chip mix parametrized
 ```
 
-Large datasets are generated as independent seeds and combined afterwards — each
+For efficiency, large datasets can be generated for independent seeds and combined afterwards. Each
 run takes a `seed` argument (e.g. `python create_mixed_data.py 3`) and the subsets
 are merged with `data/merge_datasets.py`. Some samples may fail to converge and are
 dropped. Inspect deposition runs with `plot_uniaxial_deposition.py`.
@@ -210,21 +181,29 @@ point (via `scripts_materials/prnn_material.py`). Each script points at a model 
 `trained_models/`; edit the `prnn_model_loc` / settings at the bottom of the file
 and run it from inside `scripts_FEM/`.
 
+The datasets and pretrained models these studies need are bundled in the repo — the
+two training datasets (`data/vary_all/mixed_t50_mergedv2_*` and
+`data/deposition/filler/dataset_combi/mixed_t50_merged_*`) and the handful of models
+under `trained_models/train_vary_all_v2/` and `trained_models/deposition/` — so the
+studies (including the optimizations) run out of the box on the surrogate path:
+
 ```bash
 cd scripts_FEM
 python bending_validation.py            # 3-point bending: surrogate models vs. FE² ground truth
-python graded_disk_setup.py             # pressurized annulus, fiber-orientation grading vs. uniform
+python graded_disk_setup.py             # graded disk setup + grading/stress plots
 python graded_disk_optimizer.py         # optimize radial grading to minimize peak von Mises stress
-python hole_deformation_optimization.py # hole-bulge design: CMA-ES over per-hex filler + orientation
+python hole_deformation_optimization.py # hole-bulge design: optimize over per-hex filler + orientation
 ```
 
 - `bending_validation.py` — compares the surrogates against a full FE² solve on a
-  manually graded beam, producing deformation overlays, stress/error maps, and a
-  timing summary.
-- `graded_disk_setup.py` — defines the pressurized-annulus problem (`GradedDiskSimulation`)
-  and its grading/stress plots; imported by the optimizer.
+  manually graded beam. Drop `'fe2'` from `model_keys` to skip the expensive
+  ground-truth solve and run the surrogates only.
+- `graded_disk_setup.py` — defines the graded disk problem (`GradedDiskSimulation`).
 - `graded_disk_optimizer.py` — gradient-based optimization of the 1D radial grading
   (`GradedDiskOptimizer`).
 - `hole_deformation_optimization.py` — plate-with-hole bulge study with `optimize` /
   `plot` / `baseline` entry points (select via `MODE` at the bottom).
 - `plotting_utils.py` — shared mesh/field plotting helpers used by the above.
+
+The data behind the remaining figures (learning-curve and median-curve plots) is
+not bundled; regenerate it with the data-creation and training scripts above.
