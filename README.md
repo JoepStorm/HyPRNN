@@ -2,7 +2,22 @@
 
 This is a repository associated with the paper (in preparation): "Microstructure-Conditioned Surrogate Models for Graded Multiscale Optimization of Mycelium Composites".
 
-This repository implements multi-scale FE² analysis of woodchip–mycelium composites, with Physically Recurrent Neural Networks (PRNNs) as material surrogates. RVE microstructures are generated synthetically or by DEM particle deposition (YADE), meshed with GMSH, homogenized with FEniCSx/dolfinx, and used to train JAX surrogate models that replace the RVE at each macro-scale Gauss point. The PRNNs are conditioned on microscale variables using a hypernetwork, allowing for a graded multiscale optimization. This repository enables recreating the figures of the paper. 
+This repository implements multi-scale FE² analysis of woodchip–mycelium composites, with Physically Recurrent Neural Networks (PRNNs) as material surrogates. RVE microstructures are generated synthetically or by DEM particle deposition (YADE), meshed with GMSH, homogenized with FEniCSx, and used to train JAX surrogate models that replace the RVE at each macro-scale Gauss point. The PRNNs are conditioned on microscale variables using a hypernetwork, allowing for a graded multiscale optimization.
+
+<p align="center"><img src="git_figures/overview.png" width="70%" alt="Overview"></p>
+
+A Hypernetwork PRNN (HyPRNN) surrogate is trained on RVE stress–strain data across a range of microscale variables $\boldsymbol{\alpha}^*$, then deployed at every macroscale Gauss point.
+
+One result we show is how optimizing the grading of a pressurized-disk leads to a substantially lower peak stress.
+
+<p align="center"><img src="git_figures/disk_grading.png" width="30%" alt="Graded disk optimization"></p>
+
+Furthermore, we demonstrate that we can condition directly on manufacturing variables used to generate the microstructure. This circumvents the need for an additional model to parametrize microstructural geometries (e.g., a conditional variational autoencoder or a conditional denoising diffusion model).
+We control the variables of a 3D gravity deposition of woodchips and mycelium pellets (via YADE) used to generate microscale meshes.
+
+<p align="center"><img src="git_figures/deposition_3d.png" width="25%" alt="3D particle deposition"></p>
+
+The rest of this README provides details on running the provided code.
 
 ## Installation
 
