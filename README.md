@@ -15,7 +15,7 @@ One result we show is how optimizing the grading of a pressurized-disk leads to 
 Furthermore, we demonstrate that we can condition directly on manufacturing variables used to generate the microstructure. This circumvents the need for an additional model to parametrize microstructural geometries (e.g., a conditional variational autoencoder or a conditional denoising diffusion model).
 We control the variables of a 3D gravity deposition of woodchips and mycelium pellets (via YADE) used to generate microscale meshes.
 
-<p align="center"><img src="git_figures/deposition_3d.png" width="4%" alt="3D particle deposition"></p>
+<p align="center"><img src="git_figures/deposition_3d.png" width="40%" alt="3D particle deposition"></p>
 
 The rest of this README provides details on running the provided code.
 
