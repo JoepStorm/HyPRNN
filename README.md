@@ -1,6 +1,8 @@
 # Microstructure-Conditioned Surrogate Models for Graded Multiscale Optimization of Mycelium Composites
 
-This is a repository associated with the paper (in preparation): "Microstructure-Conditioned Surrogate Models for Graded Multiscale Optimization of Mycelium Composites".
+
+
+This is a repository associated with the paper "Microstructure-Conditioned Surrogate Models for Graded Multiscale Optimization of Mycelium Composites": <https://arxiv.org/abs/2607.13688>.
 
 This repository implements multi-scale FE² analysis of woodchip–mycelium composites, with Physically Recurrent Neural Networks (PRNNs) as material surrogates. RVE microstructures are generated synthetically or by DEM particle deposition (YADE), meshed with GMSH, homogenized with FEniCSx, and used to train JAX surrogate models that replace the RVE at each macro-scale Gauss point. The PRNNs are conditioned on microscale variables using a hypernetwork, allowing for a graded multiscale optimization.
 
