@@ -1,6 +1,6 @@
 """(Hy)PRNN surrogate material for macro-scale FE.
 
-Loads a trained (Hy)PRNN (settings + normalizers + params) and exposes it as a
+Loads a trained surrogate (HyPRNN, EnergyHyPRNN or NN; settings + normalizers + params) and exposes it as a
 dolfinx_materials `Material`, returning homogenized stress and tangent at each
 macro quadrature point
 """
@@ -17,6 +17,7 @@ from material_params import FUNGI_LAMBDA
 jax.config.update("jax_enable_x64", True)
 
 from scripts_surrogates.HyPRNN import HyPRNN
+from scripts_surrogates.EnergyHyPRNN import EnergyHyPRNN
 from scripts_surrogates.StandardNN import StandardNN
 from scripts_surrogates.data_utils import LDDataset, load_settings, create_Q_matrix, matrix_to_tensor, tensor_to_matrix, load_params
 
@@ -137,21 +138,31 @@ class PRNNMaterial(Material):
         else:
             use_multiple_materials = isinstance(settings['mat_points'], list)
             n_matpts = tuple(settings['mat_points']) if use_multiple_materials else settings['mat_points']
-            self.model = HyPRNN(
+            common = dict(
                 n_matpts=n_matpts,
                 n_outputs=3,
-                encoder_type=settings['encoder_type'],
                 stress_normalizer=proxyData.stress_normalizer,
                 material_micro_features=tuple(settings['mat_micro_features']),
                 shared_micro_features=tuple(settings.get('shared_micro_features', [])),
-                hidden_dim=settings.get('hidden_dim', 8),
-                w_max=settings.get('w_max', 1.25),
                 hyper_hidden_sizes=tuple(settings['hyper_hidden_sizes']) if settings.get('hyper_hidden_sizes') else None,
                 hyper_activation=settings.get('hyper_activation', 'sigmoid'),
-                encoder_n_layers=settings.get('encoder_n_layers', 3),
-                encoder_activation=settings.get('encoder_activation', 'softplus'),
                 use_multiple_materials=use_multiple_materials,
             )
+            if model_type in ('energy_hyprnn', 'energy_prnn'):  # 'energy_prnn': legacy name in older saved settings
+                scaling = settings.get('stress_scaling_feature')
+                self.model = EnergyHyPRNN(
+                    **common,
+                    stress_scaling_index=settings['mat_parameters'].index(scaling) if scaling else None,
+                    normalized_decoder=settings.get('normalized_decoder', False),
+                    decoder_activation=settings.get('decoder_activation', 'softplus'),
+                )
+            else:  # 'hyprnn' (also accepts legacy 'shared_prnn' from older saved settings)
+                self.model = HyPRNN(
+                    **common,
+                    hidden_dim=settings.get('hidden_dim', 8),
+                    encoder_n_layers=settings.get('encoder_n_layers', 3),
+                    encoder_activation=settings.get('encoder_activation', 'softplus'),
+                )
 
         def get_material_for_sample(mu_val):
             return neohooke.create_material(lambda_=FUNGI_LAMBDA, mu_=mu_val)

@@ -77,7 +77,6 @@ model, params_init, material = create_shared_hyper_prnn_model(
     n_micro_raw=len(settings['mat_parameters']),
     shared_micro_features=settings['shared_micro_features'],
     n_matpts=settings['mat_points'],
-    encoder_type=settings['encoder_type'],
     shared_hidden_mult=settings.get('hyper_hidden_mult', 2),
     shared_output_mult=settings.get('hyper_output_mult', 4),
     hidden_dim=settings.get('hidden_dim', 8),
@@ -242,12 +241,12 @@ for j, (mesh_ax, t_idx, color) in enumerate(zip(ax_r_mesh, [6, 0, 8], r_colors))
 # Stress-strain plots
 # ============================================================
 subplot_configs = [
-    ('mu',    [10, 0, 12], mu_colors),
-    ('vfrac', [2,  0, 4],  vf_colors),
-    ('ratio', [6,  0, 8],  r_colors),
+    ('mu',    [10, 0, 12], mu_colors, 'Shear stiffness'),
+    ('vfrac', [2,  0, 4],  vf_colors, 'Volume fraction'),
+    ('ratio', [6,  0, 8],  r_colors, 'Aspect ratio'),
 ]
 
-for col, (subplot_ax, (param_name, tension_indices, colors)) in enumerate(
+for col, (subplot_ax, (param_name, tension_indices, colors, title)) in enumerate(
         zip(ax_plots, subplot_configs)):
 
     subplot_ax.axhline(0, color='lightgray', linewidth=0.6, zorder=0)
@@ -269,6 +268,7 @@ for col, (subplot_ax, (param_name, tension_indices, colors)) in enumerate(
 
     subplot_ax.set_xlabel(r'$E_{xx}$', labelpad=1)
     subplot_ax.set_ylabel(r'$S_{xx}$')
+    subplot_ax.set_title(title)
     subplot_ax.minorticks_off()
 
 # RVE / PRNN nonlin legend on first subplot only

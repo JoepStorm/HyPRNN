@@ -1,0 +1,47 @@
+{
+  "savefolder": "../trained_models/deposition/filler/prnn_energy_12m/",
+  "data_path": "../data/deposition/filler/dataset_combi/mixed_t50_merged",
+  "matdata_path": "../data/deposition/filler/dataset_combi/mixed_t50_merged_matparam.data",
+  "seq_length": 50,
+  "train_samples": 256,
+  "train_batch_size": 2,
+  "num_samples": 512,
+  "val_test_samples": 128,
+  "model_type": "energy_hyprnn",
+  "norm_stresses": true,
+  "stress_scaling_feature": null,
+  "mat_points": 12,
+  "lr_schedule_steps": 10000,
+  "max_epochs": 3000,
+  "warmup_epochs": 0,
+  "base_lr": 0.001,
+  "min_lr_factor": 1,
+  "patience": 50,
+  "interval": 1,
+  "feature_dim": 3,
+  "verbose": true,
+  "seed": 0,
+  "mat_parameters": [
+    "mu",
+    "lambda",
+    "fil_frac"
+  ],
+  "norm_matparams": [
+    false,
+    false,
+    true
+  ],
+  "shared_micro_features": [
+    2
+  ],
+  "mat_micro_features": [
+    0,
+    1
+  ],
+  "hyper_hidden_sizes": [
+    8
+  ],
+  "hyper_activation": "sigmoid",
+  "decoder_activation": "abs",
+  "normalized_decoder": false
+}

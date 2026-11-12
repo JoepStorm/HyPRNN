@@ -1,0 +1,14 @@
+name: prnn_energy_1L8_24m_normdec
+model_type: energy_hyprnn
+mat_points: 24
+hyper_hidden_sizes: (8,)
+hyper_activation: sigmoid
+normalized_decoder: True
+decoder_activation: abs
+mat_micro_features: [0, 1]
+mat_parameters: ['mu', 'lambda']
+norm_matparams: [False, False]
+shared_micro_features: []
+
+training_samples: [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
+runs_per_setting: 10

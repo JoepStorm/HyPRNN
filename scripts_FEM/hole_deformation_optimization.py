@@ -209,7 +209,7 @@ class BulgeHole:
         return float(ux[self._hole_ri] - ux[self._hole_li])
 
     def bulge_loss(self):
-        return float(abs(self.get_hole_bulge()))
+        return self.get_hole_bulge()
 
     def get_deformed_hole_coords(self):
         u = self.u.x.array
@@ -544,64 +544,48 @@ def plot_filler_angle_ellipses(sim, output_folder, fname='filler_angle_ellipses.
     """
     qp = sim.get_deformed_qp_coords() if deformed else sim.qp_coords
     theta = np.asarray(sim.micro_variables['theta'])
-    if deformed:
-        theta = theta + sim.get_qp_rotation()
+    rot = sim.get_qp_rotation() if deformed else np.zeros(len(qp))
     fil = np.clip(np.asarray(sim.micro_variables['fil_frac']), 0.0, 1.0)
     mirror = np.asarray(getattr(sim, '_mirror_sign', np.ones(len(qp))))
-    canon = np.asarray(sim.micro_variables['theta']) * mirror
+    canon = theta * mirror
 
     n_skip = max(1, len(qp) // max_ellipses)
-    q, th, c, f = qp[::n_skip], theta[::n_skip], canon[::n_skip], fil[::n_skip]
-
-    # Keep ellipses in a single quadrant, then mirror exactly. Each reflection
-    # flips the ellipse orientation sign; two reflections (opposite corner)
-    # cancel. The canonical color is shared by all four copies.
+    q, th, rt, c, f = qp[::n_skip], theta[::n_skip], rot[::n_skip], canon[::n_skip], fil[::n_skip]
     base = max(sim.plate_size, sim.plate_height) * base_frac
 
-    # A region straddling a symmetry axis would be duplicated onto itself by the
-    # flip across that axis. For such regions we instead keep their real points
-    # on both sides of that axis and skip that flip (a region on x=center is thus
-    # still mirrored top<->bottom, just not left<->right). Region membership uses
-    # the reference (undeformed) hex assignment; baseline sims have no regions, so
-    # a point is treated as "crossing" only if it sits within tol of the axis.
+    # A region whose hex centre lies on a symmetry axis straddles it and runs
+    # with a single, unmirrored theta for that axis (see _precompute_hex_assignments).
+    # Its reflected copy across that axis therefore keeps theta. Baseline sims
+    # have no regions; a point counts as "on the axis" within half an ellipse.
     rx = sim.qp_coords[::n_skip][:, 0] - sim.hole_center[0]
     ry = sim.qp_coords[::n_skip][:, 1] - sim.hole_center[1]
     if hasattr(sim, 'hex_size'):
         hq, hr = axial_round(*pixel_to_hex_axial(rx, ry, sim.hex_size))
-        hkey = hq.astype(np.int64) * 100000 + hr.astype(np.int64)
-        cross_x = np.zeros(len(rx), dtype=bool)
-        cross_y = np.zeros(len(ry), dtype=bool)
-        for k in np.unique(hkey):
-            m = hkey == k
-            if rx[m].min() < 0 < rx[m].max():
-                cross_x |= m
-            if ry[m].min() < 0 < ry[m].max():
-                cross_y |= m
+        hcx, hcy = hex_center(hq, hr, sim.hex_size)
+        on_axis_x = np.isclose(hcx, 0.0, atol=1e-10)
+        on_axis_y = np.isclose(hcy, 0.0, atol=1e-10)
     else:
-        cross_x = np.abs(rx) < 0.5 * base
-        cross_y = np.abs(ry) < 0.5 * base
+        on_axis_x = np.abs(rx) < 0.5 * base
+        on_axis_y = np.abs(ry) < 0.5 * base
 
+    # Draw the first quadrant only, then reflect positions into all four.
+    # The material angle flips sign per reflection except across an axis its
+    # region straddles; the rigid rotation (deformed only) flips per reflection.
     center = q.mean(axis=0) if deformed else np.asarray(sim.hole_center)
-    rel = q - center
     rng = np.random.default_rng(seed)
-    keep = ((rx >= 0) | cross_x) & ((ry >= 0) | cross_y) & (rng.random(len(q)) < (1.0 - f))
-    rel_b, th_b, c_b = rel[keep], th[keep], c[keep]
-    cross_x_b, cross_y_b = cross_x[keep], cross_y[keep]
+    keep = (rx >= 0) & (ry >= 0) & (rng.random(len(q)) < (1.0 - f))
+    rel_b, th_b, rt_b, c_b = (q - center)[keep], th[keep], rt[keep], c[keep]
+    sx_b = np.where(on_axis_x[keep], 1.0, -1.0)  # theta sign after an x-reflection
+    sy_b = np.where(on_axis_y[keep], 1.0, -1.0)
 
-    flips = [(1.0, 1.0, 1.0), (-1.0, 1.0, -1.0), (1.0, -1.0, -1.0), (-1.0, -1.0, 1.0)]
-    q_parts, th_parts, c_parts = [], [], []
-    for fx, fy, fa in flips:
-        m = np.ones(len(rel_b), dtype=bool)
-        if fx == -1.0:
-            m &= ~cross_x_b
-        if fy == -1.0:
-            m &= ~cross_y_b
-        q_parts.append(center + rel_b[m] * np.array([fx, fy]))
-        th_parts.append(th_b[m] * fa)
-        c_parts.append(c_b[m])
+    q_parts, th_parts = [], []
+    for fx, fy in [(1.0, 1.0), (-1.0, 1.0), (1.0, -1.0), (-1.0, -1.0)]:
+        s_mat = (sx_b if fx < 0 else 1.0) * (sy_b if fy < 0 else 1.0)
+        q_parts.append(center + rel_b * np.array([fx, fy]))
+        th_parts.append(s_mat * th_b + fx * fy * rt_b)
     q = np.vstack(q_parts)
     th = np.concatenate(th_parts)
-    c = np.concatenate(c_parts)
+    c = np.tile(c_b, 4)
 
     tmin, tmax = THETA_BOUNDS
     pc = PatchCollection(_ellipse_patches(q, th, ratio, base),
@@ -805,19 +789,19 @@ def run_baseline(output_folder, prnn_model_loc, macro_meshsize=0.02,
     plot_filler_angle_ellipses(sim, output_folder, seed=seed)
 
     sim.run(write_output=True, write_name='baseline_bulge')  # ParaView .bp
-    loss = float(abs(sim.get_hole_bulge()))
+    loss = sim.bulge_loss()
     sim.plot_deformed_hole(output_folder, 'deformed_baseline.pdf',
-                           title=f'Baseline |bulge| = {loss:.4f}')
+                           title=f'Baseline bulge = {loss:.4f}')
     plot_filler_angle_ellipses(sim, output_folder,
                                fname='filler_angle_ellipses_deformed.pdf', seed=seed, deformed=True)
-    print(f"\nBaseline (fil_frac={fil_value}, seed={seed}) |bulge| = {loss:.6f}")
+    print(f"\nBaseline (fil_frac={fil_value}, seed={seed}) bulge = {loss:.6f}")
     return loss
 
 
 # ── Optimizer ────────────────────────────────────────────────────────────────
 
 class BulgeOptimizer:
-    """Maximize |hole bulge| via per-hex fil_frac + theta grading with CMA-ES."""
+    """Minimize the signed hole-width change (i.e. maximize contraction) via per-hex fil_frac + theta grading with CMA-ES."""
 
     def __init__(self, output_folder, prnn_model_loc, macro_meshsize=0.02,
                  hole_radius=0.25, plate_height=1.0, hex_size=0.1,
@@ -874,7 +858,7 @@ class BulgeOptimizer:
         self.worst_feasible = max(self.worst_feasible, raw)
         self.best_loss = min(self.best_loss, raw)
         self.history.append(raw)
-        print(f"  eval {self.eval_count}: |bulge| = {raw:.6f}")
+        print(f"  eval {self.eval_count}: bulge = {raw:.6f}")
         self._plot_iteration(raw)
         return raw
 
@@ -893,7 +877,7 @@ class BulgeOptimizer:
         ax.plot(pts_closed[:, 0], pts_closed[:, 1], '-', lw=1.5, label='Deformed')
         ax.set_aspect('equal')
         ax.legend(fontsize=9)
-        ax.set_title(f'Iter {idx}, |bulge| = {loss:.6f}')
+        ax.set_title(f'Iter {idx}, bulge = {loss:.6f}')
         ax.axis('off')
         plt.savefig(os.path.join(contour_dir, f'contour_iter_{idx:04d}.pdf'),
                     bbox_inches='tight', dpi=150)
@@ -935,7 +919,7 @@ class BulgeOptimizer:
 
         result = es.result
         print(f"\nCMA-ES finished after {self.eval_count} evaluations")
-        print(f"Best |bulge|: {result.fbest:.6f}")
+        print(f"Best bulge: {result.fbest:.6f}")
         return result
 
     # -- reporting -----------------------------------------------------------
@@ -945,7 +929,7 @@ class BulgeOptimizer:
         ax.plot(history, '-', lw=1, alpha=0.4, label='All evaluations')
         ax.plot(np.minimum.accumulate(history), '-', lw=2, label='Best so far')
         ax.set_xlabel('Function evaluation')
-        ax.set_ylabel('|bulge|')
+        ax.set_ylabel('bulge')
         ax.legend()
         path = os.path.join(self.output_folder, fname)
         plt.savefig(path, bbox_inches='tight', dpi=150)
@@ -993,7 +977,7 @@ class BulgeOptimizer:
         self.sim.run(write_output=write_output)
         loss = self.sim.bulge_loss()
         self.sim.plot_deformed_hole(self.output_folder, 'deformed_best.pdf',
-                                    title=f'Best |bulge| = {loss:.4f}')
+                                    title=f'Best bulge = {loss:.4f}')
         plot_filler_angle_ellipses(self.sim, self.output_folder,
                                    fname='filler_angle_ellipses_deformed.pdf', deformed=True)
         return loss
@@ -1018,10 +1002,10 @@ class BulgeOptimizer:
         self.sim.run(write_output=True, write_name='bulge_hex_graded_vertical')
         loss = self.sim.bulge_loss()
         self.sim.plot_deformed_hole(self.output_folder, 'deformed_vertical.pdf',
-                                    title=f'Vertical |bulge| = {loss:.4f}')
+                                    title=f'Vertical bulge = {loss:.4f}')
         plot_filler_angle_ellipses(self.sim, self.output_folder,
                                    fname='filler_angle_ellipses_vertical_deformed.pdf', deformed=True)
-        print(f"Vertical |bulge| = {loss:.6f}")
+        print(f"Vertical bulge = {loss:.6f}")
         return loss
 
     def replot_from_results(self, fname='optimization_results.npz', run_sim=False):
@@ -1036,10 +1020,10 @@ class BulgeOptimizer:
             self.sim.run(write_output=True)
             loss = self.sim.bulge_loss()
             self.sim.plot_deformed_hole(self.output_folder, 'deformed_best.pdf',
-                                        title=f'|bulge| = {loss:.4f}')
+                                        title=f'bulge = {loss:.4f}')
             plot_filler_angle_ellipses(self.sim, self.output_folder,
                                        fname='filler_angle_ellipses_deformed.pdf', deformed=True)
-            print(f"|bulge| = {loss:.6f}")
+            print(f"bulge = {loss:.6f}")
         return fil, theta_norm
 
 
@@ -1052,7 +1036,7 @@ if __name__ == "__main__":
     # MODE = 'optimize'
     MODE = 'baseline'
 
-    prnn_model_loc = "../trained_models/deposition/filler/vary_matpoints/matpts6_run2/"
+    prnn_model_loc = "../trained_models/deposition/filler/prnn_energy_12m/"
 
     hex_size = 0.1
     macro_meshsize = 0.02
@@ -1079,7 +1063,7 @@ if __name__ == "__main__":
             # Check that orientation matters: same fil_frac but theta = 90deg.
             optimizer.run_vertical()
         else:
-            result = optimizer.run_cmaes(sigma0=0.3, maxiter=100, seed=seed)
+            result = optimizer.run_cmaes(sigma0=0.3, maxiter=200, seed=seed)
             optimizer.save_results(result.xbest, result.fbest, optimizer.history)
             optimizer.plot_convergence(optimizer.history)
             optimizer.visualize_best(result.xbest)

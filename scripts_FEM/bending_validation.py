@@ -224,22 +224,20 @@ class ThreePointBendingSimulation:
 # -- Model definitions --------------------------------------------------------
 
 MODEL_LABELS = {
-    'prnn_1': 'PRNN TEST',
-    'prnn': 'Linear PRNN (32)',
-    'prnn_512': 'Linear PRNN (512)',
     'prnn_nonlin': 'Nonlinear PRNN (512)',
     'nn': 'NN (512)',
     'nn_32': 'NN (32)',
+    'prnn_energy': 'Energy PRNN (32)',
+    'prnn_energy_512': 'Energy PRNN (512)',
     # 'fe2': r'FE$^2$',
     'fe2': r'True',
 }
 MODEL_COLORS = {
-    'prnn_1': colours[5],
-    'prnn': colours[1],
-    'prnn_512': colours[4],
     'prnn_nonlin': colours[0],
     'nn': colours[2],
     'nn_32': colours[3],
+    'prnn_energy': colours[1],
+    'prnn_energy_512': colours[4],
     # 'fe2': colours[3],
     'fe2': 'black',
 }
@@ -250,29 +248,23 @@ def _model_color(key, i=0):
 
 
 MODEL_LABELS_SHORT = {
-    'prnn_1': 'Lin.PRNN\n(1)',
-    'prnn': 'Lin.PRNN\n(32)',
-    'prnn_512': 'Lin.PRNN\n(512)',
     'prnn_nonlin': 'Nonlin.PRNN',
     'nn': 'NN (512)',
     'nn_32': 'NN (32)',
+    'prnn_energy': 'En.PRNN\n(32)',
+    'prnn_energy_512': 'En.PRNN\n(512)',
     'fe2': r'FE$^2$',
 }
 
 MODELS = {
-    'prnn_1': {
+    'prnn_energy': {
         'use_surrogate': True,
-        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/samples32_run4',
         'timer_name': 'PRNN: Constitutive integration',
     },
-    'prnn': {
+    'prnn_energy_512': {
         'use_surrogate': True,
-        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples32_run2',
-        'timer_name': 'PRNN: Constitutive integration',
-    },
-    'prnn_512': {
-        'use_surrogate': True,
-        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/samples512_run0',
+        'prnn_model_loc': '../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/samples512_run7',
         'timer_name': 'PRNN: Constitutive integration',
     },
     'prnn_nonlin': {
@@ -769,13 +761,48 @@ def plot_final_deformation(results, output_folder, mesh_cells):
     print(f"Saved final deformation overlay to {output_folder}/final_deformation")
 
 
-def plot_final_deformation_separate(results, output_folder, mesh_cells):
+def _barycentric_weights(points, ref, cells):
+    """Locate each point in the reference triangulation; return (cell, weights).
+
+    Points outside every triangle fall back to the cell with the least-negative
+    barycentric coordinate (i.e. the nearest one).
+    """
+    ref = np.asarray(ref)
+    cells = np.asarray(cells)[:, :3]
+    v0 = ref[cells[:, 0]]
+    e1 = ref[cells[:, 1]] - v0
+    e2 = ref[cells[:, 2]] - v0
+    det = e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]
+
+    out = []
+    for p in np.asarray(points):
+        d = p - v0
+        l1 = (d[:, 0] * e2[:, 1] - d[:, 1] * e2[:, 0]) / det
+        l2 = (e1[:, 0] * d[:, 1] - e1[:, 1] * d[:, 0]) / det
+        l0 = 1.0 - l1 - l2
+        lam = np.stack([l0, l1, l2], axis=1)
+        c = int(np.argmax(lam.min(axis=1)))
+        out.append((c, lam[c]))
+    return out
+
+
+def _deformed_points(bary, cells, coords):
+    """Map located points into a deformed configuration via their barycentric weights."""
+    cells = np.asarray(cells)[:, :3]
+    return np.array([coords[cells[c]].T @ w for c, w in bary])
+
+
+def plot_final_deformation_separate(results, output_folder, mesh_cells,
+                                    qp_coords=None, qp_indices=None):
     """One subplot per surrogate, fixed 2x3 layout.
 
     Layout:
-        [ fe2,         prnn (lin),   nn_32      ]
-        [ prnn_nonlin, prnn_512,     nn_512   ]
-    Empty cells (missing keys) are left blank.
+        [ fe2,         prnn_energy,       nn_32 ]
+        [ prnn_nonlin, prnn_energy_512,   nn    ]
+    Empty cells (missing keys) are removed.
+
+    If ``qp_coords`` and ``qp_indices`` are given, those quadrature points are
+    marked (and numbered) on the FE^2 panel, in the deformed configuration.
     """
     if mesh_cells is None:
         return
@@ -786,9 +813,14 @@ def plot_final_deformation_separate(results, output_folder, mesh_cells):
     fe2_final = results['fe2']['coords'][-1]
     ref = results[next(iter(results))]['coords'][0]
 
+    qp_deformed = None
+    if qp_coords is not None and qp_indices is not None:
+        qp_sel = np.asarray(qp_coords)[list(qp_indices)]
+        qp_deformed = _deformed_points(_barycentric_weights(qp_sel, ref, mesh_cells), mesh_cells, fe2_final)
+
     layout = [
-        ['fe2',         'prnn',     'nn_32'],
-        ['prnn_nonlin', 'prnn_512', 'nn'],
+        ['fe2',         'prnn_energy',     'nn_32' ],
+        ['prnn_nonlin', 'prnn_energy_512', 'nn'    ],
     ]
     n_rows, n_cols = 2, 3
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(3.1 * n_cols, 2.01 * n_rows), squeeze=False)
@@ -798,7 +830,7 @@ def plot_final_deformation_separate(results, output_folder, mesh_cells):
             ax = axes[r, c]
             key = layout[r][c]
             if key not in results:
-                ax.axis('off')
+                ax.remove()
                 continue
 
             for cell in mesh_cells:
@@ -814,6 +846,12 @@ def plot_final_deformation_separate(results, output_folder, mesh_cells):
             for cell in mesh_cells:
                 closed = list(cell) + [cell[0]]
                 ax.plot(coords_final[closed, 0], coords_final[closed, 1], color=col, linewidth=0.6, alpha=0.9, zorder=3)
+
+            # if key == 'fe2' and qp_deformed is not None:
+            #     ax.scatter(qp_deformed[:, 0], qp_deformed[:, 1], s=12, c='k', zorder=4)
+            #     for (px, py), idx in zip(qp_deformed, qp_indices):
+            #         ax.annotate(f'qp{idx}', (px, py), textcoords='offset points', xytext=(4, 3), fontsize=7, zorder=5,
+            #                     bbox=dict(boxstyle='round,pad=0.1', fc='white', ec='none', alpha=0.7))
 
             ax.set_title(MODEL_LABELS.get(key, key), fontsize=10, pad=-0.07)
             ax.set_aspect('equal')
@@ -998,10 +1036,12 @@ def _default_path_indices(qp_coords, n=6):
 
 
 def plot_stress_strain_paths(results, output_folder, indices,
-                             components=(0, 1, 2, 3), filename='stress_strain_paths'):
+                             components=(0, 1, 2, 3), filename='stress_strain_paths',
+                             exclude=('nn_32',)):
     """Plot F vs PK1 curves at each selected quadrature-point index for all models.
 
     Layout: rows = selected points, cols = components (11, 22, 12, 21).
+    Models in ``exclude`` are skipped.
     """
     comp_labels = {0: (r'$F_{11}$', r'$P_{11}$'),
                    1: (r'$F_{22}$', r'$P_{22}$'),
@@ -1019,10 +1059,13 @@ def plot_stress_strain_paths(results, output_folder, indices,
     # F_11 = F_22 = 1, F_12 = F_21 = 0.
     identity_F = {0: 1.0, 1: 1.0, 2: 0.0, 3: 0.0}
 
-    # Plot fe2 first so it sits in the background and leads the legend.
-    ordered_items = list(results.items())
-    ordered_items.sort(key=lambda kv: 0 if kv[0] == 'fe2' else 1)
-    # Preserve original index for color/linestyle cycling.
+    # Fixed plot/legend order (fe2 first so it sits in the background); any
+    # other models follow in results order.
+    order = ['fe2', 'prnn_energy', 'prnn_energy_512', 'prnn_nonlin', 'nn']
+    ordered_items = sorted(results.items(),
+                           key=lambda kv: order.index(kv[0]) if kv[0] in order else len(order))
+    linestyles = {'fe2': '-', 'prnn_energy': '-', 'prnn_energy_512': '--', 'prnn_nonlin': '-.', 'nn': ':'}
+    # Preserve original index for color/linestyle fallback cycling.
     orig_index = {k: i for i, (k, _) in enumerate(results.items())}
 
     for r, qp_idx in enumerate(indices):
@@ -1031,7 +1074,7 @@ def plot_stress_strain_paths(results, output_folder, indices,
             ax.axhline(0.0, color='gray', linewidth=0.6, zorder=0)
             ax.axvline(identity_F[comp], color='gray', linewidth=0.6, zorder=0)
             for key, data in ordered_items:
-                if key == 'nn_32':
+                if key in exclude:
                     continue
                 i = orig_index[key]
                 # Skip step 0: it's the initialization (F=I, PK1=0), not a
@@ -1042,7 +1085,7 @@ def plot_stress_strain_paths(results, output_folder, indices,
                     continue
                 ax.plot(F[:, qp_idx, comp], P[:, qp_idx, comp],
                         color=_model_color(key, i),
-                        linestyle=['-', '--', '-.', ':'][i % 4],
+                        linestyle=linestyles.get(key, ['-', '--', '-.', ':'][i % 4]),
                         linewidth=1.0,
                         label=MODEL_LABELS.get(key, key) if (r == 0 and c == 0) else None)
             xlab, ylab = comp_labels[comp]
@@ -1067,12 +1110,12 @@ def plot_stress_strain_paths(results, output_folder, indices,
     print(f"Saved stress-strain paths to {output_folder}/{filename}")
 
 
-def replot_from_saved(output_folder, extra_folder=None):
+def replot_from_saved(output_folder, extra_folders=()):
     """Rebuild all comparison plots from ``comparison_data.npz`` — no sim needed.
 
-    If ``extra_folder`` is given, its models are merged in on top of
-    ``output_folder``'s (extra wins on key collisions). Mesh / grading metadata
-    is taken from ``output_folder``; plots are written there.
+    Models from each of ``extra_folders`` are merged in on top of
+    ``output_folder``'s (later folders win on key collisions). Mesh / grading
+    metadata is taken from ``output_folder``; plots are written there.
     """
     data = np.load(f"{output_folder}/comparison_data.npz", allow_pickle=True)
     model_keys = [str(k) for k in data['model_keys']]
@@ -1085,7 +1128,7 @@ def replot_from_saved(output_folder, extra_folder=None):
             'PK1': data[f'{key}_PK1'],
         }
 
-    if extra_folder is not None:
+    for extra_folder in extra_folders:
         extra = np.load(f"{extra_folder}/comparison_data.npz", allow_pickle=True)
         for key in (str(k) for k in extra['model_keys']):
             results[key] = {
@@ -1119,30 +1162,31 @@ def replot_from_saved(output_folder, extra_folder=None):
 
     plot_trajectories(results, output_folder, mesh_cells)
     plot_final_deformation(results, output_folder, mesh_cells)
-    plot_final_deformation_separate(results, output_folder, mesh_cells)
+    path_indices = _default_path_indices(data['qp_coords'])
+    plot_final_deformation_separate(results, output_folder, mesh_cells, qp_coords=data['qp_coords'], qp_indices=path_indices)
     plot_stress_maps(results, (tri, n_cells), output_folder)
-    plot_stress_strain_paths(results, output_folder, indices=_default_path_indices(data['qp_coords']))
+    plot_stress_strain_paths(results, output_folder, indices=path_indices)
     print(f"Replotted from {output_folder}/comparison_data.npz")
 
 
 # -- Entry point --------------------------------------------------------------
 
 if __name__ == "__main__":
-    replot_only = False
-    output_folder = "../results/bending_model_comparison/new"
-    extra_folder = None  #"../results/bending_model_comparison/v6_nn32_comparison" # None
+    replot_only = False   # True: rebuild the plots from saved comparison_data.npz in output_folder; False: run a new comparison
+    output_folder = "../results/bending_model_comparison/paper"   # saved data used for replotting
+    extra_folders = []   # optional: further result folders whose models are merged in when replotting
+    run_folder = "../results/bending_model_comparison/new"  # where a new run is written
 
     if replot_only:
-        replot_from_saved(output_folder, extra_folder=extra_folder)
+        replot_from_saved(output_folder, extra_folders=extra_folders)
     else:
         run_comparison(
-            # model_keys=['prnn_1', 'prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32'], #, 'fe2'],   # prnn_1 == prnn, but adding a model makes subsequent time comparisons fairer.
-            model_keys=['prnn', 'prnn_512', 'prnn_nonlin', 'nn', 'nn_32', 'fe2'],
+            model_keys=['prnn_energy', 'prnn_energy_512', 'prnn_nonlin', 'nn', 'nn_32', 'fe2'],
             max_load=0.05,
             step_size_init=-0.01,
             step_size_min=-0.0001,
             macro_meshsize=0.05,
             beam_length=2.0,
             beam_height=0.3,
-            output_folder=output_folder,
+            output_folder=run_folder,
         )

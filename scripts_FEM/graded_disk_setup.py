@@ -85,7 +85,7 @@ class GradedDiskSimulation:
                  use_surrogate=True,
                  rve_config=None,
                  output_folder='../results/',
-                 prnn_model_loc="../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"):
+                 prnn_model_loc="../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/samples512_run7"):
         self.comm = MPI.COMM_WORLD
         self.dim = 2
         self.R_inner = R_inner

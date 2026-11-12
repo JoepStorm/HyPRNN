@@ -1,6 +1,6 @@
 {
-  "data_path": "../data/RVE/vary_all/vary_all/mixed_t50_mergedv2",
-  "matdata_path": "../data/RVE/vary_all/vary_all/mixed_t50_mergedv2_matparam.data",
+  "data_path": "../data/vary_all/mixed_t50_mergedv2",
+  "matdata_path": "../data/vary_all/mixed_t50_mergedv2_matparam.data",
   "seq_length": 50,
   "train_batch_size": 2,
   "num_samples": 3072,

@@ -140,10 +140,12 @@ Surrogate models are trained on the `{F, PK1, cauchy}.npy` sequences produced by
 `scripts_data_creation/`. Run every script from inside `scripts_surrogates/`. Microscale variables are included by referencing `_matparam.data` files.  
 
 **Model and utility modules** (imported by the scripts below, not run directly):
-- `HyPRNN.py` — the (Hy)PRNN model: a PRNN whose material points
-  are Neo-Hookean, with an optional shared hypernetwork that adapts the network to
-  per-sample micro parameters. A linear vs. non-linear encoder selects a plain PRNN
-  vs. its non-linear variant (`encoder_type`); `model_type='hyprnn'`.
+- `EnergyHyPRNN.py` — the energy-based (Hy)PRNN (`model_type='energy_hyprnn'`).
+  A hypernetwork conditions $A_m$ and $\alpha_m$ on per-sample micro parameters.
+  Running the file directly executes its self-tests.
+- `HyPRNN.py` — the (Hy)PRNN with a non-linear (MLP) encoder (`model_type='hyprnn'`):
+  Neo-Hookean material points with a sparse stress decoder, conditioned on the same
+  shared hypernetwork.
 - `StandardNN.py` — plain feed-forward NN baseline (`model_type='nn'`).
 - `trainer.py` — `Trainer` class holding the JAX/Flax training loop, learning-rate
   schedule, masking, and early stopping.
@@ -166,13 +168,6 @@ python train_surrogate.py
 python train_surrogate_batch.py
 ```
 
-**Deposition filler study** — trains/tests HyPRNN on the deposition dataset while
-sweeping the number of material points. Set `MODE='train'`, run, then `MODE='test'`:
-
-```bash
-python train_surrogate_deposit_batch.py
-```
-
 **Learning-curve sweep** (many configurations × sample counts × repeats) — meant for a cluster, where one job trains one configuration. Uncomment the selected configuration(s). Then pass the configuration index as an argument; with no argument it evaluates all configurations:
 
 ```bash
@@ -185,8 +180,9 @@ python train_surrogate_multiconfig_batch.py        # test/evaluate all configura
 - `plot_uniaxial_data.py` — uniaxial dataset with PRNN predictions overlaid, per
   varied parameter (mu / vfrac / ratio), with RVE mesh thumbnails.
 - `plot_median_curves.py` — for one dataset, compare truth vs. non-linear PRNN,
-  linear PRNN, and NN on the median-error test sample.
+  energy PRNN, and NN on the median-error test sample.
 - `plot_learncurve.py` — learning curves from the saved `test_losses.txt` files.
+- `plot_matpoints_curve.py` — sensitivity of the test loss to the number of material points.
 
 ## Macroscale simulations (`scripts_FEM/`)
 
@@ -210,7 +206,9 @@ python hole_deformation_optimization.py # hole-bulge design: optimize over per-h
 
 - `bending_validation.py` — compares the surrogates against a full FE² solve on a
   manually graded beam. Drop `'fe2'` from `model_keys` to skip the expensive
-  ground-truth solve and run the surrogates only.
+  ground-truth solve and run the surrogates only. A new run is written to
+  `results/bending_model_comparison/new/`; with `replot_only = True` the plots are
+  rebuilt from a saved `comparison_data.npz` instead.
 - `graded_disk_setup.py` — defines the graded disk problem (`GradedDiskSimulation`).
 - `graded_disk_optimizer.py` — gradient-based optimization of the 1D radial grading
   (`GradedDiskOptimizer`).

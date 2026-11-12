@@ -1,0 +1,13 @@
+name: prnn_energy_2L8_12m
+model_type: energy_hyprnn
+mat_points: 12
+hyper_hidden_sizes: (8, 8)
+hyper_activation: sigmoid
+decoder_activation: abs
+mat_micro_features: [0, 1]
+mat_parameters: ['mu', 'lambda', 'vfrac', 'ratio']
+norm_matparams: [False, False, True, True]
+shared_micro_features: [2, 3]
+
+training_samples: [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
+runs_per_setting: 10

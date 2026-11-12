@@ -1,0 +1,16 @@
+name: prnn_nonlin_1HL8_1L_6m
+model_type: shared_prnn
+encoder_type: NonLinear
+mat_parameters: ['mu', 'lambda', 'vfrac', 'ratio']
+norm_matparams: [False, False, True, True]
+shared_micro_features: [2, 3]
+mat_micro_features: [0, 1]
+mat_points: 6
+hyper_hidden_sizes: (8,)
+hyper_activation: sigmoid
+encoder_n_layers: 1
+encoder_activation: softplus
+hidden_dim: 8
+
+training_samples: [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
+runs_per_setting: 10

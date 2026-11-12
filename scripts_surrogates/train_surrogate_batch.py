@@ -17,6 +17,7 @@ from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings
 from StandardNN import create_nn_model
 from HyPRNN import create_shared_hyper_prnn_model
+from EnergyHyPRNN import create_energy_hyprnn_model
 
 
 RUNS_PER_MODEL = 2
@@ -65,28 +66,27 @@ NN_MAT_PARAMS = {
 }
 
 MODELS_TO_TRAIN = {
-    'prnn_lin_32': {
-        'model_type': 'hyprnn',
+    'prnn_energy_32': {
+        'model_type': 'energy_hyprnn',
         'train_samples': 32,
-        'encoder_type': 'Linear',
-        'mat_points': 6,
+        'mat_points': 12,
         'hyper_hidden_sizes': (8,),
         'hyper_activation': 'sigmoid',
+        'decoder_activation': 'abs',
         **PRNN_MAT_PARAMS,
     },
-    'prnn_lin_512': {
-        'model_type': 'hyprnn',
+    'prnn_energy_512': {
+        'model_type': 'energy_hyprnn',
         'train_samples': 512,
-        'encoder_type': 'Linear',
-        'mat_points': 6,
+        'mat_points': 12,
         'hyper_hidden_sizes': (8,),
         'hyper_activation': 'sigmoid',
+        'decoder_activation': 'abs',
         **PRNN_MAT_PARAMS,
     },
     'prnn_nonlin_512': {
         'model_type': 'hyprnn',
         'train_samples': 512,
-        'encoder_type': 'NonLinear',
         'mat_points': 12,
         'hyper_hidden_sizes': (8, 8, 8),
         'hyper_activation': 'sigmoid',
@@ -171,7 +171,6 @@ for model_name, model_cfg in MODELS_TO_TRAIN.items():
                 n_micro_raw=len(settings['mat_parameters']),
                 shared_micro_features=settings['shared_micro_features'],
                 n_matpts=settings['mat_points'],
-                encoder_type=settings['encoder_type'],
                 hidden_dim=settings.get('hidden_dim', 8),
                 stress_normalizer=dataset.stress_normalizer,
                 mat_m_feats=settings['mat_micro_features'],
@@ -180,6 +179,19 @@ for model_name, model_cfg in MODELS_TO_TRAIN.items():
                 encoder_n_layers=settings.get('encoder_n_layers', 3),
                 encoder_activation=settings.get('encoder_activation', 'softplus'),
                 stress_scaling_index=None
+            )
+        elif model_cfg['model_type'] == 'energy_hyprnn':
+            model, params, material = create_energy_hyprnn_model(
+                random_key=key,
+                n_micro_raw=len(settings['mat_parameters']),
+                shared_micro_features=settings['shared_micro_features'],
+                n_matpts=settings['mat_points'],
+                stress_normalizer=dataset.stress_normalizer,
+                mat_m_feats=settings['mat_micro_features'],
+                hyper_hidden_sizes=settings.get('hyper_hidden_sizes', None),
+                hyper_activation=settings.get('hyper_activation', 'sigmoid'),
+                normalized_decoder=settings.get('normalized_decoder', False),
+                decoder_activation=settings.get('decoder_activation', 'softplus'),
             )
         elif model_cfg['model_type'] == 'nn':
             model, params, material = create_nn_model(

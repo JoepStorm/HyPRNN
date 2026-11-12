@@ -192,7 +192,7 @@ class GradedDiskOptimizer:
             'maxiter': maxiter,
             # 'popsize': popsize,
             'bounds': [list(lower), list(upper)],
-            'seed': 42,
+            'seed': 0,
             'verb_disp': 1,
             'verb_log': 0,
             'tolfun': 1e-8,
@@ -489,8 +489,8 @@ def run_optimization(output_folder, prnn_model_loc, n_ctrl, label,
 
 def main_visualize_saved():
     """Load previously saved optimization results and re-plot grading only."""
-    base_folder = "../results/graded_disk/optimized/v3"
-    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
+    base_folder = "../results/graded_disk/optimized/v6"
+    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/samples512_run7"
 
     common_kwargs = dict(
         macro_meshsize=0.03,
@@ -522,15 +522,15 @@ if __name__ == "__main__":
     # uncomment this line:
     # main_visualize_saved(); import sys; sys.exit(0)
 
-    base_folder = "../results/graded_disk/optimized/v5"
-    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/samples512_run1"
+    base_folder = "../results/graded_disk/optimized/v6"
+    prnn_model_loc = "../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/samples512_run7"
 
     common_kwargs = dict(
         macro_meshsize=0.03,
         optimize_mu=True,
         fd_step=1e-3,
         max_displacement=0.05,
-        maxiter_cma = 100,
+        maxiter_cma = 200,
         maxiter_lbfgsb = 0,
     )
 
@@ -543,7 +543,7 @@ if __name__ == "__main__":
         n_ctrl=1,
         **init_kwargs,
     )
-    vfrac_rand, vm_rand, du_rand = opt_rand.run_random_baseline(mu=1.5, seed=42)
+    vfrac_rand, vm_rand, du_rand = opt_rand.run_random_baseline(mu=1.5, seed=0)
 
     # --- Optimization 1: homogeneous (n_ctrl=1) ---
     opt_hom, x_hom, vm_hom, du_hom = run_optimization(

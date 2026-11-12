@@ -11,11 +11,11 @@ except:
     print("not using custom colors")
 
 type = 'vary_all_v2'  # 'vfrac_ratio' 'vary_all_v2' 'mu'
-highlight_keyword = None  # 'm3'  #'scaleMU'  #'scaleMu'  #'_relu'  #'_sigmoid'  # configs containing this string get higher opacity (set to None to disable)
+highlight_keyword = None  # e.g. '_6m3' or ['_6m3', '_12m6']: configs containing any of these strings are highlighted (None to disable)
 highlight_alpha = 1.0
 non_highlight_linestyle = '-'
 
-output_name = f"6m3/{type}_comparison"
+output_name = f"{type}_comparison"
 
 save_folder = f'../trained_models/train_{type}/'
 folder = f'../trained_models/train_{type}/'
@@ -23,9 +23,35 @@ training_samples = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 xticks = [2, 32, 64, 128, 192, 256, 512]
 xlim_xticks = [2, 8, 16, 24, 32, 64, 96, 128]
 xlog_xticks = [2, 4, 8, 16, 32, 64, 128, 256, 512]
-# ylim = (1/48, 1.4)  # None  # set to e.g. (0, 0.1) to fix y-axis across plots, None for automatic
+ylim = (1/48, 1.4)  # None  # set to e.g. (0, 0.1) to fix y-axis across plots, None for automatic
 # ylim = (0.01, 1.4)  # None  # set to e.g. (0, 0.1) to fix y-axis across plots, None for automatic
-ylim = (0.04, 250)
+# ylim = (0.04, 250)
+
+
+energy_types = [
+    'prnn_energy_1L8_12m',
+    'prnn_energy_2L8_12m',
+    'prnn_energy_1L4_12m',
+    'prnn_energy_1L12_12m',
+    'prnn_energy_1L24_12m',
+    'prnn_energy_1L8_12m_relu',
+    'prnn_energy_1L8_12m_tanh',
+    'prnn_energy_1L8_6m',
+    'prnn_energy_1L8_12m6',
+    'prnn_energy_1L8_18m',
+    'prnn_energy_1L8_24m',
+    'prnn_energy_1L8_12m_normdec',
+    'prnn_energy_1L8_24m_normdec',
+]
+
+# In the mu runs the hypernetwork has no inputs (constant embedding), so these give results identical to 1L8_12m
+mu_duplicates = [
+    'prnn_energy_2L8_12m',
+    'prnn_energy_1L8_12m_relu',
+    'prnn_energy_1L8_12m_tanh',
+]
+energy_types_mu = [n for n in energy_types if n not in mu_duplicates]
+
 
 model_types_mu = {
     'nn': {
@@ -67,17 +93,11 @@ model_types_mu = {
         'linestyle': ':',
         'label': 'PRNN (nonlinear)',
     },
-'prnn_lin': {
-        'configs': [
-            'prnn_lin_2m',
-            'prnn_lin_3m',
-            'prnn_lin_6m',
-            # 'prnn_lin_6m3',
-            'prnn_lin_12m',
-        ],
+    'prnn_energy': {
+        'configs': energy_types_mu,
         'color': 'C1',
         'linestyle': '-.',
-        'label': 'PRNN (linear)',
+        'label': 'PRNN (energy)',
     },
 }
 
@@ -121,18 +141,11 @@ model_types_vfrac_ratio = {
         'linestyle': ':',
         'label': 'PRNN (nonlinear)',
     },
-    'prnn_lin': {
-        'configs': [
-            'prnn_lin_1L_6m',
-            'prnn_lin_3L_2m',
-            'prnn_lin_3L_3m',
-            'prnn_lin_3L_6m',
-            'prnn_lin_3L_6m3',
-            'prnn_lin_3L_12m',
-        ],
+    'prnn_energy': {
+        'configs': energy_types,
         'color': 'C1',
         'linestyle': '-.',
-        'label': 'PRNN (linear)',
+        'label': 'PRNN (energy)',
     },
 }
 
@@ -178,18 +191,11 @@ model_types_all = {
         'linestyle': ':',
         'label': 'PRNN (nonlinear)',
     },
-    'prnn_lin': {
-        'configs': [
-            'prnn_lin_1L_6m',
-            'prnn_lin_3L_2m',
-            'prnn_lin_3L_3m',
-            'prnn_lin_3L_6m',
-            'prnn_lin_3L_6m3',
-            'prnn_lin_3L_12m',
-        ],
+    'prnn_energy': {
+        'configs': energy_types,
         'color': 'C1',
         'linestyle': '-.',
-        'label': 'PRNN (linear)',
+        'label': 'PRNN (energy)',
     },
 }
 
@@ -260,8 +266,11 @@ for curves_key, ylabel_base, name_suffix, cur_ylim in datasets_to_plot:
             sample_vals = {}
             for name, samples, losses in mtype[curves_key]:
                 vals = agg_func(losses)
-                alpha = highlight_alpha if (highlight_keyword and highlight_keyword in name) else 0.1
-                linestyle = non_highlight_linestyle if not highlight_keyword in name else mtype['linestyle']
+                keywords = [highlight_keyword] if isinstance(highlight_keyword, str) else (highlight_keyword or [])
+                highlighted = any(k in name for k in keywords)
+                alpha = highlight_alpha if highlighted else 0.2
+                # Without a highlight keyword every curve keeps its model type's linestyle
+                linestyle = mtype['linestyle'] if (highlighted or highlight_keyword is None) else non_highlight_linestyle
                 if log_scale and log_x:
                     plot_func = ax.loglog
                 elif log_scale:
@@ -270,11 +279,11 @@ for curves_key, ylabel_base, name_suffix, cur_ylim in datasets_to_plot:
                     plot_func = ax.semilogx
                 else:
                     plot_func = ax.plot
-                if highlight_keyword in name:
-                    if name == 'prnn_nonlin_3L8_6m3':
-                        label_name = 'PRNN (nonlinear) [6, 3]'
-                    if name == 'prnn_lin_3L_6m3':
-                        label_name = 'PRNN (linear) [6, 3]'
+                if highlighted:
+                    label_name = {
+                        'prnn_nonlin_3L8_6m3': 'PRNN (nonlinear) [6, 3]',
+                        'prnn_energy_1L8_12m6': 'PRNN (energy) [12, 6]',
+                    }.get(name, mtype['label'])
                     plot_func(samples, vals, linestyle=linestyle, linewidth=1, color=color, alpha=alpha, zorder=2, label=label_name)
                 else:
                     plot_func(samples, vals, linestyle=linestyle, linewidth=1, color=color, alpha=alpha, zorder=1)
@@ -294,8 +303,9 @@ for curves_key, ylabel_base, name_suffix, cur_ylim in datasets_to_plot:
                     plot_func = ax.semilogx
                 else:
                     plot_func = ax.plot
-                # plot_func(xs, ys, linestyle='none', marker='o', markersize=5, color=color, label=mtype['label'], zorder=2)
-                plot_func(xs, ys, linestyle='none', marker='o', markersize=5, color=color, zorder=2)
+                # Without highlighting, the min scatter carries the legend entry for each model type
+                scatter_label = mtype['label'] if highlight_keyword is None else None
+                plot_func(xs, ys, linestyle='none', marker='o', markersize=5, color=color, label=scatter_label, zorder=2)
 
         ax.set_xlabel('Number of Training Samples')
         if log_scale and log_x:
@@ -320,8 +330,8 @@ for curves_key, ylabel_base, name_suffix, cur_ylim in datasets_to_plot:
                 ax.set_ylim(0, ymax)
         elif not log_scale:
             ax.set_ylim(ymin=0)
-        # legend_loc = 'lower left' if (log_scale and log_x and type == 'vary_all_v2') else 'upper right'
-        legend_loc = 'upper right'
+        legend_loc = 'lower left' if (log_scale and log_x and type == 'vary_all_v2') else 'upper right'
+        # legend_loc = 'upper right'
         ax.legend(loc=legend_loc)
         ax.grid(True, alpha=0.3)
         if log_scale and log_x:

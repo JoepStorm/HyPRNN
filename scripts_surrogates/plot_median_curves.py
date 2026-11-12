@@ -1,5 +1,5 @@
-"""For a shared dataset, compare truth vs. predictions of nonlinear PRNN, linear PRNN, and NN
-for the median-error test sample (ranked by nonlinear PRNN error)."""
+"""For a shared dataset, compare truth vs. predictions of nonlinear PRNN, energy PRNN, and NN
+for the median-error test sample (ranked by energy PRNN (32 samples) error)."""
 import os
 import numpy as np
 import jax
@@ -10,6 +10,7 @@ jax.config.update('jax_platform_name', 'cpu')
 from trainer import Trainer
 from data_utils import LDDataset, Config, load_settings, tensor_to_matrix
 from HyPRNN import create_shared_hyper_prnn_model
+from EnergyHyPRNN import create_energy_hyprnn_model
 from StandardNN import create_nn_model
 
 import matplotlib.pyplot as plt
@@ -28,11 +29,11 @@ training_samples_array = [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
 nonlin_folder   = '../trained_models/train_vary_all_v2/prnn_nonlin_1L8_12m_sigmoid/'
 nonlin_samples  = 512
 
-linear_folder   = '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/'
-linear_samples  = 32
+energy_folder   = '../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/'
+energy_samples  = 32
 
-linear512_folder  = '../trained_models/train_vary_all_v2/prnn_lin_1L_6m/'
-linear512_samples = 512
+energy512_folder  = '../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/'
+energy512_samples = 512
 
 nn32_folder    = '../trained_models/train_vary_all_v2/nn_64_4/'
 nn32_samples   = 32
@@ -41,7 +42,10 @@ nn32_samples   = 32
 nn_folder    = '../trained_models/train_vary_all_v2/nn_64_4/'
 nn_samples   = 512
 
-y_lims = [[-2, 0.1], [-0.1, 2.2], [-0.1, 1.7]]  # None
+# y_lims = [[-2, 0.1], [-0.1, 2.2], [-0.1, 1.7]]  # nonlinear
+y_lims = [[-0.1, 2.5], [-0.1, 2.5], [-0.1, 2.5]]  # energy 32
+# y_lims = [[-0.1, 2.1], [-0.1, 2.], [-0.1, 1.3]]  # energy 512
+# y_lims = [[-8., .4], [-0.05, .4], [-0.05, .3]]  # nn 512
 
 def median_run(folder, n_samples):
     """Return the run name (e.g. 'samples512_run3') whose test loss is closest to the median."""
@@ -54,12 +58,12 @@ def median_run(folder, n_samples):
 
 
 nonlin_run    = median_run(nonlin_folder,   nonlin_samples)
-linear_run    = median_run(linear_folder,   linear_samples)
-linear512_run = median_run(linear512_folder, linear512_samples)
+energy_run    = median_run(energy_folder,   energy_samples)
+energy512_run = median_run(energy512_folder, energy512_samples)
 nn_run        = median_run(nn_folder,       nn_samples)
 nn32_run      = median_run(nn32_folder,       nn32_samples)
 
-plot_folder = nonlin_folder + 'statistics/'
+plot_folder = energy_folder + 'statistics/'
 # plot_folder = nn32_folder + 'statistics/'
 os.makedirs(plot_folder, exist_ok=True)
 
@@ -93,13 +97,27 @@ def load_model_and_predict(folder, run, eval_indices):
             activation=settings['nn_activation'],
             use_bias=settings['nn_bias'],
         )
+    elif model_type in ('energy_hyprnn', 'energy_prnn'):  # 'energy_prnn': legacy name in older saved settings
+        model, params, material = create_energy_hyprnn_model(
+            random_key=key,
+            n_micro_raw=len(settings['mat_parameters']),
+            shared_micro_features=settings['shared_micro_features'],
+            n_matpts=settings['mat_points'],
+            shared_hidden_mult=settings.get('hyper_hidden_mult', 2),
+            shared_output_mult=settings.get('hyper_output_mult', 4),
+            stress_normalizer=dataset.stress_normalizer,
+            mat_m_feats=settings['mat_micro_features'],
+            hyper_hidden_sizes=settings.get('hyper_hidden_sizes', None),
+            hyper_activation=settings.get('hyper_activation', 'sigmoid'),
+            normalized_decoder=settings.get('normalized_decoder', False),
+            decoder_activation=settings.get('decoder_activation', 'softplus'),
+        )
     else:  # 'hyprnn' (also accepts legacy 'shared_prnn' from older saved settings)
         model, params, material = create_shared_hyper_prnn_model(
             random_key=key,
             n_micro_raw=len(settings['mat_parameters']),
             shared_micro_features=settings['shared_micro_features'],
             n_matpts=settings['mat_points'],
-            encoder_type=settings['encoder_type'],
             shared_hidden_mult=settings.get('hyper_hidden_mult', 2),
             shared_output_mult=settings.get('hyper_output_mult', 4),
             hidden_dim=settings.get('hidden_dim', 8),
@@ -149,15 +167,15 @@ print(f"{eval_set} set: {len(eval_indices)} samples")
 y_true = primary_dataset.stress_normalizer.denormalize(primary_testset['t'])
 mask = primary_testset['mask']
 
-# ================== Get predictions from all three models ==================
+# ================== Get predictions from all models ==================
 print("Loading nonlinear PRNN...")
 y_nonlin, _ = load_model_and_predict(nonlin_folder, nonlin_run, eval_indices)
 
-print("Loading linear PRNN (32 samples)...")
-y_linear, _ = load_model_and_predict(linear_folder, linear_run, eval_indices)
+print("Loading energy PRNN (32 samples)...")
+y_energy, _ = load_model_and_predict(energy_folder, energy_run, eval_indices)
 
-print("Loading linear PRNN (512 samples)...")
-y_linear512, _ = load_model_and_predict(linear512_folder, linear512_run, eval_indices)
+print("Loading energy PRNN (512 samples)...")
+y_energy512, _ = load_model_and_predict(energy512_folder, energy512_run, eval_indices)
 
 print("Loading NN...")
 y_nn, _ = load_model_and_predict(nn_folder, nn_run, eval_indices)
@@ -170,14 +188,14 @@ def sample_errors(y_pred):
     return np.array(jnp.sum(jnp.abs(y_pred - y_true) * mask, axis=(1, 2)) / jnp.sum(mask, axis=(1, 2)))
 
 errors_nonlin   = sample_errors(y_nonlin)
-errors_linear   = sample_errors(y_linear)
-errors_linear512 = sample_errors(y_linear512)
+errors_energy    = sample_errors(y_energy)
+errors_energy512 = sample_errors(y_energy512)
 errors_nn       = sample_errors(y_nn)
 errors_nn32       = sample_errors(y_nn32)
 
 n_test = len(eval_indices)
-median_idx = int(np.argsort(errors_nonlin)[n_test // 2])
-print(f"Median-error sample index: {median_idx}  (nonlin error={errors_nonlin[median_idx]:.6f})")
+median_idx = int(np.argsort(errors_energy)[n_test // 2])  # rank by the energy PRNN (32); swap in another model's errors to rank by it
+print(f"Median-error sample index: {median_idx}  (energy PRNN error={errors_energy[median_idx]:.6f})")
 
 def rank_label(name, errors, idx):
     """'Name, 0.0783, 413/512' — rank = number of samples with strictly lower error."""
@@ -188,8 +206,8 @@ def rank_label(name, errors, idx):
 E_mat = primary_testset['x']
 y_true_mat   = tensor_to_matrix(y_true)
 y_nonlin_mat = tensor_to_matrix(y_nonlin)
-y_linear_mat     = tensor_to_matrix(y_linear)
-y_linear512_mat  = tensor_to_matrix(y_linear512)
+y_energy_mat     = tensor_to_matrix(y_energy)
+y_energy512_mat  = tensor_to_matrix(y_energy512)
 y_nn_mat     = tensor_to_matrix(y_nn)
 y_nn32_mat     = tensor_to_matrix(y_nn32)
 
@@ -203,8 +221,8 @@ true_label = rf'True ($\mu$={mu_val:.2f}, $V_f$={vf_val:.2f}, $r$={r_val:.2f})'
 E_s      = np.array(E_mat[median_idx])
 true_s   = np.array(y_true_mat[median_idx])
 nonlin_s = np.array(y_nonlin_mat[median_idx])
-linear_s    = np.array(y_linear_mat[median_idx])
-linear512_s = np.array(y_linear512_mat[median_idx])
+energy_s    = np.array(y_energy_mat[median_idx])
+energy512_s = np.array(y_energy512_mat[median_idx])
 nn_s     = np.array(y_nn_mat[median_idx])
 nn32_s     = np.array(y_nn32_mat[median_idx])
 
@@ -215,8 +233,8 @@ fig, axes = plt.subplots(1, 3, figsize=(8, 2.2), sharey=False)
 
 model_styles = [
     (nonlin_s,    rank_label(f'Nonlinear PRNN ({nonlin_samples})', errors_nonlin,    median_idx), '--', colours[0]),
-    (linear_s,    rank_label(f'Linear PRNN ({linear_samples})',    errors_linear,    median_idx), ':',  colours[1]),
-    (linear512_s, rank_label(f'Linear PRNN ({linear512_samples})', errors_linear512, median_idx), '--', colours[1]),
+    (energy_s,    rank_label(f'Energy PRNN ({energy_samples})',    errors_energy,    median_idx), ':',  colours[1]),
+    (energy512_s, rank_label(f'Energy PRNN ({energy512_samples})', errors_energy512, median_idx), '--', colours[1]),
     (nn32_s,      rank_label(f'NN ({nn32_samples})',            errors_nn32,      median_idx), ':',  colours[2]),
     (nn_s,        rank_label(f'NN ({nn_samples})',                 errors_nn,        median_idx), '--', colours[2]),
 ]

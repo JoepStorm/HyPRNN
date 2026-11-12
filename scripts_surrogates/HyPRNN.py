@@ -18,20 +18,6 @@ def _get_activation(name):
             'relu': nn.relu, 'tanh': nn.tanh}[name]
 
 
-def _max_eigenvalue_2x2_spd(W):
-    """λ_max of a 2x2 symmetric positive definite matrix (closed-form)."""
-    a, b, c = W[0, 0], W[0, 1], W[1, 1]
-    return 0.5 * (a + c + jnp.sqrt((a - c) ** 2 + 4 * b ** 2))
-
-
-def _cholesky_weight_matrix(params, w_max):
-    """Build SPD weight matrix from 3 Cholesky params, bounded by w_max."""
-    L = jnp.array([[jax.nn.softplus(params[0]), 0.0],
-                   [params[1], jax.nn.softplus(params[2])]])
-    W = L @ L.T
-    return W * jnp.minimum(1.0, w_max / _max_eigenvalue_2x2_spd(W))
-
-
 def _llt_matrix(params):
     """Build C_micro = L @ L^T from 3 params with softplus diagonal (zero gives identity offset)."""
     l11, l22, l21 = params
@@ -44,19 +30,6 @@ def _llt_matrix(params):
 # ---------------------------------------------------------------------------
 # Fixed (non-hyper) encoder/decoder — used when shared_micro_features is empty
 # ---------------------------------------------------------------------------
-
-class FixedLinearEncoder(nn.Module):
-    """Non-hyper encoder: direct trainable Cholesky params (like DeformationGradientLayer)."""
-    n_matpts: int
-    w_max: float = 1.25
-
-    @nn.compact
-    def __call__(self, x, embedding=None):
-        chol = self.param('cholesky_params', nn.initializers.glorot_normal(), (self.n_matpts, 3))
-        W = jax.vmap(_cholesky_weight_matrix, in_axes=(0, None))(chol, self.w_max)  # [m, 2, 2]
-        E_micro = jnp.einsum('bij,mjk->bmik', x, W)
-        return 2 * E_micro + jnp.eye(2)
-
 
 class FixedNonLinearEncoder(nn.Module):
     """Non-hyper encoder: standard Flax MLP mapping strain to LLT params."""
@@ -139,25 +112,6 @@ class SharedHypernetworkFixed(nn.Module):
 # ---------------------------------------------------------------------------
 # Hyper encoders  (receive embedding, do one more dense layer)
 # ---------------------------------------------------------------------------
-
-class SharedLinearEncoder(nn.Module):
-    """Encoder equivalent to HyperDeformationGradientLayer_grad.
-
-    embedding → Dense(3m) → Cholesky params → SPD weight matrices W
-    → C_micro = 2·E·W + I
-    """
-    n_matpts: int
-    w_max: float = 1.25
-
-    @nn.compact
-    def __call__(self, x, embedding):
-        # embedding → Cholesky params [b, m, 3] (final hypernetwork layer)
-        chol = nn.Dense(3 * self.n_matpts)(embedding).reshape(-1, self.n_matpts, 3)
-        # Cholesky params → SPD weight matrices [b, m, 2, 2]
-        W = jax.vmap(jax.vmap(_cholesky_weight_matrix, in_axes=(0, None)),in_axes=(0, None))(chol, self.w_max)
-        E_micro = jnp.einsum('bij,bmjk->bmik', x, W)
-        return 2 * E_micro + jnp.eye(2)    # C_micro [b, m, 2, 2]
-
 
 class SharedNonLinearEncoder(nn.Module):
     """Encoder: embedding → Dense(all_mlp_params) → per-sample MLP → L@L^T = C_micro."""
@@ -243,18 +197,16 @@ class HyPRNN(nn.Module):
     """
     n_matpts: int              # int for single material, tuple for multiple materials
     n_outputs: int
-    encoder_type: str              # 'Linear' or 'NonLinear'
     stress_normalizer: object
     material_micro_features: tuple # (mu_idx, lambda_idx) into raw micro_params
     shared_micro_features: tuple   # indices of raw micro_params fed to the shared hypernet
     shared_hidden_mult: int = 2    # shared hidden width = mult × m
     shared_output_mult: int = 4    # embedding dim       = mult × m
-    hidden_dim: int = 8            # inner MLP hidden dim (NonLinear encoder only)
-    w_max: float = 1.25            # λ_max bound for weight matrices (Linear encoder only)
+    hidden_dim: int = 8            # inner encoder MLP hidden dim
     hyper_hidden_sizes: tuple = None   # if set, use SharedHypernetworkFixed
     hyper_activation: str = 'sigmoid'  # activation for the hypernetwork
-    encoder_n_layers: int = 3          # hidden layers in NonLinear encoder MLP
-    encoder_activation: str = 'softplus'  # activation in NonLinear encoder MLP
+    encoder_n_layers: int = 3          # hidden layers in encoder MLP
+    encoder_activation: str = 'softplus'  # activation in encoder MLP
     use_multiple_materials: bool = False
     stress_scaling_index: int = None     # Index into micro_params for per-sample stress scaling (e.g. mu)
 
@@ -275,18 +227,10 @@ class HyPRNN(nn.Module):
         else:
             self.hypernet = None
 
-        if self.encoder_type == 'Linear':
-            if use_hyper:
-                self.encoder = SharedLinearEncoder(n_matpts=total_matpts, w_max=self.w_max)
-            else:
-                self.encoder = FixedLinearEncoder(n_matpts=total_matpts, w_max=self.w_max)
-        elif self.encoder_type == 'NonLinear':
-            if use_hyper:
-                self.encoder = SharedNonLinearEncoder(n_matpts=total_matpts, hidden_dim=self.hidden_dim, n_hidden_layers=self.encoder_n_layers, activation=self.encoder_activation)
-            else:
-                self.encoder = FixedNonLinearEncoder(n_matpts=total_matpts, hidden_dim=self.hidden_dim, n_hidden_layers=self.encoder_n_layers, activation=self.encoder_activation)
+        if use_hyper:
+            self.encoder = SharedNonLinearEncoder(n_matpts=total_matpts, hidden_dim=self.hidden_dim, n_hidden_layers=self.encoder_n_layers, activation=self.encoder_activation)
         else:
-            raise ValueError(f"Unknown encoder_type: {self.encoder_type}")
+            self.encoder = FixedNonLinearEncoder(n_matpts=total_matpts, hidden_dim=self.hidden_dim, n_hidden_layers=self.encoder_n_layers, activation=self.encoder_activation)
 
         if use_hyper:
             self.decoder = SharedSparseDecoder(n_matpts=total_matpts, n_outputs=self.n_outputs)
@@ -358,11 +302,9 @@ def create_shared_hyper_prnn_model(
     n_micro_raw,
     shared_micro_features,
     n_matpts=8,
-    encoder_type='Linear',
     shared_hidden_mult=2,
     shared_output_mult=4,
     hidden_dim=8,
-    w_max=1.25,
     n_outputs=3,
     random_key=jax.random.PRNGKey(0),
     stress_normalizer=None,
@@ -380,14 +322,12 @@ def create_shared_hyper_prnn_model(
     model = HyPRNN(
         n_matpts=tuple(n_matpts) if use_multiple_materials else n_matpts,
         n_outputs=n_outputs,
-        encoder_type=encoder_type,
         stress_normalizer=stress_normalizer,
         material_micro_features=tuple(mat_m_feats),
         shared_micro_features=tuple(shared_micro_features),
         shared_hidden_mult=shared_hidden_mult,
         shared_output_mult=shared_output_mult,
         hidden_dim=hidden_dim,
-        w_max=w_max,
         hyper_hidden_sizes=tuple(hyper_hidden_sizes) if hyper_hidden_sizes is not None else None,
         hyper_activation=hyper_activation,
         encoder_n_layers=encoder_n_layers,
@@ -405,12 +345,12 @@ def create_shared_hyper_prnn_model(
     if len(shared_micro_features) > 0:
         hyper_desc = (f'fixed{hyper_hidden_sizes}' if hyper_hidden_sizes is not None
                       else f'{shared_hidden_mult}m×{shared_output_mult}m')
-        print(f'HyPRNN: encoder={encoder_type}  m={n_matpts}  '
+        print(f'HyPRNN: m={n_matpts}  '
               f'hyper={hyper_desc}({hyper_activation})'
               f'enc_layers={encoder_n_layers}({encoder_activation})  hidden_dim={hidden_dim}  '
               f'multiple_materials={use_multiple_materials}')
     else:
-        print(f'HyPRNN (fixed, no hyper): encoder={encoder_type}  m={n_matpts}  '
+        print(f'HyPRNN (fixed, no hyper): m={n_matpts}  '
               f'enc_layers={encoder_n_layers}({encoder_activation})  hidden_dim={hidden_dim}  '
               f'multiple_materials={use_multiple_materials}')
 

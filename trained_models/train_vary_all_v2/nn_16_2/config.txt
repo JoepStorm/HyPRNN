@@ -1,0 +1,10 @@
+name: nn_16_2
+model_type: nn
+nn_hidden_sizes: (16, 16)
+nn_activation: sigmoid
+nn_bias: True
+mat_parameters: ['mu', 'vfrac', 'ratio']
+norm_matparams: [True, True, True]
+
+training_samples: [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
+runs_per_setting: 10

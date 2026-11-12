@@ -1,0 +1,14 @@
+name: prnn_nonlin_3m_sigmoid
+model_type: shared_prnn
+encoder_type: NonLinear
+mat_parameters: ['mu', 'lambda']
+norm_matparams: [False, False]
+shared_micro_features: []
+mat_micro_features: [0, 1]
+mat_points: 3
+encoder_n_layers: 3
+encoder_activation: sigmoid
+hidden_dim: 8
+
+training_samples: [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
+runs_per_setting: 10

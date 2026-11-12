@@ -14,6 +14,7 @@ jax.config.update('jax_platform_name', 'cpu')  # force jax to use cpu; which sho
 from trainer import Trainer
 from data_utils import LDDataset, Config, save_settings, tensor_to_matrix
 from HyPRNN import create_shared_hyper_prnn_model
+from EnergyHyPRNN import create_energy_hyprnn_model
 from StandardNN import create_nn_model
 from material_params import FUNGI_MU, FUNGI_LAMBDA
 
@@ -47,18 +48,14 @@ settings = {
     'val_test_samples': 128,
     # 'val_test_samples': 2048,
 
-    'model_type': 'hyprnn',
+    'model_type': 'energy_hyprnn',
+    # 'model_type': 'hyprnn',
     # 'model_type': 'nn',
-
-    # 'encoder_type': 'NonLinear',
-    'encoder_type': 'Linear',
-
-    'decoder_type': 'HyperSparseLayer',
 
     'norm_stresses': True,
     'stress_scaling_feature': None,  #'mu',  # None  # e.g. 'mu': divide stresses by this mat param before normalization to equalize magnitudes
 
-    'mat_points': 6,
+    'mat_points': 12,
 
     'lr_schedule_steps': 10000,          # interval over which learning rate is scheduled. Ideally finish around this # of update steps. Linked to epochs through num batches
     'max_epochs': 3000,  # 2000
@@ -102,6 +99,16 @@ if settings['model_type'] == 'hyprnn':
     # settings['hyper_hidden_sizes'] = (8, 8, 8)  # (8,)
     settings['hyper_hidden_sizes'] = (8,)
     settings['hyper_activation'] = 'sigmoid'
+if settings['model_type'] == 'energy_hyprnn':
+    # Mixture (same material inputs as hyprnn)
+    settings['mat_parameters'] = ['mu', 'lambda', mix_label]
+    settings['norm_matparams'] = [False, False, True]
+    settings['shared_micro_features'] = [2]
+    settings['mat_micro_features'] = [0, 1]
+    settings['hyper_hidden_sizes'] = (8,)
+    settings['hyper_activation'] = 'sigmoid'
+    settings['decoder_activation'] = 'abs'
+    settings['normalized_decoder'] = False
 
 
 # Create save directory if it doesn't exist
@@ -154,7 +161,6 @@ if settings['model_type'] == 'hyprnn':
         n_micro_raw=len(settings['mat_parameters']),
         shared_micro_features=settings['shared_micro_features'],
         n_matpts=settings['mat_points'],
-        encoder_type=settings['encoder_type'],  # 'DefGrad' or 'LLT'
         stress_normalizer=dataset.stress_normalizer,
         mat_m_feats=settings['mat_micro_features'],
         random_key=key,
@@ -166,6 +172,22 @@ if settings['model_type'] == 'hyprnn':
         encoder_n_layers=settings.get('encoder_n_layers', 3),
         encoder_activation=settings.get('encoder_activation', 'sigmoid'),
         stress_scaling_index=stress_scaling_index,
+    )
+elif settings['model_type'] == 'energy_hyprnn':
+    model, params, material = create_energy_hyprnn_model(
+        n_micro_raw=len(settings['mat_parameters']),
+        shared_micro_features=settings['shared_micro_features'],
+        n_matpts=settings['mat_points'],
+        stress_normalizer=dataset.stress_normalizer,
+        mat_m_feats=settings['mat_micro_features'],
+        random_key=key,
+        shared_hidden_mult=settings.get('hyper_hidden_mult', 2),
+        shared_output_mult=settings.get('hyper_output_mult', 4),
+        hyper_hidden_sizes=settings.get('hyper_hidden_sizes', None),
+        hyper_activation=settings.get('hyper_activation', 'sigmoid'),
+        stress_scaling_index=stress_scaling_index,
+        normalized_decoder=settings.get('normalized_decoder', False),
+        decoder_activation=settings.get('decoder_activation', 'softplus'),
     )
 elif settings['model_type'] == 'nn':
     model, params, material = create_nn_model(random_key=key, hidden_sizes=settings['nn_hidden_sizes'], num_mat_features=len(settings['mat_parameters']), activation=settings['nn_activation'], use_bias=settings['nn_bias'])

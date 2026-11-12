@@ -1,0 +1,50 @@
+{
+  "seq_length": 50,
+  "train_batch_size": 2,
+  "num_samples": 3072,
+  "val_test_samples": 512,
+  "norm_stresses": true,
+  "stress_scaling_feature": null,
+  "lr_schedule_steps": 10000,
+  "max_epochs": 5000,
+  "warmup_epochs": 0,
+  "base_lr": 0.001,
+  "min_lr_factor": 1,
+  "patience": 50,
+  "interval": 1,
+  "feature_dim": 3,
+  "verbose": false,
+  "seed": 59,
+  "data_path": "../data/vary_all/mixed_t50_mergedv2",
+  "matdata_path": "../data/vary_all/mixed_t50_mergedv2_matparam.data",
+  "name": "prnn_energy_1L8_12m",
+  "model_type": "energy_hyprnn",
+  "mat_points": 12,
+  "hyper_hidden_sizes": [
+    8
+  ],
+  "hyper_activation": "sigmoid",
+  "decoder_activation": "abs",
+  "mat_micro_features": [
+    0,
+    1
+  ],
+  "mat_parameters": [
+    "mu",
+    "lambda",
+    "vfrac",
+    "ratio"
+  ],
+  "norm_matparams": [
+    false,
+    false,
+    true,
+    true
+  ],
+  "shared_micro_features": [
+    2,
+    3
+  ],
+  "train_samples": 32,
+  "savename": "../trained_models/train_vary_all_v2/prnn_energy_1L8_12m/samples32_run4"
+}

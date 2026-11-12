@@ -1,0 +1,10 @@
+name: nn_relu_64_3
+model_type: nn
+nn_hidden_sizes: (64, 64, 64)
+nn_activation: relu
+nn_bias: True
+mat_parameters: ['vfrac', 'ratio']
+norm_matparams: [True, True]
+
+training_samples: [2, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512]
+runs_per_setting: 10
